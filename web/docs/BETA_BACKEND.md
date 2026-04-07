@@ -17,6 +17,7 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 ## Gaps documented for launch
 
 - **SOS / share validation:** Implemented in repo root `server/` when deployed; wire env vars per `server/README.md`. Production still needs OAuth/BFF instead of `VITE_AURA_API_TOKEN`.
+- **Journey ownership:** When the beta API is enabled, the web app calls `POST /v1/journeys` before starting a journey so `journeyId` is bound to the current bearer actor; `location-shares` and `im-safe` reject ids the caller did not create (`journey_not_found` / `journey_forbidden`). Same pattern extends to per-user OAuth tokens once auth ships.
 - Map tiles are public OSM; add attribution review for production branding.
 
 ## Observability
