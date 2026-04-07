@@ -29,6 +29,18 @@
 | Unknown / unlisted HTTP | `userMessageForUnknownError` | Final fallback after status branches; **no** `(${status})` or raw codes in UI |
 | **404** | `userMessageForHttpFailure` | Explicit branch; prefers JSON `not_found` mapping, else calm refresh copy |
 | Wire-up | `web/src/api/auraBackend.ts` | `remotePost` passes `userMessage` / `notice` to pages |
+| Journey ownership | `messageForJsonError` in `auraApiMessages.ts` | `journey_not_found` / `journey_forbidden` → **session / sync** tone (not safety alarm); see JSON table below |
+
+## JSON `error` codes — journey ownership
+
+Server: `server/src/index.js` (404 `journey_not_found`, 403 `journey_forbidden` on `im-safe` / `location-shares` when `journeyId` is unknown or not owned by the bearer). **Design intent:** read as **stale client state / wrong session**, same calm bar as offline and generic 404 — never imply immediate personal danger.
+
+| `error` | Typical HTTP | User-visible copy (journey actions) | Telemetry (raw code in payload) |
+|---------|--------------|-------------------------------------|----------------------------------|
+| `journey_not_found` | 404 | We couldn't find this journey for your current session. Start a new journey from home, then try again. | `category: backend`, `event: error`, `operation: im_safe \| share_location`, `error` · `category: journey`, `im_safe_failed` / `share_location_failed`, `error` |
+| `journey_forbidden` | 403 | This journey doesn't match your current session or token. Start your own journey, then try I'm safe or share again. | same |
+
+**Product context:** how `journeyId` is bound to the token — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md) (“Journey ownership”; baseline `ea3c12a` in managed history).
 
 ## User-visible strings (map `error` / HTTP to copy)
 
@@ -65,7 +77,7 @@ Telemetry should record the header value for ops; see below.
 2. **Read `X-Aura-Anomaly`** on success responses for emergency POST only; pass through to UI as a flag, not as `error`.
 3. **Preserve** `role="alert"` on `Emergency` and `JourneyActive` for mapped failure strings only.
 4. **429:** distinguish SOS route from others if middleware bodies differ; user copy for SOS is more safety-aware.
-5. **QA:** airplane mode, wrong token, throttle SOS past limit, invalid journey UUID.
+5. **QA:** airplane mode, wrong token, throttle SOS past limit, invalid journey UUID; **journey ownership:** start journey → tamper or clear stored `journeyId` → I'm safe / share shows calm journey copy (no raw codes).
 
 ## Optional analytics / telemetry keys
 
