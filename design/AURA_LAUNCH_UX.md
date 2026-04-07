@@ -8,7 +8,7 @@
 1. **Calm first:** No blame, no catastrophizing. Prefer “we couldn’t complete that” over “failed” or “error.”
 2. **Action next:** Every message implies what to do (retry, check connection, sign in again, wait, contact support).
 3. **No technical leakage:** Do not show raw HTTP status codes, JSON `error` codes, or stack traces in user-visible copy — map to the string table below.
-4. **SOS-sensitive:** On emergency flows, keep copy short; avoid technical jargon; do not imply the alert was received when it was not.
+4. **SOS-sensitive & anomalies:** On emergency flows, keep copy short; avoid technical jargon; do not imply the alert was received when it was not. **`X-Aura-Anomaly`** is an ops signal — after a **successful** POST, show only **calm, non-blocking** notice copy (never the red `role="alert"` region for the anomaly alone).
 
 ## Where copy lands (current UI)
 
@@ -77,17 +77,23 @@ Telemetry should record the header value for ops; see below.
 2. **Read `X-Aura-Anomaly`** on success responses for emergency POST only; pass through to UI as a flag, not as `error`.
 3. **Preserve** `role="alert"` on `Emergency` and `JourneyActive` for mapped failure strings only.
 4. **429:** distinguish SOS route from others if middleware bodies differ; user copy for SOS is more safety-aware.
-5. **QA:** airplane mode, wrong token, throttle SOS past limit, invalid journey UUID; **journey ownership:** start journey → tamper or clear stored `journeyId` → I'm safe / share shows calm journey copy (no raw codes).
+5. **QA (board / staging):** **401** wrong or expired token; **offline** / airplane; **burst** paths (`429` and/or `X-Aura-Anomaly` on SOS or location share); invalid journey UUID; **journey ownership** — start journey → tamper or clear stored `journeyId` → I'm safe / share shows calm mapped copy (no raw codes).
 
-## Optional analytics / telemetry keys
+## Telemetry (shipped client patterns)
 
-Emit on mapped failures (existing `emitTelemetry` patterns):
+`emitTelemetry` today (`web/src/api/auraBackend.ts`, `web/src/pages/JourneyActive.tsx`, `web/src/pages/Emergency.tsx`):
 
-| Key idea | When |
-|----------|------|
-| `backend.error_mapped` | After mapping, include `httpStatus`, `errorCode` (from JSON if any), `operation` |
-| `backend.anomaly_header` | On emergency success with `X-Aura-Anomaly` present |
+| Pattern | When | Fields (representative) |
+|---------|------|-------------------------|
+| `backend` · `event: error` | Remote POST failed after response | `operation` (`im_safe`, `share_location`, `emergency_alert`), `error` (raw technical string / code for ops) |
+| `journey` · `im_safe_failed` | I'm safe UI path failed | `journeyId`, `error` |
+| `journey` · `share_location_failed` | Share location UI path failed | `journeyId`, `error` |
+| `sos` · `alert_failed` | Emergency POST failed in UI | `mode`, `error` |
+| `sos` · `alert_sent` | Emergency POST succeeded | `mode`, `alertId` |
+| SOS success + `X-Aura-Anomaly` | Anomaly notice path | Log header value for ops; UI uses mapped **notice** string only |
+
+**Future:** richer `backend.error_mapped` (HTTP + `errorCode`) may be added — keep **user copy** in `auraApiMessages.ts` regardless.
 
 ---
 
-*Last updated: aligns with `server/src/index.js` error shapes as of launch-readiness milestone.*
+*Canonical **aura-app** git. Implementation baselines: `0411ed3` (no raw HTTP in generic failure path), `cc847fa` (journey ownership JSON table + session/sync copy). Aligns with `server/src/index.js` error shapes; journey binding — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md).*
