@@ -5,9 +5,10 @@
 
 ## Principles
 
-- **Calm first:** No blame, no catastrophizing. Prefer “we couldn’t complete that” over “failed” or “error.”
-- **Action next:** Every message implies what to do (retry, check connection, sign in again, wait, contact support).
-- **SOS-sensitive:** On emergency flows, keep copy short; avoid technical jargon; do not imply the alert was received when it was not.
+1. **Calm first:** No blame, no catastrophizing. Prefer “we couldn’t complete that” over “failed” or “error.”
+2. **Action next:** Every message implies what to do (retry, check connection, sign in again, wait, contact support).
+3. **No technical leakage:** Do not show raw HTTP status codes, JSON `error` codes, or stack traces in user-visible copy — map to the string table below.
+4. **SOS-sensitive:** On emergency flows, keep copy short; avoid technical jargon; do not imply the alert was received when it was not.
 
 ## Where copy lands (current UI)
 
@@ -19,6 +20,15 @@
 | Backend boundary | `web/src/api/auraBackend.ts` + `web/src/api/auraApiMessages.ts` | `remotePost` in `auraBackend.ts`; **user-visible mapping** centralized in `auraApiMessages.ts` (no raw HTTP codes in UI) |
 
 **Not in app yet:** global toast/banner. When added, use it for transient network blips; keep **inline `role="alert"`** for journey and SOS so assistive tech and high-stress contexts stay aligned.
+
+## Implementation status (`0411ed3`+)
+
+| Concern | Location | Behavior |
+|--------|----------|----------|
+| Centralized copy | `web/src/api/auraApiMessages.ts` | `userMessageForHttpFailure`, `userMessageForNetworkFailure`, `noticeForAnomalyHeader`, `userMessageForUnknownError` |
+| Unknown / unlisted HTTP | `userMessageForUnknownError` | Final fallback after status branches; **no** `(${status})` or raw codes in UI |
+| **404** | `userMessageForHttpFailure` | Explicit branch; prefers JSON `not_found` mapping, else calm refresh copy |
+| Wire-up | `web/src/api/auraBackend.ts` | `remotePost` passes `userMessage` / `notice` to pages |
 
 ## User-visible strings (map `error` / HTTP to copy)
 
@@ -33,6 +43,8 @@ Implement in one helper (e.g. `mapBackendError(res, json)` used by `remotePost`)
 | **503** + `server_misconfigured` | **Aura isn’t fully set up yet. Try again later or contact support.** | |
 | **5xx** / unknown HTTP | **Something went wrong on our side. Try again in a few minutes.** | |
 | **404** + `not_found` | **That action isn’t available. Go back and try again.** | Rare for current POST routes. |
+| **404** without a usable JSON `error` | **We couldn’t find that resource. Refresh the page or start again.** | Matches `userMessageForHttpFailure` when body omits `not_found`. |
+| Other non-mapped HTTP | Calm surface-specific copy from `userMessageForUnknownError` | **No numeric status** in the string (principle 3). |
 | **400** + `invalid_journey_id` | **This journey isn’t valid anymore. Start or resume a journey and try again.** | |
 | **400** + `validation_failed` | **We couldn’t send that request. Go back and try again.** | Optional: one short second line *only in dev builds*: show sanitized detail. |
 | JSON parse / shape issues (`Invalid response`) | **We got an unexpected response. Try again.** | |
