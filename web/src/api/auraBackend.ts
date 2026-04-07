@@ -4,10 +4,21 @@
  */
 
 import { emitTelemetry } from '../observability/auraTelemetry';
+import {
+  isOfflineError,
+  noticeForAnomalyHeader,
+  userMessageForHttpFailure,
+  userMessageForMisconfiguration,
+  userMessageForNetworkFailure,
+  userMessageForUnknownError,
+  type ApiSurface,
+} from './auraApiMessages';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export type BackendResult<T> = { ok: true; data: T } | { ok: false; error: string };
+export type BackendResult<T> =
+  | { ok: true; data: T; notice?: string }
+  | { ok: false; error: string; userMessage: string };
 
 function deviceFingerprint(): string | undefined {
   if (typeof window === 'undefined' || !window.localStorage) return undefined;
@@ -27,10 +38,10 @@ function remoteConfig(): { base: string; token: string } | null {
   return null;
 }
 
-async function remotePost<T>(path: string, body?: unknown): Promise<BackendResult<T>> {
+async function remotePost<T>(path: string, body: unknown | undefined, surface: ApiSurface): Promise<BackendResult<T>> {
   const cfg = remoteConfig();
   if (!cfg) {
-    return { ok: false, error: 'Backend not configured' };
+    return { ok: false, error: 'Backend not configured', userMessage: userMessageForMisconfiguration() };
   }
   const fp = deviceFingerprint();
   try {
@@ -43,24 +54,41 @@ async function remotePost<T>(path: string, body?: unknown): Promise<BackendResul
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
+    const anomaly = res.headers.get('X-Aura-Anomaly');
     const json = (await res.json().catch(() => null)) as
       | { ok: true; data: T }
       | { ok: false; error?: string; detail?: string }
       | null;
     if (!res.ok) {
-      const msg =
+      const technical =
         json && typeof json === 'object' && 'error' in json && json.error
           ? String(json.error)
           : `HTTP ${res.status}`;
-      return { ok: false, error: msg };
+      return {
+        ok: false,
+        error: technical,
+        userMessage: userMessageForHttpFailure(res.status, json, surface),
+      };
     }
     if (json && typeof json === 'object' && 'ok' in json && json.ok === true && 'data' in json) {
-      return { ok: true, data: (json as { data: T }).data };
+      const notice = noticeForAnomalyHeader(anomaly);
+      return {
+        ok: true,
+        data: (json as { data: T }).data,
+        ...(notice ? { notice } : {}),
+      };
     }
-    return { ok: false, error: 'Invalid response' };
+    return {
+      ok: false,
+      error: 'Invalid response',
+      userMessage: 'We got an unexpected reply from Aura. Try again.',
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Network error';
-    return { ok: false, error: msg };
+    const userMessage = isOfflineError(e)
+      ? userMessageForNetworkFailure(surface)
+      : userMessageForUnknownError(surface);
+    return { ok: false, error: msg, userMessage };
   }
 }
 
@@ -68,7 +96,11 @@ export async function postImSafe(journeyId: string): Promise<BackendResult<{ rec
   emitTelemetry({ category: 'backend', event: 'request', operation: 'im_safe', journeyId });
   const cfg = remoteConfig();
   if (cfg) {
-    const res = await remotePost<{ receivedAt: string }>(`/v1/journeys/${encodeURIComponent(journeyId)}/im-safe`);
+    const res = await remotePost<{ receivedAt: string }>(
+      `/v1/journeys/${encodeURIComponent(journeyId)}/im-safe`,
+      undefined,
+      'journey',
+    );
     if (res.ok) {
       emitTelemetry({ category: 'backend', event: 'success', operation: 'im_safe', journeyId });
     } else {
@@ -88,6 +120,7 @@ export async function postShareLocation(journeyId: string): Promise<BackendResul
     const res = await remotePost<{ shareId: string }>(
       `/v1/journeys/${encodeURIComponent(journeyId)}/location-shares`,
       {},
+      'journey',
     );
     if (res.ok) {
       emitTelemetry({ category: 'backend', event: 'success', operation: 'share_location', journeyId });
@@ -111,7 +144,7 @@ export async function postEmergencyAlert(mode: 'silent' | 'visible'): Promise<Ba
   emitTelemetry({ category: 'backend', event: 'request', operation: 'emergency_alert', mode });
   const cfg = remoteConfig();
   if (cfg) {
-    const res = await remotePost<{ alertId: string }>('/v1/emergency-alerts', { mode });
+    const res = await remotePost<{ alertId: string }>('/v1/emergency-alerts', { mode }, 'sos');
     if (res.ok) {
       emitTelemetry({ category: 'backend', event: 'success', operation: 'emergency_alert', mode });
     } else {

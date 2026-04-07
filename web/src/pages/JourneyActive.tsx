@@ -45,7 +45,7 @@ export function JourneyActive() {
     setBusy(null);
     if (!res.ok) {
       emitTelemetry({ category: 'journey', event: 'im_safe_failed', journeyId: activeJourney.id, error: res.error });
-      setError(res.error);
+      setError(res.userMessage);
       return;
     }
     emitTelemetry({ category: 'journey', event: 'im_safe', journeyId: activeJourney.id });
@@ -63,7 +63,7 @@ export function JourneyActive() {
         journeyId: activeJourney.id,
         error: res.error,
       });
-      setError(res.error);
+      setError(res.userMessage);
       return;
     }
     emitTelemetry({ category: 'journey', event: 'share_location', journeyId: activeJourney.id });

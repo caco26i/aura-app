@@ -102,6 +102,7 @@ app.use(
     origin: CORS_ORIGIN === '*' ? true : CORS_ORIGIN.split(',').map((s) => s.trim()),
     methods: ['POST', 'GET', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type', 'X-Aura-Device-Fingerprint'],
+    exposedHeaders: ['X-Aura-Anomaly'],
   }),
 );
 app.use(express.json({ limit: '24kb' }));

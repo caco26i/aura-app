@@ -13,19 +13,26 @@ export function Emergency() {
   const { setGlobalStatus } = useAura();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const silentPreferred = state?.mode === 'silent';
 
   const send = async (mode: 'silent' | 'visible') => {
     setError(null);
+    setInfo(null);
     setBusy(true);
     const res = await postEmergencyAlert(mode);
-    setBusy(false);
     if (!res.ok) {
+      setBusy(false);
       emitTelemetry({ category: 'sos', event: 'alert_failed', mode, error: res.error });
-      setError(res.error);
+      setError(res.userMessage);
       return;
     }
     emitTelemetry({ category: 'sos', event: 'alert_sent', mode, alertId: res.data.alertId });
+    if (res.notice) {
+      setInfo(res.notice);
+      await new Promise((r) => setTimeout(r, 3200));
+    }
+    setBusy(false);
     setGlobalStatus('alert');
     navigate('/');
   };
@@ -49,6 +56,21 @@ export function Emergency() {
       {error ? (
         <div role="alert" style={{ marginTop: 12, color: '#ffb4b4', fontWeight: 700 }}>
           {error}
+        </div>
+      ) : null}
+
+      {info ? (
+        <div
+          role="status"
+          style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: 12,
+            background: 'rgba(255,255,255,0.12)',
+            lineHeight: 1.5,
+          }}
+        >
+          {info}
         </div>
       ) : null}
 
