@@ -16,7 +16,8 @@
 |--------|----------|---------|
 | Live journey actions | `web/src/pages/JourneyActive.tsx` | Inline `role="alert"` under map/actions for I’m safe / share failures |
 | Silent SOS sheet | Same file (sheet is confirm-only today) | Errors from this path still route through `/emergency` after continue |
-| Emergency / SOS | `web/src/pages/Emergency.tsx` | Full-width `role="alert"` above actions |
+| Emergency / SOS | `web/src/pages/Emergency.tsx` | Full-width `role="alert"` above actions **for failures only** |
+| Anomaly notice (success + header) | `web/src/pages/Emergency.tsx` | **`role="status"`** calm panel — not `role="alert"`; throttling / burst must not read like imminent personal danger |
 | Backend boundary | `web/src/api/auraBackend.ts` + `web/src/api/auraApiMessages.ts` | `remotePost` in `auraBackend.ts`; **user-visible mapping** centralized in `auraApiMessages.ts` (no raw HTTP codes in UI) |
 
 **Not in app yet:** global toast/banner. When added, use it for transient network blips; keep **inline `role="alert"`** for journey and SOS so assistive tech and high-stress contexts stay aligned.
@@ -67,7 +68,8 @@ Implement in one helper (e.g. `mapBackendError(res, json)` used by `remotePost`)
 When `POST /v1/emergency-alerts` returns **201** but response headers include **`X-Aura-Anomaly`** (e.g. `burst_sos`):
 
 - **Do not** change the primary success message if the alert was accepted.
-- Optionally show a **non-blocking** calm notice (secondary text or dismissible banner, not the red alert region): **Your alert was sent. If you still feel unsafe, contact local emergency services.**
+- Show mapped anomaly copy in a **`role="status"`** region (current: muted panel on `Emergency` before navigate home) — **never** reuse the red **`role="alert"`** styling used for hard failures.
+- Example calm strings: see `noticeForAnomalyHeader` in `auraApiMessages.ts` (e.g. burst SOS reassurance).
 
 Telemetry should record the header value for ops; see below.
 
@@ -96,4 +98,4 @@ Telemetry should record the header value for ops; see below.
 
 ---
 
-*Canonical **aura-app** git. Implementation baselines: `0411ed3` (no raw HTTP in generic failure path), `cc847fa` (journey ownership JSON table + session/sync copy). Aligns with `server/src/index.js` error shapes; journey binding — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md).*
+*Canonical **aura-app** git. Implementation baselines: `0411ed3` (no raw HTTP in generic failure path), `cc847fa` (journey ownership JSON table + session/sync copy), `60146f1` (telemetry table + principle 4 / anomaly doc parity); **latest doc:** anomaly notice **`role="status"`** row + SOS subsection (see `Emergency.tsx`). Aligns with `server/src/index.js` error shapes; journey binding — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md).*
