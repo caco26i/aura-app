@@ -18,7 +18,7 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 
 - **Abuse / false alarms:** Visible and silent alerts must be rate-limited and anomaly-scored server-side; log actor, device fingerprint (hashed), and cooldown state.
 - **Trusted contacts:** Contact list is local-only today; server-side fan-out must validate consent, opt-out, and regional messaging rules (SMS/email/push).
-- **No server validation yet:** SOS and share payloads are not verified by a backend in this repo — **P0** tracked in Paperclip (see launch milestone children).
+- **Authoritative API (beta):** The `server/` package exposes validated routes (`POST /v1/emergency-alerts`, journey share, I’m safe) with bearer auth, layered rate limits, burst anomaly header (`X-Aura-Anomaly`), and an append-only JSON-lines audit log. The web client uses it when `VITE_AURA_API_URL` and `VITE_AURA_API_TOKEN` are set; otherwise it falls back to local mocks in `src/api/auraBackend.ts`. **Do not treat `VITE_AURA_API_TOKEN` as a long-lived secret** — it is visible in the bundle; ship a BFF or OAuth exchange before production hardening.
 
 ## Data at rest (client)
 
