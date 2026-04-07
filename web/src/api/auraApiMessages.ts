@@ -103,6 +103,9 @@ export function noticeForAnomalyHeader(header: string | null): string | undefine
   if (flags.includes('burst_sos')) {
     return ANOMALY_SUCCESS_SOS;
   }
+  if (flags.includes('burst_location_share')) {
+    return 'We noticed a lot of location updates in a short time. Sharing may still work — if something looks wrong, pause and try again in a few minutes.';
+  }
   return ANOMALY_HINT;
 }
 

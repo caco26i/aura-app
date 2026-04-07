@@ -22,6 +22,21 @@ const emergencyBodySchema = z.object({
   mode: z.enum(['silent', 'visible']),
 });
 
+const emptyBodySchema = z.object({}).strict();
+
+const locationShareBodySchema = z
+  .object({
+    latitude: z.number().finite().gte(-90).lte(90).optional(),
+    longitude: z.number().finite().gte(-180).lte(180).optional(),
+    accuracyM: z.number().finite().nonnegative().optional(),
+    recordedAt: z.string().max(64).optional(),
+  })
+  .strict()
+  .refine(
+    (b) => (b.latitude === undefined) === (b.longitude === undefined),
+    { message: 'latitude and longitude must both be provided or both omitted' },
+  );
+
 function actorKey(req) {
   const raw = req.headers.authorization || '';
   const token = raw.startsWith('Bearer ') ? raw.slice(7) : '';
@@ -40,6 +55,30 @@ function sosAnomalyFlags(actor) {
   windowed.push(now);
   sosRecent.set(actor, windowed);
   return windowed.length >= SOS_BURST_THRESHOLD ? ['burst_sos'] : [];
+}
+
+/** In-memory burst detector for location-share abuse signals. */
+const shareRecent = new Map();
+const SHARE_BURST_WINDOW_MS = 10 * 60 * 1000;
+const SHARE_BURST_THRESHOLD = 12;
+
+function shareAnomalyFlags(actor) {
+  const now = Date.now();
+  const prev = shareRecent.get(actor) || [];
+  const windowed = prev.filter((t) => now - t < SHARE_BURST_WINDOW_MS);
+  windowed.push(now);
+  shareRecent.set(actor, windowed);
+  return windowed.length >= SHARE_BURST_THRESHOLD ? ['burst_location_share'] : [];
+}
+
+function auditRateLimited(route, req) {
+  appendAudit({
+    ts: new Date().toISOString(),
+    type: 'audit.rate_limited',
+    route,
+    actorHash: actorKey(req),
+    ip: req.ip,
+  });
 }
 
 function ensureAuditDir() {
@@ -93,6 +132,24 @@ const sosLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
   message: { ok: false, error: 'rate_limited', detail: 'Too many emergency alerts; try again later.' },
+  handler: (req, res, _next, options) => {
+    auditRateLimited('emergency-alerts', req);
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
+/** Hourly cap on location shares (layered under journey + global limits). */
+const shareLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 48,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
+  message: { ok: false, error: 'rate_limited', detail: 'Too many location shares; try again later.' },
+  handler: (req, res, _next, options) => {
+    auditRateLimited('location-shares', req);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 const app = express();
@@ -151,38 +208,74 @@ app.post('/v1/emergency-alerts', globalLimiter, requireBearer, sosLimiter, (req,
   res.status(201).json({ ok: true, data: { alertId } });
 });
 
-app.post('/v1/journeys/:journeyId/location-shares', globalLimiter, journeyLimiter, requireBearer, (req, res) => {
-  const jid = uuidSchema.safeParse(req.params.journeyId);
-  if (!jid.success) {
+app.post(
+  '/v1/journeys/:journeyId/location-shares',
+  globalLimiter,
+  journeyLimiter,
+  requireBearer,
+  shareLimiter,
+  (req, res) => {
+    const jid = uuidSchema.safeParse(req.params.journeyId);
+    if (!jid.success) {
+      appendAudit({
+        ts: new Date().toISOString(),
+        type: 'audit.validation_failed',
+        route: 'location-shares',
+        actorHash: actorKey(req),
+        ip: req.ip,
+        journeyId: req.params.journeyId,
+      });
+      res.status(400).json({ ok: false, error: 'invalid_journey_id' });
+      return;
+    }
+    const bodyParsed = locationShareBodySchema.safeParse(req.body ?? {});
+    if (!bodyParsed.success) {
+      appendAudit({
+        ts: new Date().toISOString(),
+        type: 'audit.validation_failed',
+        route: 'location-shares',
+        actorHash: actorKey(req),
+        ip: req.ip,
+        journeyId: jid.data,
+        issues: bodyParsed.error.flatten(),
+      });
+      res.status(400).json({ ok: false, error: 'validation_failed', detail: bodyParsed.error.flatten() });
+      return;
+    }
+    const shareId = randomUUID();
+    const anomalyFlags = shareAnomalyFlags(actorKey(req));
+    const payload = bodyParsed.data;
+    const hasCoords = payload.latitude !== undefined && payload.longitude !== undefined;
     appendAudit({
       ts: new Date().toISOString(),
-      type: 'audit.validation_failed',
-      route: 'location-shares',
+      type: 'journey.location_share',
+      shareId,
+      journeyId: jid.data,
       actorHash: actorKey(req),
       ip: req.ip,
-      journeyId: req.params.journeyId,
+      deviceFingerprint: typeof req.headers['x-aura-device-fingerprint'] === 'string'
+        ? createHash('sha256')
+            .update(req.headers['x-aura-device-fingerprint'])
+            .digest('hex')
+            .slice(0, 16)
+        : null,
+      ...(hasCoords
+        ? {
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+            accuracyM: payload.accuracyM ?? null,
+            recordedAt: payload.recordedAt ?? null,
+          }
+        : {}),
+      anomalyFlags,
+      consentModel: 'trusted_contacts_local_only',
     });
-    res.status(400).json({ ok: false, error: 'invalid_journey_id' });
-    return;
-  }
-  const shareId = randomUUID();
-  appendAudit({
-    ts: new Date().toISOString(),
-    type: 'journey.location_share',
-    shareId,
-    journeyId: jid.data,
-    actorHash: actorKey(req),
-    ip: req.ip,
-    deviceFingerprint: typeof req.headers['x-aura-device-fingerprint'] === 'string'
-      ? createHash('sha256')
-          .update(req.headers['x-aura-device-fingerprint'])
-          .digest('hex')
-          .slice(0, 16)
-      : null,
-    consentModel: 'trusted_contacts_local_only',
-  });
-  res.status(201).json({ ok: true, data: { shareId } });
-});
+    if (anomalyFlags.length) {
+      res.setHeader('X-Aura-Anomaly', anomalyFlags.join(','));
+    }
+    res.status(201).json({ ok: true, data: { shareId } });
+  },
+);
 
 app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, journeyLimiter, requireBearer, (req, res) => {
   const jid = uuidSchema.safeParse(req.params.journeyId);
@@ -196,6 +289,20 @@ app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, journeyLimiter, requi
       journeyId: req.params.journeyId,
     });
     res.status(400).json({ ok: false, error: 'invalid_journey_id' });
+    return;
+  }
+  const bodyParsed = emptyBodySchema.safeParse(req.body ?? {});
+  if (!bodyParsed.success) {
+    appendAudit({
+      ts: new Date().toISOString(),
+      type: 'audit.validation_failed',
+      route: 'im-safe',
+      actorHash: actorKey(req),
+      ip: req.ip,
+      journeyId: jid.data,
+      issues: bodyParsed.error.flatten(),
+    });
+    res.status(400).json({ ok: false, error: 'validation_failed', detail: bodyParsed.error.flatten() });
     return;
   }
   const receivedAt = new Date().toISOString();

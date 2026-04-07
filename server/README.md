@@ -22,10 +22,10 @@ npm run dev
 ## Routes
 
 - `POST /v1/emergency-alerts` — body `{ "mode": "silent" \| "visible" }`
-- `POST /v1/journeys/:journeyId/location-shares` — UUID journey id
+- `POST /v1/journeys/:journeyId/location-shares` — UUID journey id; JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
 - `POST /v1/journeys/:journeyId/im-safe` — UUID journey id
 - `GET /health`
 
 Optional header: `X-Aura-Device-Fingerprint` (opaque client id; stored hashed in audit).
 
-When burst SOS threshold is exceeded within 10 minutes, responses may include `X-Aura-Anomaly: burst_sos` for downstream alerting.
+When burst SOS threshold is exceeded within 10 minutes, responses may include `X-Aura-Anomaly: burst_sos` for downstream alerting. Location shares use a separate burst detector (`burst_location_share`). Dedicated rate-limit responses append `audit.rate_limited` lines to the audit log.
