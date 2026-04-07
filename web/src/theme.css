@@ -1,0 +1,54 @@
+:root {
+  --aura-canvas: #f6f3ff;
+  --aura-lavender-wash: #e8e4ff;
+  --aura-blush: #f4b8c5;
+  --aura-text: #1c1530;
+  --aura-muted: #5c5470;
+  --aura-card: rgba(255, 255, 255, 0.72);
+  --aura-border: rgba(28, 21, 48, 0.08);
+  --aura-shadow: 0 12px 40px rgba(28, 21, 48, 0.12);
+  --aura-radius-lg: 20px;
+  --aura-radius-md: 14px;
+  --aura-status-ok: #3d9a6a;
+  --aura-status-warn: #c98a2c;
+  --aura-status-alert: #c94c5c;
+  --aura-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: var(--aura-text);
+  background: radial-gradient(120% 80% at 50% 0%, var(--aura-lavender-wash), var(--aura-canvas));
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
