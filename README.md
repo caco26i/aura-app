@@ -73,6 +73,20 @@ npm run dev
 
 With a token set and **without** `VITE_AURA_API_URL`, the Vite dev server proxies `/v1` and `/health` to the local API. Details: [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md).
 
+### Setup pointers (`web/docs/`)
+
+After the commands above, use the **web package’s** [`web/docs/`](./web/docs/) folder as the canonical place for deeper setup and operations:
+
+| Doc | Use when |
+|-----|----------|
+| [`web/docs/AUTH.md`](./web/docs/AUTH.md) | Google sign-in and stub auth |
+| [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) | Client ↔ API wiring, proxies, tokens |
+| [`web/docs/DEPLOY.md`](./web/docs/DEPLOY.md) | Staging / production deploy |
+| [`web/docs/SECURITY.md`](./web/docs/SECURITY.md) | Threat model and safety notes |
+| [`web/docs/OBSERVABILITY.md`](./web/docs/OBSERVABILITY.md) | Logs and telemetry |
+
+The **server** package documents API env vars and routes in [`server/README.md`](./server/README.md) (pair it with `BETA_BACKEND` when wiring the web app to a real backend).
+
 ---
 
 ## Documentation index

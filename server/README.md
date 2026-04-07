@@ -2,6 +2,10 @@
 
 Validates SOS, location share, and “I’m safe” payloads; enforces bearer auth and rate limits; appends an **immutable JSON-lines audit log** (treat the log file as WORM in production — ship to object storage / SIEM).
 
+## Related docs (web package)
+
+Stack setup beyond this README (client auth, deploy, security, observability, and **client ↔ API** integration) lives under **[`../web/docs/`](../web/docs/)** in the web package. For local wiring, start with [`../web/docs/BETA_BACKEND.md`](../web/docs/BETA_BACKEND.md) alongside the env table below.
+
 ## Run locally
 
 ```bash

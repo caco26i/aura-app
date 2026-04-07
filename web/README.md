@@ -15,7 +15,7 @@ npm run dev
 
 ## Docs (this package)
 
-All operational and handoff docs for the web app are in **[`web/docs/`](./docs/)** (`AUTH`, `DEPLOY`, `SECURITY`, `OBSERVABILITY`, `BETA_BACKEND`). The repo overview and screenshot checklist are in **[`../README.md`](../README.md)**.
+**Setup and operations:** all handoff docs for the web app live under **[`./docs/`](./docs/)** (repo path **`web/docs/`**): [`AUTH.md`](./docs/AUTH.md), [`BETA_BACKEND.md`](./docs/BETA_BACKEND.md), [`DEPLOY.md`](./docs/DEPLOY.md), [`SECURITY.md`](./docs/SECURITY.md), [`OBSERVABILITY.md`](./docs/OBSERVABILITY.md). The repo overview and screenshot checklist are in **[`../README.md`](../README.md)**; API env and routes are in **[`../server/README.md`](../server/README.md)**.
 
 ## Scripts
 
