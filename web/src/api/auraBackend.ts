@@ -1,6 +1,7 @@
 /**
  * Boundary for a future real backend (Supabase, Firebase, REST).
- * When `VITE_AURA_API_URL` + `VITE_AURA_API_TOKEN` are set, calls the authoritative Aura API in `../../server`.
+ * When `VITE_AURA_API_TOKEN` is set, calls the authoritative Aura API in `../../server`.
+ * `VITE_AURA_API_URL` is optional: omit or leave empty to use same-origin URLs (Vite dev proxy → local `server/`).
  */
 
 import { emitTelemetry } from '../observability/auraTelemetry';
@@ -32,10 +33,14 @@ function deviceFingerprint(): string | undefined {
 }
 
 function remoteConfig(): { base: string; token: string } | null {
-  const base = import.meta.env.VITE_AURA_API_URL?.replace(/\/$/, '');
-  const token = import.meta.env.VITE_AURA_API_TOKEN;
-  if (base && token) return { base, token };
-  return null;
+  const token = import.meta.env.VITE_AURA_API_TOKEN?.trim();
+  if (!token) return null;
+  const raw = import.meta.env.VITE_AURA_API_URL;
+  const base =
+    raw === undefined || raw === null || String(raw).trim() === ''
+      ? ''
+      : String(raw).replace(/\/$/, '');
+  return { base, token };
 }
 
 async function remotePost<T>(path: string, body: unknown | undefined, surface: ApiSurface): Promise<BackendResult<T>> {

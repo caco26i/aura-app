@@ -2,6 +2,8 @@
 
 Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) while routing network calls through `src/api/auraBackend.ts`.
 
+**Local dev with real API:** run `server/` on `:8787`, set `VITE_AURA_API_TOKEN` in `web/.env.local` (see `web/.env.example`). Leave `VITE_AURA_API_URL` unset so requests hit the Vite dev server, which **proxies** `/v1` and `/health` to the Node API (`VITE_AURA_DEV_API_PROXY` overrides the target, default `http://127.0.0.1:8787`).
+
 ## Swap path
 
 1. Implement real HTTP or SDK calls inside `auraBackend.ts` (or split per domain).
