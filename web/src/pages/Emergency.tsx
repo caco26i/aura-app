@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { postEmergencyAlert } from '../api/auraBackend';
 import { useAura } from '../context/AuraContext';
+import { emitTelemetry } from '../observability/auraTelemetry';
 
 type LocState = { mode?: 'silent' | 'visible' } | null;
 
@@ -20,9 +21,11 @@ export function Emergency() {
     const res = await postEmergencyAlert(mode);
     setBusy(false);
     if (!res.ok) {
+      emitTelemetry({ category: 'sos', event: 'alert_failed', mode, error: res.error });
       setError(res.error);
       return;
     }
+    emitTelemetry({ category: 'sos', event: 'alert_sent', mode, alertId: res.data.alertId });
     setGlobalStatus('alert');
     navigate('/');
   };

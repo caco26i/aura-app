@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAura } from '../context/AuraContext';
+import { emitTelemetry } from '../observability/auraTelemetry';
 
 export function JourneyNew() {
   const navigate = useNavigate();
@@ -11,6 +12,12 @@ export function JourneyNew() {
 
   const onStart = () => {
     const etaMinutes = Math.max(1, Number.parseInt(eta, 10) || settings.timerDefaultMinutes);
+    emitTelemetry({
+      category: 'journey',
+      event: 'started',
+      etaMinutes,
+      locationPrecision: settings.locationPrecision,
+    });
     startJourney({
       label,
       destinationLabel: destination,

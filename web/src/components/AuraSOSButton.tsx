@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAura } from '../context/AuraContext';
+import { emitTelemetry } from '../observability/auraTelemetry';
 
 export function AuraSOSButton() {
   const navigate = useNavigate();
@@ -14,7 +15,10 @@ export function AuraSOSButton() {
     <button
       type="button"
       aria-label="Emergency SOS"
-      onClick={() => navigate('/emergency')}
+      onClick={() => {
+        emitTelemetry({ category: 'sos', event: 'fab_open' });
+        navigate('/emergency');
+      }}
       style={{
         position: 'fixed',
         right: 20,

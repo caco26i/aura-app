@@ -16,5 +16,9 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 ## Gaps documented for launch
 
-- No server-side validation of SOS or share payloads yet.
+- No server-side validation of SOS or share payloads yet (tracked as P0 child of [AURA-9](/AURA/issues/AURA-9)).
 - Map tiles are public OSM; add attribution review for production branding.
+
+## Observability
+
+Client structured logs and staging HTTP mirror: [OBSERVABILITY.md](./OBSERVABILITY.md).

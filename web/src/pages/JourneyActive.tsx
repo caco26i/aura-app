@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { postImSafe, postShareLocation } from '../api/auraBackend';
+import { emitTelemetry } from '../observability/auraTelemetry';
 import { AuraMap } from '../components/AuraMap';
 import { StatusPill } from '../components/StatusPill';
 import { useAura } from '../context/AuraContext';
@@ -42,7 +43,12 @@ export function JourneyActive() {
     setBusy('safe');
     const res = await postImSafe(activeJourney.id);
     setBusy(null);
-    if (!res.ok) setError(res.error);
+    if (!res.ok) {
+      emitTelemetry({ category: 'journey', event: 'im_safe_failed', journeyId: activeJourney.id, error: res.error });
+      setError(res.error);
+      return;
+    }
+    emitTelemetry({ category: 'journey', event: 'im_safe', journeyId: activeJourney.id });
   };
 
   const runShare = async () => {
@@ -50,7 +56,17 @@ export function JourneyActive() {
     setBusy('share');
     const res = await postShareLocation(activeJourney.id);
     setBusy(null);
-    if (!res.ok) setError(res.error);
+    if (!res.ok) {
+      emitTelemetry({
+        category: 'journey',
+        event: 'share_location_failed',
+        journeyId: activeJourney.id,
+        error: res.error,
+      });
+      setError(res.error);
+      return;
+    }
+    emitTelemetry({ category: 'journey', event: 'share_location', journeyId: activeJourney.id });
   };
 
   return (
@@ -73,13 +89,34 @@ export function JourneyActive() {
       />
 
       <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-        <button type="button" aria-pressed={activeJourney.trackState === 'on_track'} onClick={() => setTrackState('on_track')}>
+        <button
+          type="button"
+          aria-pressed={activeJourney.trackState === 'on_track'}
+          onClick={() => {
+            emitTelemetry({ category: 'journey', event: 'track_state', state: 'on_track' });
+            setTrackState('on_track');
+          }}
+        >
           On track
         </button>
-        <button type="button" aria-pressed={activeJourney.trackState === 'delay'} onClick={() => setTrackState('delay')}>
+        <button
+          type="button"
+          aria-pressed={activeJourney.trackState === 'delay'}
+          onClick={() => {
+            emitTelemetry({ category: 'journey', event: 'track_state', state: 'delay' });
+            setTrackState('delay');
+          }}
+        >
           Delay
         </button>
-        <button type="button" aria-pressed={activeJourney.trackState === 'deviation'} onClick={() => setTrackState('deviation')}>
+        <button
+          type="button"
+          aria-pressed={activeJourney.trackState === 'deviation'}
+          onClick={() => {
+            emitTelemetry({ category: 'journey', event: 'track_state', state: 'deviation' });
+            setTrackState('deviation');
+          }}
+        >
           Deviation
         </button>
       </div>
@@ -97,7 +134,14 @@ export function JourneyActive() {
         <button type="button" disabled={busy !== null} onClick={runShare} style={actionBtn}>
           {busy === 'share' ? 'Sharing…' : 'Share live location'}
         </button>
-        <button type="button" onClick={() => endJourney()} style={{ ...actionBtn, background: '#fff' }}>
+        <button
+          type="button"
+          onClick={() => {
+            emitTelemetry({ category: 'journey', event: 'ended', journeyId: activeJourney.id });
+            endJourney();
+          }}
+          style={{ ...actionBtn, background: '#fff' }}
+        >
           End journey
         </button>
       </div>

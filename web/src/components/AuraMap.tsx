@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaf
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapIntelFeature } from '../data/mapIntelSeed';
+import { emitTelemetry } from '../observability/auraTelemetry';
 
 /** Default center (NYC) — swap for user geolocation in production */
 const DEFAULT_CENTER: [number, number] = [40.7549, -73.984];
@@ -63,6 +64,15 @@ export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProp
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          eventHandlers={{
+            tileerror: (e) => {
+              emitTelemetry({
+                category: 'map',
+                event: 'tile_error',
+                tileUrl: (e.tile as { src?: string } | undefined)?.src,
+              });
+            },
+          }}
         />
         {features.map((f) => (
           <CircleMarker
