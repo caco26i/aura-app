@@ -1,6 +1,8 @@
 # Aura — web client
 
-React (Vite + TypeScript) SPA for the Aura safety companion: journey tracking, maps, trusted contacts, settings, and emergency flows. Visual and UX rules live under [`../design/`](../design/).
+React (Vite + TypeScript) SPA for the Aura safety companion: journey tracking, maps, trusted contacts, settings, and emergency flows. The UI aims for a **calm, mobile-first** experience; tokens, components, and copy tone are documented under [`../design/`](../design/).
+
+**Repo visitors:** start at the root [`README.md`](../README.md) for stack overview, screenshot checklist, and maintainer publish notes. This file focuses on **running and shipping** the `web/` package.
 
 ## Run locally
 

@@ -25,15 +25,15 @@ Routing reference: [`design/AURA_SCREEN_SPECS.md`](./design/AURA_SCREEN_SPECS.md
 
 ---
 
-## Screenshots (placeholders for the public repo)
+## Screenshots
 
-Replace these with real captures before or right after open-sourcing:
+Use real product captures so newcomers see Aura at a glance. Add images **after** `main` is on GitHub (or in the same PR as go-public) so paths resolve on the default branch.
 
-1. **Home / safety dashboard** — `<!-- TODO: docs/assets/screenshot-home.png -->`
-2. **Live journey** — `<!-- TODO: docs/assets/screenshot-journey.png -->`
-3. **Emergency** — `<!-- TODO: docs/assets/screenshot-sos.png -->`
+1. **Home / safety dashboard** — replace `<!-- TODO: docs/assets/screenshot-home.png -->` with `![Aura home — safety dashboard](docs/assets/screenshot-home.png)` (adjust alt text to match the UI).
+2. **Live journey** — `docs/assets/screenshot-journey.png`
+3. **Emergency (SOS)** — `docs/assets/screenshot-sos.png`
 
-Suggested layout: add a `docs/assets/` folder and reference images from this section with standard Markdown `![…](docs/assets/…)` once files exist.
+**Layout:** create `docs/assets/` at the repo root, drop PNG or WebP files there, and use relative Markdown image syntax as above. Keep alt text concrete and calm (no alarmist wording); see [`design/AURA_LAUNCH_UX.md`](./design/AURA_LAUNCH_UX.md) for voice guidance.
 
 ---
 
@@ -139,9 +139,10 @@ Managed automation without interactive login must use **non-interactive** auth (
 
 ### After push
 
-1. Confirm **GitHub** shows `main` and the expected commit (README + `web/` + `server/` as intended).
-2. **Public README hygiene** — skim root (and `web/README.md`) on github.com for anything that should stay **internal-only** (VPN URLs, private board links); fix in a follow-up commit if needed.
-3. Close or hand off **AURA-20** on the board per CTO agreement (verify remote tip vs local release criteria).
+1. Open **github.com** → this repo → default branch `main` → rendered root `README.md`. Confirm code blocks, tables, and **relative links** (including `blob/main`-style paths from the GitHub UI) read correctly.
+2. Confirm the tip matches the intended release (README + `web/` + `server/` as intended).
+3. **Public README hygiene** — skim root and [`web/README.md`](./web/README.md) in the browser for anything that should stay **internal-only** (VPN URLs, private board links, staging hosts); fix in a follow-up commit if needed.
+4. Close or hand off **AURA-20** on the internal board per CTO agreement (remote tip vs local release criteria).
 
 ---
 
