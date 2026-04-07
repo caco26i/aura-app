@@ -86,7 +86,13 @@ export function userMessageForHttpFailure(
   if (status === 400) {
     return 'Something in the request did not look right. Check your details and try again.';
   }
-  return `Something went wrong (${status}). Please try again.`;
+  if (status === 404) {
+    return (
+      messageForJsonError('not_found', surface) ??
+      "We couldn't find that resource. Refresh the page or start again."
+    );
+  }
+  return userMessageForUnknownError(surface);
 }
 
 export function userMessageForNetworkFailure(surface: ApiSurface): string {

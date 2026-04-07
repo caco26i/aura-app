@@ -16,7 +16,7 @@
 | Live journey actions | `web/src/pages/JourneyActive.tsx` | Inline `role="alert"` under map/actions for I’m safe / share failures |
 | Silent SOS sheet | Same file (sheet is confirm-only today) | Errors from this path still route through `/emergency` after continue |
 | Emergency / SOS | `web/src/pages/Emergency.tsx` | Full-width `role="alert"` above actions |
-| Backend boundary | `web/src/api/auraBackend.ts` | Maps HTTP + JSON `error` to a single string today — **replace raw codes here** with rows below |
+| Backend boundary | `web/src/api/auraBackend.ts` + `web/src/api/auraApiMessages.ts` | `remotePost` in `auraBackend.ts`; **user-visible mapping** centralized in `auraApiMessages.ts` (no raw HTTP codes in UI) |
 
 **Not in app yet:** global toast/banner. When added, use it for transient network blips; keep **inline `role="alert"`** for journey and SOS so assistive tech and high-stress contexts stay aligned.
 
@@ -49,7 +49,7 @@ Telemetry should record the header value for ops; see below.
 
 ## CTO implementation checklist
 
-1. **Centralize mapping** in `auraBackend.ts` (or `web/src/api/backendErrors.ts`) using status + optional `json.error` / `json.detail`.
+1. **Centralize mapping** in `web/src/api/auraApiMessages.ts` (used by `auraBackend.ts`) using status + optional `json.error` / `json.detail`.
 2. **Read `X-Aura-Anomaly`** on success responses for emergency POST only; pass through to UI as a flag, not as `error`.
 3. **Preserve** `role="alert"` on `Emergency` and `JourneyActive` for mapped failure strings only.
 4. **429:** distinguish SOS route from others if middleware bodies differ; user copy for SOS is more safety-aware.
