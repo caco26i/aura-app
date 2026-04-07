@@ -131,6 +131,7 @@ If the remote has no `main` yet, that command creates it. If you use SSH, ensure
 | Approach | When to use |
 |----------|-------------|
 | **HTTPS + PAT** | Quick setup on a laptop; use a fine-scoped token with `contents:write` (and `workflow` if you add Actions later). Prefer a credential helper so the token is not pasted into shell history. |
+| **GitHub CLI (`gh`)** | Interactive developer machines: `gh auth login`, then use HTTPS or SSH remotes as configured; useful for quick `gh repo sync` / release flows alongside `git`. |
 | **SSH deploy key** | Servers and managed workspaces (e.g. Paperclip); add a **write** deploy key on the GitHub repo settings. |
 | **SSH user key** | Day-to-day dev machines already using `git@github.com:...`. |
 
@@ -139,7 +140,8 @@ Managed automation without interactive login must use **non-interactive** auth (
 ### After push
 
 1. Confirm **GitHub** shows `main` and the expected commit (README + `web/` + `server/` as intended).
-2. Close or hand off **AURA-20** on the board per CTO agreement (verify remote tip vs local release criteria).
+2. **Public README hygiene** — skim root (and `web/README.md`) on github.com for anything that should stay **internal-only** (VPN URLs, private board links); fix in a follow-up commit if needed.
+3. Close or hand off **AURA-20** on the board per CTO agreement (verify remote tip vs local release criteria).
 
 ---
 
