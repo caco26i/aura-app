@@ -18,7 +18,7 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 
 - **Abuse / false alarms:** Visible and silent alerts must be rate-limited and anomaly-scored server-side; log actor, device fingerprint (hashed), and cooldown state.
 - **Trusted contacts:** Contact list is local-only today; server-side fan-out must validate consent, opt-out, and regional messaging rules (SMS/email/push).
-- **Authoritative API (beta):** The `server/` package exposes validated routes (`POST /v1/emergency-alerts`, journey share, I’m safe) with bearer auth, layered rate limits, burst anomaly header (`X-Aura-Anomaly`), and an append-only JSON-lines audit log. The web client uses it when `VITE_AURA_API_URL` and `VITE_AURA_API_TOKEN` are set; otherwise it falls back to local mocks in `src/api/auraBackend.ts`. **Do not treat `VITE_AURA_API_TOKEN` as a long-lived secret** — it is visible in the bundle; ship a BFF or OAuth exchange before production hardening.
+- **Authoritative API (beta):** The `server/` package exposes validated routes (`POST /v1/journeys` to register a journey for the current bearer, then `POST /v1/emergency-alerts`, journey share, I’m safe) with bearer auth, layered rate limits, burst anomaly header (`X-Aura-Anomaly`), and an append-only JSON-lines audit log. Share and I’m-safe reject unknown journey ids or ids owned by another bearer (in-memory registry today; swap for durable store with OAuth/BFF). The web client uses it when `VITE_AURA_API_URL` and `VITE_AURA_API_TOKEN` are set; otherwise it falls back to local mocks in `src/api/auraBackend.ts`. **Do not treat `VITE_AURA_API_TOKEN` as a long-lived secret** — it is visible in the bundle; ship a BFF or OAuth exchange before production hardening.
 
 ## Data at rest (client)
 

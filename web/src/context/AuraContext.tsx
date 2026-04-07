@@ -77,6 +77,8 @@ type AuraContextValue = {
   removeContact: (id: string) => void;
   activeJourney: ActiveJourney | null;
   startJourney: (input: {
+    /** When live API is used, must be the id returned by `POST /v1/journeys`. */
+    id?: string;
     label: string;
     destinationLabel: string;
     etaMinutes: number;
@@ -131,13 +133,14 @@ export function AuraProvider({ children }: { children: ReactNode }) {
 
   const startJourney = useCallback(
     (input: {
+      id?: string;
       label: string;
       destinationLabel: string;
       etaMinutes: number;
       trackState?: JourneyTrackState;
     }) => {
       const j: ActiveJourney = {
-        id: crypto.randomUUID(),
+        id: input.id ?? crypto.randomUUID(),
         label: input.label,
         destinationLabel: input.destinationLabel,
         etaMinutes: input.etaMinutes,

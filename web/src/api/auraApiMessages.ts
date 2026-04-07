@@ -50,6 +50,10 @@ function messageForJsonError(code: string | undefined, surface: ApiSurface): str
     case 'validation_failed':
     case 'invalid_journey_id':
       return 'Something in the request did not look right. Check your details and try again.';
+    case 'journey_not_found':
+      return "We couldn't find this journey on the server. Start a new journey and try again.";
+    case 'journey_forbidden':
+      return "This journey belongs to another session. Start your own journey to share location or mark safe.";
     case 'not_found':
       return "We couldn't find that resource. Refresh the page or start again.";
     case 'server_misconfigured':

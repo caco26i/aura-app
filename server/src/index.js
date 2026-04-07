@@ -71,6 +71,39 @@ function shareAnomalyFlags(actor) {
   return windowed.length >= SHARE_BURST_THRESHOLD ? ['burst_location_share'] : [];
 }
 
+/** Server-side journey registry: journey UUID → owner actor key (bearer hash today; per-user token when OAuth ships). */
+const journeyOwners = new Map();
+
+function journeyOwnerOrRespond(journeyIdUuid, req, res, route) {
+  const owner = actorKey(req);
+  const registered = journeyOwners.get(journeyIdUuid);
+  if (!registered) {
+    appendAudit({
+      ts: new Date().toISOString(),
+      type: 'audit.journey_not_found',
+      route,
+      journeyId: journeyIdUuid,
+      actorHash: owner,
+      ip: req.ip,
+    });
+    res.status(404).json({ ok: false, error: 'journey_not_found' });
+    return false;
+  }
+  if (registered !== owner) {
+    appendAudit({
+      ts: new Date().toISOString(),
+      type: 'audit.journey_forbidden',
+      route,
+      journeyId: journeyIdUuid,
+      actorHash: owner,
+      ip: req.ip,
+    });
+    res.status(403).json({ ok: false, error: 'journey_forbidden' });
+    return false;
+  }
+  return true;
+}
+
 function auditRateLimited(route, req) {
   appendAudit({
     ts: new Date().toISOString(),
@@ -168,6 +201,33 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'aura-api' });
 });
 
+app.post('/v1/journeys', globalLimiter, journeyLimiter, requireBearer, (req, res) => {
+  const parsed = emptyBodySchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    appendAudit({
+      ts: new Date().toISOString(),
+      type: 'audit.validation_failed',
+      route: 'journeys-create',
+      actorHash: actorKey(req),
+      ip: req.ip,
+      issues: parsed.error.flatten(),
+    });
+    res.status(400).json({ ok: false, error: 'validation_failed', detail: parsed.error.flatten() });
+    return;
+  }
+  const journeyId = randomUUID();
+  const owner = actorKey(req);
+  journeyOwners.set(journeyId, owner);
+  appendAudit({
+    ts: new Date().toISOString(),
+    type: 'journey.created',
+    journeyId,
+    actorHash: owner,
+    ip: req.ip,
+  });
+  res.status(201).json({ ok: true, data: { journeyId } });
+});
+
 app.post('/v1/emergency-alerts', globalLimiter, requireBearer, sosLimiter, (req, res) => {
   const parsed = emergencyBodySchema.safeParse(req.body);
   if (!parsed.success) {
@@ -226,6 +286,9 @@ app.post(
         journeyId: req.params.journeyId,
       });
       res.status(400).json({ ok: false, error: 'invalid_journey_id' });
+      return;
+    }
+    if (!journeyOwnerOrRespond(jid.data, req, res, 'location-shares')) {
       return;
     }
     const bodyParsed = locationShareBodySchema.safeParse(req.body ?? {});
@@ -289,6 +352,9 @@ app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, journeyLimiter, requi
       journeyId: req.params.journeyId,
     });
     res.status(400).json({ ok: false, error: 'invalid_journey_id' });
+    return;
+  }
+  if (!journeyOwnerOrRespond(jid.data, req, res, 'im-safe')) {
     return;
   }
   const bodyParsed = emptyBodySchema.safeParse(req.body ?? {});

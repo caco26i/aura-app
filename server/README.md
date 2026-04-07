@@ -21,9 +21,10 @@ npm run dev
 
 ## Routes
 
+- `POST /v1/journeys` — body `{}`; creates a journey bound to the current bearer actor and returns `{ journeyId }` (audit: `journey.created`). **Call this before** location-share or I’m-safe for that id.
 - `POST /v1/emergency-alerts` — body `{ "mode": "silent" \| "visible" }`
-- `POST /v1/journeys/:journeyId/location-shares` — UUID journey id; JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
-- `POST /v1/journeys/:journeyId/im-safe` — UUID journey id
+- `POST /v1/journeys/:journeyId/location-shares` — UUID journey id **registered via** `POST /v1/journeys` **for this token**; otherwise `404 journey_not_found` or `403 journey_forbidden`. JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
+- `POST /v1/journeys/:journeyId/im-safe` — same ownership rules as location-shares
 - `GET /health`
 
 Optional header: `X-Aura-Device-Fingerprint` (opaque client id; stored hashed in audit).

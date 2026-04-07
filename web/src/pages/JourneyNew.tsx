@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { postCreateJourney } from '../api/auraBackend';
 import { useAura } from '../context/AuraContext';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
@@ -9,22 +10,36 @@ export function JourneyNew() {
   const [label, setLabel] = useState('Walk home');
   const [destination, setDestination] = useState('Home');
   const [eta, setEta] = useState(String(settings.timerDefaultMinutes));
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
 
-  const onStart = () => {
+  const onStart = async () => {
     const etaMinutes = Math.max(1, Number.parseInt(eta, 10) || settings.timerDefaultMinutes);
-    emitTelemetry({
-      category: 'journey',
-      event: 'started',
-      etaMinutes,
-      locationPrecision: settings.locationPrecision,
-    });
-    startJourney({
-      label,
-      destinationLabel: destination,
-      etaMinutes,
-      trackState: 'on_track',
-    });
-    navigate('/journey/active');
+    setStartError(null);
+    setStarting(true);
+    try {
+      const created = await postCreateJourney();
+      if (!created.ok) {
+        setStartError(created.userMessage);
+        return;
+      }
+      emitTelemetry({
+        category: 'journey',
+        event: 'started',
+        etaMinutes,
+        locationPrecision: settings.locationPrecision,
+      });
+      startJourney({
+        id: created.data.journeyId,
+        label,
+        destinationLabel: destination,
+        etaMinutes,
+        trackState: 'on_track',
+      });
+      navigate('/journey/active');
+    } finally {
+      setStarting(false);
+    }
   };
 
   return (
@@ -63,8 +78,13 @@ export function JourneyNew() {
         style={inputStyle}
       />
 
-      <button type="button" onClick={onStart} style={btnPrimary}>
-        Start live tracking
+      {startError ? (
+        <p role="alert" style={{ marginTop: 12, color: '#b42318', fontSize: 14 }}>
+          {startError}
+        </p>
+      ) : null}
+      <button type="button" onClick={onStart} style={btnPrimary} disabled={starting}>
+        {starting ? 'Starting…' : 'Start live tracking'}
       </button>
     </div>
   );

@@ -92,6 +92,15 @@ async function remotePost<T>(path: string, body: unknown | undefined, surface: A
   }
 }
 
+/** When API is configured, registers a server-side journey for the current bearer; required before share / im-safe. */
+export async function postCreateJourney(): Promise<BackendResult<{ journeyId: string }>> {
+  const cfg = remoteConfig();
+  if (!cfg) {
+    return { ok: true, data: { journeyId: crypto.randomUUID() } };
+  }
+  return remotePost<{ journeyId: string }>('/v1/journeys', {}, 'journey');
+}
+
 export async function postImSafe(journeyId: string): Promise<BackendResult<{ receivedAt: string }>> {
   emitTelemetry({ category: 'backend', event: 'request', operation: 'im_safe', journeyId });
   const cfg = remoteConfig();
