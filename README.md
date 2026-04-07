@@ -105,6 +105,44 @@ The **server** package documents API env vars and routes in [`server/README.md`]
 
 ---
 
+## Publishing to GitHub (maintainers)
+
+Use this checklist when the canonical remote is empty or you are wiring **write** access for the first time. It mirrors the board-facing thread for **AURA-20** (*publish Aura to the project GitHub*).
+
+### Before you push
+
+1. **Repo access** — confirm you can push to `https://github.com/Chrisdugamo/aura-app` (org/repo permissions or fork + PR if that is the agreed model).
+2. **Local tree** — on `main`, clean working tree, `npm ci` + `npm run build` under `web/` (and any release checks you use) passing.
+3. **Tip alignment** — if your checkout predates recent README/docs-only commits, merge or cherry-pick so this file includes this section before advertising the repo.
+
+### First push (empty remote)
+
+From the repo root, on `main`:
+
+```bash
+git remote -v
+git push -u origin main
+```
+
+If the remote has no `main` yet, that command creates it. If you use SSH, ensure `origin` uses the SSH URL and your key is loaded.
+
+### Credentials (pick one)
+
+| Approach | When to use |
+|----------|-------------|
+| **HTTPS + PAT** | Quick setup on a laptop; use a fine-scoped token with `contents:write` (and `workflow` if you add Actions later). Prefer a credential helper so the token is not pasted into shell history. |
+| **SSH deploy key** | Servers and managed workspaces (e.g. Paperclip); add a **write** deploy key on the GitHub repo settings. |
+| **SSH user key** | Day-to-day dev machines already using `git@github.com:...`. |
+
+Managed automation without interactive login must use **non-interactive** auth (deploy key, machine user PAT in a secret store, or provider-specific integration)—not a one-off browser login on the agent host.
+
+### After push
+
+1. Confirm **GitHub** shows `main` and the expected commit (README + `web/` + `server/` as intended).
+2. Close or hand off **AURA-20** on the board per CTO agreement (verify remote tip vs local release criteria).
+
+---
+
 ## Resumen (ES)
 
 **Aura** es una aplicación web centrada en la seguridad personal: seguimiento de rutas, red de confianza y SOS accesible en pocos toques, con un tono calmado y una interfaz alineada al sistema de diseño del proyecto. El repositorio incluye el cliente en `web/`, la API opcional en `server/` y la documentación operativa en `web/docs/`. Para arrancar en local, sigue la sección *Quick start* arriba.
