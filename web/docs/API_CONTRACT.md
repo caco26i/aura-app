@@ -4,6 +4,8 @@ Canonical server behavior: [`../../server/README.md`](../../server/README.md). T
 
 **Coordination:** Backend track [AURA-60](/AURA/issues/AURA-60); parallel UI work [AURA-59](/AURA/issues/AURA-59). Treat changes to paths, envelopes, or `error` **codes** as breaking unless both sides ship together.
 
+**Beta approval:** CTO ack on this handshake — [comment 4ea48512](/AURA/issues/AURA-60#comment-4ea48512-499f-49f8-8fd8-23a7902b8cb2) (review-only; ship FE/BE together or version when changing the contract).
+
 ## Transport and auth (beta)
 
 | Item | Rule |
