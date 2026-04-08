@@ -32,7 +32,7 @@ docker run --rm -e AURA_API_BEARER_TOKEN -p 8787:8787 \
   aura-api:local
 ```
 
-**Compose (example):** [`docker-compose.yml`](./docker-compose.yml) mounts a named volume at `/app/data` and sets `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` under that path. Set `AURA_API_BEARER_TOKEN` in the environment or a `.env` file next to the compose file, then:
+**Compose (example):** [`docker-compose.yml`](./docker-compose.yml) mounts a named volume at `/app/data` and sets `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` under that path. Host port mapping uses **`PORT`** in a `.env` next to this file (default **8787** — unlike the repo-root compose, which uses `API_PORT`). Set `AURA_API_BEARER_TOKEN` in the environment or that `.env`, then:
 
 ```bash
 cd server

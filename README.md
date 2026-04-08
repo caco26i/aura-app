@@ -133,6 +133,22 @@ After the commands above, use the **web package’s** [`web/docs/`](./web/docs/)
 
 The **server** package documents API env vars and routes in [`server/README.md`](./server/README.md) (pair it with [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) when wiring the web app to a real backend — that doc name is what we mean by “beta backend”; it is not a single shell variable).
 
+### 3. Full stack with Docker (operators)
+
+From the **repo root**, use [`.env.example`](./.env.example) as the template for Compose (copy to `.env` and set values — never commit a filled `.env`):
+
+```bash
+cp .env.example .env
+# Edit .env — for the default file, set AURA_API_BEARER_TOKEN (see comments in .env.example)
+docker compose up --build
+```
+
+- **Services** (default [`docker-compose.yml`](./docker-compose.yml)): `aura-api` (API on container port **8787**), `aura-web` (nginx + static SPA on container port **80**).
+- **Host ports:** `API_PORT` (default **8787**) and `WEB_PORT` (default **8080**) — browser opens `http://localhost:${WEB_PORT:-8080}`; nginx proxies `/v1` to the API.
+- **JWT + BFF** (no static bearer baked into the web image): `docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build` — see `.env.example` and [`web/docs/DEPLOY.md`](./web/docs/DEPLOY.md).
+
+API-only compose from `server/` (single service) is documented in [`server/README.md`](./server/README.md).
+
 ---
 
 ## Documentation index
