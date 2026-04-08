@@ -23,7 +23,7 @@ npm run dev
 npm test
 ```
 
-Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), and append-only audit writes. They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
+Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), append-only audit writes, **journey store unit restart checks** (`journey-registry.restart.test.js`), and **HTTP continuity across two Node processes** (`journey-http-restart.integration.test.js` + `journey-restart-phase.mjs`). Default API tests set `AURA_API_JOURNEY_STORE=memory`; subprocess test uses a temp SQLite file.
 
 On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` when `server/` or that workflow file changes.
 
@@ -38,6 +38,9 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 | `AURA_API_BEARER_TOKEN_ALT` | no | Optional second static bearer (separate actor). Tests use it for `journey_forbidden` across actors. |
 | `PORT` | no | Default `8787` |
 | `AUDIT_LOG_PATH` | no | Default `./data/audit.log` |
+| `AURA_API_JOURNEY_STORE_SQLITE_PATH` | no | SQLite **WAL** journey store (default `./data/journeys.sqlite`). Primary backend when `AURA_API_JOURNEY_STORE=auto` and the driver opens successfully. Legacy alias: `AURA_API_JOURNEY_SQLITE_PATH`. |
+| `AURA_API_JOURNEY_STORE_JSONL_PATH` | no | Append-only **JSONL** fallback (default `./data/journeys.jsonl`): used when SQLite cannot be opened, or when `AURA_API_JOURNEY_STORE=jsonl`. Each append **fsync**s. Legacy alias: `AURA_API_JOURNEY_JSONL_PATH`. |
+| `AURA_API_JOURNEY_STORE` | no | `auto` (default): SQLite then JSONL fallback. `sqlite` / `jsonl` / `memory`: force backend (`memory` = in-process `Map`, for fast tests). Legacy alias: `AURA_API_JOURNEY_BACKEND`. |
 | `CORS_ORIGIN` | no | `*` or comma-separated allowlist |
 | `AURA_API_JSON_BODY_LIMIT` | no | Express JSON body size (default `24kb`) |
 | `AURA_API_RATE_LIMIT_GLOBAL_WINDOW_MS` | no | Per-IP+actor minute window for **`globalLimiter`** on all mutating routes (default `60000`) |
@@ -62,7 +65,7 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 - `POST /v1/journeys/:journeyId/location-shares` — UUID journey id **registered via** `POST /v1/journeys` **for this token**; otherwise `404 journey_not_found` or `403 journey_forbidden`. JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
 - `POST /v1/journeys/:journeyId/im-safe` — same ownership rules as location-shares; **hourly** rate limit (layered under global + per-minute journey limits)
 - `GET /health` — liveness (process up).
-- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and `AUDIT_LOG_PATH` directory writable (**503** `not_ready` otherwise). Use for orchestration / load balancer health when audit persistence must succeed.
+- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and directories for `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` writable (**503** `not_ready` otherwise). Use for orchestration / load balancer health when persistence must succeed.
 
 All JSON responses include baseline headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` (see [`API_CONTRACT.md`](../web/docs/API_CONTRACT.md)).
 

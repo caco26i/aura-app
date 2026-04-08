@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
+import { createJourneyRegistry } from './journeyRegistry.js';
 
 const PORT = Number(process.env.PORT || 8787);
 const BEARER = process.env.AURA_API_BEARER_TOKEN;
@@ -21,7 +22,20 @@ const BFF_JWT_ISSUER = process.env.AURA_API_BFF_JWT_ISSUER || '';
 const BFF_JWT_AUDIENCE = process.env.AURA_API_BFF_JWT_AUDIENCE || '';
 const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '24kb';
 const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
+const JOURNEY_SQLITE_PATH =
+  process.env.AURA_API_JOURNEY_STORE_SQLITE_PATH ||
+  process.env.AURA_API_JOURNEY_SQLITE_PATH ||
+  path.join(process.cwd(), 'data', 'journeys.sqlite');
+const JOURNEY_JSONL_PATH =
+  process.env.AURA_API_JOURNEY_STORE_JSONL_PATH ||
+  process.env.AURA_API_JOURNEY_JSONL_PATH ||
+  path.join(process.cwd(), 'data', 'journeys.jsonl');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
+const journeyRegistry = createJourneyRegistry({
+  sqlitePath: JOURNEY_SQLITE_PATH,
+  jsonlPath: JOURNEY_JSONL_PATH,
+});
 
 /** @param {string} name @param {number} defaultVal @param {number} [min] */
 function parsePositiveIntEnv(name, defaultVal, min = 1) {
@@ -172,12 +186,9 @@ function shareAnomalyFlags(actor) {
   return windowed.length >= SHARE_BURST_THRESHOLD ? ['burst_location_share'] : [];
 }
 
-/** Server-side journey registry: journey UUID → owner actor key (bearer hash today; per-user token when OAuth ships). */
-const journeyOwners = new Map();
-
 function journeyOwnerOrRespond(journeyIdUuid, req, res, route) {
   const owner = actorKey(req);
-  const registered = journeyOwners.get(journeyIdUuid);
+  const registered = journeyRegistry.getOwner(journeyIdUuid);
   if (!registered) {
     appendAudit({
       ts: new Date().toISOString(),
@@ -220,16 +231,23 @@ function ensureAuditDir() {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-/** Verifies auth is configured and audit log directory is writable (for load balancers / orchestration readiness). */
+function probeDirWritable(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const probe = path.join(dir, `.aura-ready-probe-${process.pid}`);
+  fs.writeFileSync(probe, '', { flag: 'w' });
+  fs.unlinkSync(probe);
+}
+
+/** Verifies auth is configured and audit + journey store directories are writable. */
 function readinessResult() {
   if (!BEARER && !BFF_JWT_SECRET) {
     return { ok: false, detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET' };
   }
   try {
     ensureAuditDir();
-    const probe = path.join(path.dirname(AUDIT_LOG_PATH), `.aura-ready-probe-${process.pid}`);
-    fs.writeFileSync(probe, '', { flag: 'w' });
-    fs.unlinkSync(probe);
+    probeDirWritable(path.dirname(AUDIT_LOG_PATH));
+    probeDirWritable(path.dirname(JOURNEY_SQLITE_PATH));
+    probeDirWritable(path.dirname(JOURNEY_JSONL_PATH));
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -443,7 +461,7 @@ app.post(
   }
   const journeyId = randomUUID();
   const owner = actorKey(req);
-  journeyOwners.set(journeyId, owner);
+  journeyRegistry.register(journeyId, owner);
   appendAudit({
     ts: new Date().toISOString(),
     type: 'journey.created',
@@ -631,8 +649,10 @@ app.use((_req, res) => {
 
 if (!process.env.AURA_API_SKIP_LISTEN) {
   app.listen(PORT, () => {
-    process.stdout.write(`aura-api listening on :${PORT} audit=${AUDIT_LOG_PATH}\n`);
+    process.stdout.write(
+      `aura-api listening on :${PORT} audit=${AUDIT_LOG_PATH} journeys=${journeyRegistry.backend}\n`,
+    );
   });
 }
 
-export { app };
+export { app, journeyRegistry };

@@ -22,6 +22,7 @@ process.env.AURA_API_BEARER_TOKEN_ALT = TOKEN_ALT;
 process.env.AURA_API_BFF_JWT_SECRET = JWT_SECRET;
 process.env.AURA_API_SKIP_LISTEN = '1';
 process.env.AUDIT_LOG_PATH = auditPath;
+process.env.AURA_API_JOURNEY_STORE = 'memory';
 
 const { app } = await import('../src/index.js');
 

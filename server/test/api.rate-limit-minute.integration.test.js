@@ -16,6 +16,7 @@ const auditPath = path.join(tmpDir, 'audit.log');
 process.env.AURA_API_BEARER_TOKEN = TOKEN;
 process.env.AURA_API_SKIP_LISTEN = '1';
 process.env.AUDIT_LOG_PATH = auditPath;
+process.env.AURA_API_JOURNEY_STORE = 'memory';
 process.env.AURA_API_RATE_LIMIT_JOURNEY_MAX = '5';
 process.env.AURA_API_RATE_LIMIT_GLOBAL_MAX = '9999';
 
