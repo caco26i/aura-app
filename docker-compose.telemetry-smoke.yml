@@ -1,0 +1,20 @@
+# Optional override: exercise nginx → collector proxy for /ingest/aura (CI / manual smoke).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up --build
+#
+# Build args should include VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura (default in .env for staging-style checks).
+
+services:
+  aura-telemetry-stub:
+    image: mendhak/http-https-echo:35
+    expose:
+      - "8080"
+
+  aura-web:
+    environment:
+      AURA_TELEMETRY_PROXY_TARGET: http://aura-telemetry-stub:8080/ingest/aura
+    depends_on:
+      aura-api:
+        condition: service_healthy
+      aura-telemetry-stub:
+        condition: service_started

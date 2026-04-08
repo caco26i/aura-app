@@ -8,6 +8,7 @@
 #   VITE_GOOGLE_CLIENT_ID=<Google OAuth client id, same as web>
 # Optional:
 #   AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080  (comma-separated allowlist)
+#   AURA_TELEMETRY_PROXY_TARGET=https://collector.example/ingest/aura  (nginx proxies /ingest/aura)
 
 services:
   aura-bff:
@@ -54,8 +55,9 @@ services:
         VITE_AURA_BFF_URL: /aura-bff
         VITE_AURA_TELEMETRY_ENDPOINT: ${VITE_AURA_TELEMETRY_ENDPOINT:-}
         VITE_AURA_TELEMETRY_DEBUG: ${VITE_AURA_TELEMETRY_DEBUG:-}
-    volumes:
-      - ./web/nginx-docker-bff.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      AURA_NGINX_STACK: bff
+      AURA_TELEMETRY_PROXY_TARGET: ${AURA_TELEMETRY_PROXY_TARGET:-}
     depends_on:
       aura-api:
         condition: service_healthy

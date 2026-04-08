@@ -52,6 +52,8 @@ VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura
 
 Relative URLs do not add a second origin to CSP: `connect-src` already includes `'self'`, which covers this path.
 
+**Docker Compose (root `docker-compose.yml` / BFF merge):** set runtime env **`AURA_TELEMETRY_PROXY_TARGET`** on `aura-web` to the **full URL** nginx should use in `proxy_pass` (for example `https://collector.internal/ingest/aura`). Build with **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`**. If the proxy env is unset, nginx does not expose `/ingest/aura` — use a full `VITE_AURA_TELEMETRY_*` URL at build time instead. See [`DEPLOY.md`](./DEPLOY.md) hosting / telemetry sections.
+
 ### Local development (`npm run dev`)
 
 - Default: dev server accepts `POST /ingest/aura` and responds **204** with an empty body (no collector required). Use `VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura` in `.env.local` to mirror staging’s same-origin pattern.

@@ -28,6 +28,10 @@ ENV VITE_AURA_API_TOKEN=$VITE_AURA_API_TOKEN \
 RUN npm run build
 
 FROM nginx:1.27-alpine AS run
+RUN apk add --no-cache gettext && mkdir -p /etc/nginx/presets /etc/nginx/snippets
 COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx-docker.conf /etc/nginx/conf.d/default.conf
+COPY nginx-docker.conf nginx-docker-bff.conf /etc/nginx/presets/
+COPY nginx-fragment-telemetry-empty.conf nginx-fragment-telemetry.conf.template /etc/nginx/presets/
+COPY docker-entrypoint.d/40-aura-telemetry-fragment.sh /docker-entrypoint.d/
+RUN chmod +x /docker-entrypoint.d/40-aura-telemetry-fragment.sh
 EXPOSE 80

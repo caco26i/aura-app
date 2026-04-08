@@ -100,3 +100,46 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.bff.yml down -v --remove-orphans
+
+  compose-telemetry-proxy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: .env with token + same-origin telemetry build arg
+        run: |
+          echo "AURA_API_BEARER_TOKEN=$(openssl rand -hex 24)" > .env
+          short_sha="${GITHUB_SHA:0:7}"
+          echo "AURA_API_GIT_SHA=${short_sha}" >> .env
+          echo "AURA_API_DEPLOY_VERSION=compose-smoke" >> .env
+          echo "VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura" >> .env
+
+      - name: Build and start stack (telemetry stub override)
+        run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up -d --build
+
+      - name: Wait for /health then POST /ingest/aura via nginx proxy
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8080/health" >/dev/null 2>&1; then
+              echo "health ok (attempt $i)"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "::group::compose ps + logs"
+              docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml ps
+              docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml logs --tail=200
+              echo "::endgroup::"
+              exit 1
+            fi
+            sleep 2
+          done
+          code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
+            -H "Content-Type: application/json" -d '{"smoke":true}')"
+          echo "POST /ingest/aura HTTP ${code}"
+          test "${code}" = "200"
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml down -v --remove-orphans
