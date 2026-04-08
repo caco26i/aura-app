@@ -121,6 +121,14 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'journey_forbidden');
   });
 
+  test('im-safe returns journey_forbidden for a second authenticated actor', async () => {
+    const created = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
+    const { journeyId } = created.body.data;
+    const res = await request(app).post(`/v1/journeys/${journeyId}/im-safe`).set(bearerAlt).expect(403);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'journey_forbidden');
+  });
+
   test('location-shares returns journey_not_found for unknown id', async () => {
     const res = await request(app)
       .post('/v1/journeys/00000000-0000-4000-8000-000000000001/location-shares')
