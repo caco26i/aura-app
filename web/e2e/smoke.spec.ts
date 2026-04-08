@@ -105,6 +105,40 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
+  test('Modo Transporte shell from home grid: h1 and no page/console errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/');
+    await page.getByRole('link', { name: /Transporte/i }).click();
+    await expect(page).toHaveURL(/\/transport$/);
+    await expect(page.getByRole('heading', { name: 'Modo Transporte', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Check-in IA shell from home grid: h1 and no page/console errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/');
+    await page.getByRole('link', { name: /Check-in IA/i }).click();
+    await expect(page).toHaveURL(/\/checkin$/);
+    await expect(page.getByRole('heading', { name: 'Check-in IA', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
   test('Trusted: open from bootstrapped shell, h1 and no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
