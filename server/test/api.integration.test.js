@@ -120,6 +120,17 @@ describe('Aura API', () => {
     assert.ok(typeof res.body.data.receivedAt === 'string');
   });
 
+  test('im-safe rejects non-empty JSON body', async () => {
+    const create = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
+    const { journeyId } = create.body.data;
+    const res = await request(app)
+      .post(`/v1/journeys/${journeyId}/im-safe`)
+      .set(bearer)
+      .send({ extra: true })
+      .expect(400);
+    assert.equal(res.body.error, 'validation_failed');
+  });
+
   test('happy path: journey then location-share then im-safe', async () => {
     const create = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
     const { journeyId } = create.body.data;

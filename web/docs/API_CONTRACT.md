@@ -71,8 +71,8 @@ Allowed anomaly tokens today: `burst_sos`, `burst_location_share` (comma-separat
 | `postCreateJourney` | `{}` |
 | `postEmergencyAlert` | `{ "mode": "silent" }` or `{ "mode": "visible" }` |
 | `postShareLocation` | `{}` (UI does not send lat/lon yet; server accepts optional coordinates) |
-| `postImSafe` | No body (fetch without `body`) |
+| `postImSafe` | No body (fetch without `body`); server rejects any non-empty JSON with `validation_failed` |
 
 ## Regression coverage
 
-Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`). Includes `invalid_journey_id` on `:journeyId` routes, unknown-path and wrong-method `not_found` (404), a sample **OPTIONS** preflight assertion for CORS (`Authorization` / `Content-Type` allowed), **`429` `rate_limited`** on `POST /v1/emergency-alerts` after the hourly SOS cap (emergency cases grouped at the **end** of the suite so the limiter is deterministic; `audit.rate_limited` in the audit file), and `journey_forbidden` is exercised once the API accepts multiple distinct authenticated actors (today’s single shared beta token maps to one actor key).
+Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`). Includes `invalid_journey_id` on `:journeyId` routes, **`im-safe` non-empty body → `validation_failed`**, unknown-path and wrong-method `not_found` (404), a sample **OPTIONS** preflight assertion for CORS (`Authorization` / `Content-Type` allowed), **`429` `rate_limited`** on `POST /v1/emergency-alerts` after the hourly SOS cap (emergency cases grouped at the **end** of the suite so the limiter is deterministic; `audit.rate_limited` in the audit file), and `journey_forbidden` is exercised once the API accepts multiple distinct authenticated actors (today’s single shared beta token maps to one actor key).
