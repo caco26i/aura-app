@@ -55,8 +55,8 @@ Cross-check for map intel and global HTML shell called out in [AURA-61](/AURA/is
 |--------|-------------|
 | §4.1 Routes & shell | [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) (incl. deep links / `*` policy) + `web/src/App.tsx`, `AppShell.tsx` |
 | §4.2 Journey API before share / I’m safe | [`BETA_BACKEND.md`](./BETA_BACKEND.md), `auraBackend.ts` (`postCreateJourney`), `JourneyNew.tsx`, `JourneyActive.tsx`, `auraApiMessages.ts` |
-| §4.3 SOS confirm; anomaly notice styling | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md), `Emergency.tsx` |
-| §4.4 Voice; no raw HTTP in UI | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md), `auraApiMessages.ts` |
+| §4.3 SOS confirm; anomaly notice styling | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md) (incl. [AURA-247](/AURA/issues/AURA-247) reconciliation), `Emergency.tsx`, `auraBackend.ts` (`postEmergencyAlert` / `X-Aura-Anomaly` → notice) |
+| §4.4 Voice; no raw HTTP in UI | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md), `auraApiMessages.ts`, `auraBackend.ts` (`remotePost`) |
 
 ---
 
@@ -152,3 +152,4 @@ _None at present._
 | 2026-04-08 | [AURA-221](/AURA/issues/AURA-221): post–[AURA-61](/AURA/issues/AURA-61) UX / PDR trace closure — **PASS** (`web/` `npm run lint` + production `vite build`); shipped `web/src` cross-checked vs this file + [`AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) (wildcard home replace, `/auth` titles, map OSM attribution, settings privacy deep link); no drift found. |
 | 2026-04-08 | [AURA-232](/AURA/issues/AURA-232): Post–[AURA-220](/AURA/issues/AURA-220) UX polish — [`UX_ONBOARDING_TRUST_SETTINGS.md`](./UX_ONBOARDING_TRUST_SETTINGS.md) §5 reconciled to shipped AURA-28 empty/loading inventory; [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §2.5 / §3 checklist synced. Gap register unchanged (**Open product questions** / **Nice-to-have** still empty). |
 | 2026-04-08 | [AURA-238](/AURA/issues/AURA-238): Post–[AURA-232](/AURA/issues/AURA-232) empty/loading/safety spec pass — static cross-check of `web/src` vs [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) + SOS placement vs [`AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md); Home hub global alert `aria-live` + SOS `data-aura-sos-entry` notes recorded in UX doc §1 / §2.3. No engineering delta; gap register unchanged. |
+| 2026-04-08 | [AURA-247](/AURA/issues/AURA-247): Launch / SOS spec vs shipped (`Emergency.tsx`, `auraApiMessages.ts`, `auraBackend.ts`, PDR §4.3–§4.4) — drift closed in [`AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md) reconciliation + string-table sync; §4 trace rows tightened. No CTO child (no eng gap). |

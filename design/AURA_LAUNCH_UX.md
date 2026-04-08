@@ -15,8 +15,8 @@
 | Surface | Location | Pattern |
 |--------|----------|---------|
 | Live journey actions | `web/src/pages/JourneyActive.tsx` | Inline `role="alert"` under map/actions for I’m safe / share failures |
-| Silent SOS sheet | Same file (sheet is confirm-only today) | Errors from this path still route through `/emergency` after continue |
-| Emergency / SOS | `web/src/pages/Emergency.tsx` | Full-width `role="alert"` above actions **for failures only** |
+| Journey → silent path primer | Same file (sheet is **navigate-only** — no POST) | Continues to `/emergency` with `{ mode: 'silent' }`; all send errors surface on `Emergency` |
+| Emergency / SOS | `web/src/pages/Emergency.tsx` | Full-width `role="alert"` above actions **for failures only**; **silent** send uses **two in-page confirm steps** before POST; **visible** uses one confirm dialog |
 | Anomaly notice (success + header) | `web/src/pages/Emergency.tsx` | **`role="status"`** calm panel — not `role="alert"`; throttling / burst must not read like imminent personal danger |
 | Backend boundary | `web/src/api/auraBackend.ts` + `web/src/api/auraApiMessages.ts` | `remotePost` in `auraBackend.ts`; **user-visible mapping** centralized in `auraApiMessages.ts` (no raw HTTP codes in UI) |
 
@@ -49,8 +49,9 @@ Server: `server/src/index.js` (404 `journey_not_found`, 403 `journey_forbidden` 
 
 | Condition | Shipped user string | Notes |
 |-----------|---------------------|--------|
-| **Offline / network** (`fetch` throws, `TypeError`, “Failed to fetch”, navigator offline) | **Journey / map:** “We couldn't reach Aura. Check your connection and try again.” **SOS:** “We couldn't confirm your alert reached Aura. If you're in immediate danger, contact local emergency services. You can also check your connection and try again.” | `userMessageForNetworkFailure` — SOS uses stronger safety framing than journey. |
-| **401** — missing/invalid bearer | “Your session may have expired. When sign-in is available, sign in again and retry.” | From `messageForJsonError('unauthorized')` / 401 branch. |
+| **Offline / network** (`fetch` throws with common offline signatures — see `isOfflineError` in `auraApiMessages.ts`) | **Journey / map:** “We couldn't reach Aura. Check your connection and try again.” **SOS:** “We couldn't confirm your alert reached Aura. If you're in immediate danger, contact local emergency services. You can also check your connection and try again.” | `userMessageForNetworkFailure` after `isOfflineError`; other thrown errors use `userMessageForUnknownError` (does **not** consult `navigator.onLine` alone). |
+| **401** — JSON `unauthorized` | “Your session may have expired. When sign-in is available, sign in again and retry.” | `messageForJsonError('unauthorized')`. |
+| **401** — no mapped JSON `error` | “Your session may have expired. Sign in again when available.” | Fallback in `userMessageForHttpFailure` when body does not carry `unauthorized`. |
 | **403** — wrong token / scope | JSON `forbidden`: “This action isn't available with your current access. If it keeps happening, contact your organizer.” Fallback (no mapped code): “This action isn't available right now. If it keeps happening, contact your organizer.” | |
 | **429** — rate limited | **Journey / map:** “Aura is handling a lot of requests right now. Please wait a moment and try again.” **SOS:** “We couldn't send your alert just yet because Aura is limiting requests. If you're in immediate danger, contact local emergency services. Wait a moment, then try again.” | Also used when JSON `error` is `rate_limited` (surface-aware). |
 | **`server_misconfigured`** (any HTTP where mapped) | “Aura's live service isn't fully configured yet. Try again later or use demo mode without API keys.” | |
@@ -60,20 +61,40 @@ Server: `server/src/index.js` (404 `journey_not_found`, 403 `journey_forbidden` 
 | Other non-mapped HTTP | **Journey:** “We couldn't complete that request. Please try again.” **SOS:** “We couldn't complete that request. If you're in immediate danger, contact local emergency services, then try again.” | `userMessageForUnknownError` — **no** numeric status in the string (principle 3). |
 | **400** + `invalid_journey_id` (journey surface) | “We couldn't use this journey on your current session. Start a new journey from home, then try again.” | Non-journey surfaces get generic validation copy. |
 | **400** + `validation_failed` | “Something in the request did not look right. Check your details and try again.” | |
+| **400** + `invalid_json` | “The request could not be read as JSON. Refresh the page and try again.” | `messageForJsonError` |
 | **413** + `payload_too_large` | “The request was too large for the server to accept. Try again with less data or refresh and start over.” | |
+| **`not_ready`** (JSON `error`, when mapped) | “Aura's live service isn't ready to accept traffic yet. Try again in a few minutes.” | |
 | Missing client API config (`userMessageForMisconfiguration`) | “Live backend is not connected (missing API URL or token in this build). If you're a participant, contact your organizer.” | Distinct from `server_misconfigured` (server-declared). |
 | BFF: no session (`userMessageForBffSignIn`) | “Sign in with Google under Settings to connect this device to the live Aura API, then try again.” | |
 | BFF: session fetch failed (`userMessageForBffSessionFetchFailure`) | “Could not reach the sign-in service. Check that the BFF is running and CORS allows this origin.” | |
+| **200** OK but body not `{ ok: true, data: … }` (client parse / contract drift) | “We got an unexpected reply from Aura. Try again.” | `remotePost` guard in `auraBackend.ts`; technical `error` for telemetry remains `Invalid response`. |
 
 ### SOS success with `X-Aura-Anomaly`
 
 When `POST /v1/emergency-alerts` returns **201** but response headers include **`X-Aura-Anomaly`** (e.g. `burst_sos`):
 
 - **Do not** change the primary success message if the alert was accepted.
-- Show mapped anomaly copy in a **`role="status"`** region (current: muted panel on `Emergency` before navigate home) — **never** reuse the red **`role="alert"`** styling used for hard failures.
-- Example calm strings: see `noticeForAnomalyHeader` in `auraApiMessages.ts` (e.g. burst SOS reassurance).
+- Show mapped anomaly copy in a **`role="status"`** region (muted panel on `Emergency`) — **never** reuse the red **`role="alert"`** styling used for hard failures.
+- **`burst_sos` shipped string:** “Your alert was recorded. If you still feel unsafe, contact local emergency services.” Other flags: see `noticeForAnomalyHeader` in `auraApiMessages.ts` (`burst_location_share`, generic `ANOMALY_HINT`).
+- **Timing:** UI holds the notice for **~3.2s** (`Emergency.tsx`) before `navigate('/')` and global alert status, so the calm panel is readable.
 
 Telemetry should record the header value for ops; see below.
+
+---
+
+## Spec vs shipped — [AURA-247](/AURA/issues/AURA-247) (post–[AURA-238](/AURA/issues/AURA-238))
+
+Drift review: PDR **§4.3–§4.4**, this file, `Emergency.tsx`, `auraApiMessages.ts`, `auraBackend.ts`, [`AURA_SCREEN_SPECS.md`](./AURA_SCREEN_SPECS.md) routing.
+
+| Severity | Topic | Resolution |
+|----------|--------|------------|
+| **None** | PDR §4.3 confirm-before-send; `role="status"` for anomaly vs `role="alert"` for failures | Shipped `Emergency.tsx` + `remotePost` / `noticeForAnomalyHeader` match. |
+| **None** | §4.4 centralized copy; no raw HTTP in user strings | `userMessageForHttpFailure` / `userMessageForUnknownError` paths omit numeric status in UI copy. |
+| **None** | `/emergency` outside shell; reachable before onboarding | Matches `App.tsx` + screen specs. |
+| **Doc only** | Launch UX string table missing `not_ready`, `invalid_json`, bare 401 fallback, invalid JSON-body guard, offline heuristic detail | **Closed** — rows added above (this pass). |
+| **Doc only** | Journey silent sheet described as “confirm-only” while send is two-step on `Emergency` | **Closed** — “Where copy lands” table clarified (navigate-only sheet vs two-step send). |
+
+No CTO engineering child filed: no remaining spec–code mismatch that requires implementation work.
 
 ## CTO implementation checklist
 
@@ -100,4 +121,4 @@ Telemetry should record the header value for ops; see below.
 
 ---
 
-*Canonical **aura-app** git. Implementation baselines: `0411ed3` (no raw HTTP in generic failure path), `cc847fa` (journey ownership JSON table + session/sync copy), `60146f1` (telemetry table + principle 4 / anomaly doc parity); **latest doc:** anomaly notice **`role="status"`** row + SOS subsection (see `Emergency.tsx`). Aligns with `server/src/index.js` error shapes; journey binding — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md).*
+*Canonical **aura-app** git. Implementation baselines: `0411ed3` (no raw HTTP in generic failure path), `cc847fa` (journey ownership JSON table + session/sync copy), `60146f1` (telemetry table + principle 4 / anomaly doc parity); **latest doc:** [AURA-247](/AURA/issues/AURA-247) reconciliation block + expanded string table / journey vs Emergency silent flow. Aligns with `server/src/index.js` error shapes; journey binding — [BETA_BACKEND.md](../web/docs/BETA_BACKEND.md).*
