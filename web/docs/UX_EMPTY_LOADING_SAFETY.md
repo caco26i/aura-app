@@ -10,7 +10,7 @@
 
 | Surface | Empty / edge | Loading / busy | Errors / alerts |
 |--------|----------------|----------------|-----------------|
-| **Home** | N/A (cards always shown) | N/A | N/A |
+| **Home** | N/A (cards always shown) | N/A | Global hub headline *Safe.* / *Alert active.* via `role="status"` + `aria-live="polite"` (not API errors) |
 | **JourneyNew** | N/A | Button `Starting…` | `role="alert"` via `startError` |
 | **JourneyActive** | No journey: title + device clarifier (`role="status"`) + next-step line + link | `Sending…` / `Sharing…` on actions | `role="alert"` shared for API failures |
 | **Emergency** | N/A | Both buttons `Sending…` | `role="alert"` + optional `role="status"` notice |
@@ -61,9 +61,9 @@
 
 **SOS entry (bottom nav / Home / optional `AuraSOSButton`)**
 
-- Shipped chrome uses bottom-nav **SOS**; FAB component exists but may be unmounted — see [`PDR_SCOPE_TRACE.md`](./PDR_SCOPE_TRACE.md).
-- When FAB is used: `aria-label="Emergency SOS"` — Good.  
-- **Spec:** When `globalStatus === 'alert'`, consider tooltip or `aria-live` polite announcement *“Alert status active”* (optional, avoid duplicate nagging).
+- Shipped chrome uses bottom-nav **SOS** (`data-aura-sos-entry="nav"` + `sosReturnFocus.ts`); Home SOS tile uses `data-aura-sos-entry="home-tile"`. FAB component exists but is **not** mounted in shell — see [`PDR_SCOPE_TRACE.md`](./PDR_SCOPE_TRACE.md) and [`AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md).
+- When FAB is used: `aria-label` escalates to *Emergency SOS — alert active* when `globalStatus === 'alert'` — Good.
+- **Global alert + SR:** **Shipped on Home** — hub headline uses `role="status"`, `aria-live="polite"`, `aria-atomic="true"` with *Alert active.* when `globalStatus === 'alert'` (`Home.tsx`). Optional later: tooltip on SOS entry points or a separate polite string *“Alert status active”* if product wants exact wording outside the hub (avoid duplicate nagging).
 
 **End journey**
 
@@ -101,8 +101,9 @@
 ## 5. Files referenced
 
 - `web/src/pages/*.tsx` — screen copy and structure  
+- `web/src/pages/Home.tsx` — hub safe / alert headline + polite live region  
 - `web/src/api/auraApiMessages.ts` — API-facing user strings  
 - `web/src/a11y/sosReturnFocus.ts` — Emergency “Go back” focus restore  
 - `web/src/components/AuraMap.tsx` — map loading behavior  
 
-— UX Designer · AURA-28 handoff
+— UX Designer · AURA-28 handoff · [AURA-238](/AURA/issues/AURA-238) verification (2026-04-08): shipped vs optional rows re-checked against `web/`; doc nits above only.
