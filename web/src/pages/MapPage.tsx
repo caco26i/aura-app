@@ -16,7 +16,7 @@ export function MapPage() {
     [mapLayers],
   );
 
-  const toggleRow = (label: string, key: keyof typeof mapLayers, description: string) => (
+  const toggleRow = (idPrefix: string, label: string, key: keyof typeof mapLayers, description: string) => (
     <div
       key={key}
       style={{
@@ -31,14 +31,19 @@ export function MapPage() {
       }}
     >
       <div>
-        <div style={{ fontWeight: 700 }}>{label}</div>
-        <div style={{ fontSize: 13, color: 'var(--aura-muted)' }}>{description}</div>
+        <div id={`${idPrefix}-label`} style={{ fontWeight: 700 }}>
+          {label}
+        </div>
+        <div id={`${idPrefix}-desc`} style={{ fontSize: 13, color: 'var(--aura-muted)' }}>
+          {description}
+        </div>
       </div>
       <button
         type="button"
         role="switch"
         aria-checked={mapLayers[key]}
-        aria-label={`Toggle ${label} layer`}
+        aria-labelledby={`${idPrefix}-label`}
+        aria-describedby={`${idPrefix}-desc`}
         onClick={() => setMapLayer(key, !mapLayers[key])}
         style={{
           width: 52,
@@ -71,9 +76,9 @@ export function MapPage() {
       <h1 style={{ marginTop: 0 }}>Map intel</h1>
       <p style={{ color: 'var(--aura-muted)' }}>Layers and POIs persist across reloads (local device).</p>
 
-      {toggleRow('Risk signals', 'risk', 'Areas to stay aware near')}
-      {toggleRow('Safe points', 'safePoints', 'Lit checkpoints and safer zones')}
-      {toggleRow('Activity', 'activity', 'Events and crowd context')}
+      {toggleRow('map-layer-risk', 'Risk signals', 'risk', 'Areas to stay aware near')}
+      {toggleRow('map-layer-safe', 'Safe points', 'safePoints', 'Lit checkpoints and safer zones')}
+      {toggleRow('map-layer-activity', 'Activity', 'activity', 'Events and crowd context')}
 
       <AuraMap features={visible} height={340} />
 

@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 export function ModoTransporte() {
   return (
     <div>
-      <header className="m3-tbar">
+      <header className="m3-tbar" aria-labelledby="modo-transporte-title">
         <Link to="/" className="ibtn" aria-label="Volver al inicio">
           <span className="mi material-symbols-rounded" aria-hidden>
             arrow_back
           </span>
         </Link>
-        <h1 className="m3-tbar-title" style={{ margin: 0 }}>
+        <h1 id="modo-transporte-title" className="m3-tbar-title" style={{ margin: 0 }}>
           Modo Transporte
         </h1>
         <span className="feat-badge">

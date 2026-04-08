@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 export function ModoCita() {
   return (
     <div>
-      <header className="m3-tbar">
+      <header className="m3-tbar" aria-labelledby="modo-cita-title">
         <Link to="/" className="ibtn" aria-label="Volver al inicio">
           <span className="mi material-symbols-rounded" aria-hidden>
             arrow_back
           </span>
         </Link>
-        <h1 className="m3-tbar-title" style={{ margin: 0 }}>
+        <h1 id="modo-cita-title" className="m3-tbar-title" style={{ margin: 0 }}>
           Modo Cita
         </h1>
         <span className="feat-badge">

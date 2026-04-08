@@ -44,10 +44,14 @@ export function JourneyNew() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>New journey</h1>
-      <p style={{ color: 'var(--aura-muted)' }}>Details persist once you start — refresh mid-journey is safe.</p>
+      <h1 id="journey-new-heading" style={{ marginTop: 0 }}>
+        New journey
+      </h1>
+      <p id="journey-new-lede" style={{ color: 'var(--aura-muted)' }}>
+        Details persist once you start — refresh mid-journey is safe.
+      </p>
 
-      <div aria-busy={starting}>
+      <div aria-busy={starting} aria-describedby="journey-new-lede">
         <label style={{ display: 'block', marginTop: 16, fontWeight: 600 }} htmlFor="j-label">
           Journey name
         </label>
