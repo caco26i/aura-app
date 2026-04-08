@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_* (see README)
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README)
  */
 
 import cors from 'cors';
@@ -31,6 +31,33 @@ const JOURNEY_JSONL_PATH =
   process.env.AURA_API_JOURNEY_JSONL_PATH ||
   path.join(process.cwd(), 'data', 'journeys.jsonl');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
+/** Max length for optional deploy metadata strings (env); longer values are truncated. */
+const DEPLOY_META_MAX_LEN = 256;
+
+/**
+ * @param {string | undefined} raw
+ * @returns {string | null}
+ */
+function trimDeployMeta(raw) {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== 'string') return null;
+  const t = raw.trim();
+  if (t.length === 0) return null;
+  return t.length > DEPLOY_META_MAX_LEN ? t.slice(0, DEPLOY_META_MAX_LEN) : t;
+}
+
+const DEPLOY_VERSION = trimDeployMeta(process.env.AURA_API_DEPLOY_VERSION);
+const GIT_SHA = trimDeployMeta(process.env.AURA_API_GIT_SHA);
+
+/** @returns {Record<string, string>} */
+function deployMetadataFields() {
+  /** @type {Record<string, string>} */
+  const o = {};
+  if (DEPLOY_VERSION) o.deployVersion = DEPLOY_VERSION;
+  if (GIT_SHA) o.gitSha = GIT_SHA;
+  return o;
+}
 
 /** Max length for client-supplied `X-Request-Id` / `X-Correlation-Id` (printable ASCII only). */
 const REQUEST_ID_MAX_LEN = 128;
@@ -476,13 +503,14 @@ app.use((err, req, res, next) => {
 });
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'aura-api' });
+  res.json({ ok: true, service: 'aura-api', ...deployMetadataFields() });
 });
 
 app.get('/ready', (_req, res) => {
+  const meta = deployMetadataFields();
   const r = readinessResult();
   if (r.ok) {
-    res.json({ ok: true, service: 'aura-api', ready: true });
+    res.json({ ok: true, service: 'aura-api', ready: true, ...meta });
     return;
   }
   res.status(503).json({
@@ -492,6 +520,7 @@ app.get('/ready', (_req, res) => {
     error: 'not_ready',
     detail: r.detail,
     ...(r.message ? { message: r.message } : {}),
+    ...meta,
   });
 });
 

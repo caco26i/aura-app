@@ -49,6 +49,10 @@ npm run build
 
 Upload `dist/` to the CDN origin. Invalidate CDN cache after deploy.
 
+### API image: build / revision metadata (optional)
+
+For the Node API container, you can set **`AURA_API_DEPLOY_VERSION`** (e.g. release tag or image digest short form) and/or **`AURA_API_GIT_SHA`** (commit SHA) at **runtime** so **`GET /health`** and **`GET /ready`** echo which build is live — useful for dashboards and deploy smoke scripts. Example in CI (GitHub Actions): pass `-e AURA_API_GIT_SHA="${{ github.sha }}"` or a shortened form. See [`server/README.md`](../../server/README.md) for exact variable names and response field mapping; do not put secrets in these values.
+
 ## Smoke checks after deploy
 
 - `/` loads; navigation between Home, Journey, Map, Trusted, Settings works.

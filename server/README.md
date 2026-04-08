@@ -50,7 +50,7 @@ Web deploy cross-links: [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md).
 npm test
 ```
 
-Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), append-only audit writes, **journey store unit restart checks** (`journey-registry.restart.test.js`), and **HTTP continuity across two Node processes** (`journey-http-restart.integration.test.js` + `journey-restart-phase.mjs`). Default API tests set `AURA_API_JOURNEY_STORE=memory`; subprocess test uses a temp SQLite file.
+Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), append-only audit writes, **journey store unit restart checks** (`journey-registry.restart.test.js`), **HTTP continuity across two Node processes** (`journey-http-restart.integration.test.js` + `journey-restart-phase.mjs`), and **optional deploy metadata** on `/health` / `/ready` (`deploy-metadata.health-ready.integration.test.js`). Default API tests set `AURA_API_JOURNEY_STORE=memory`; subprocess test uses a temp SQLite file.
 
 On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` and a **`docker build`** smoke on `server/Dockerfile` when `server/`, `web/docs/API_CONTRACT.md`, or that workflow file changes.
 
@@ -64,6 +64,8 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 | `AURA_API_BFF_JWT_AUDIENCE` | no | If set, JWT `aud` must match (string or array). |
 | `AURA_API_BEARER_TOKEN_ALT` | no | Optional second static bearer (separate actor). Tests use it for `journey_forbidden` across actors. |
 | `PORT` | no | Default `8787` |
+| `AURA_API_DEPLOY_VERSION` | no | Optional release label (e.g. `1.2.3`, image tag). When set (non-empty after trim), included as **`deployVersion`** on **`GET /health`** and **`GET /ready`** JSON. Omit in env to keep the default response shape unchanged. Values longer than **256** characters are truncated; must not contain secrets. |
+| `AURA_API_GIT_SHA` | no | Optional VCS revision (short SHA). When set (non-empty after trim), included as **`gitSha`** on **`GET /health`** and **`GET /ready`** (including **`503`** `not_ready` on `/ready`). Same length and secrecy rules as `AURA_API_DEPLOY_VERSION`. |
 | `AUDIT_LOG_PATH` | no | Default `./data/audit.log` |
 | `AURA_API_JOURNEY_STORE_SQLITE_PATH` | no | SQLite **WAL** journey store (default `./data/journeys.sqlite`). Primary backend when `AURA_API_JOURNEY_STORE=auto` and the driver opens successfully. Legacy alias: `AURA_API_JOURNEY_SQLITE_PATH`. |
 | `AURA_API_JOURNEY_STORE_JSONL_PATH` | no | Append-only **JSONL** fallback (default `./data/journeys.jsonl`): used when SQLite cannot be opened, or when `AURA_API_JOURNEY_STORE=jsonl`. Each append **fsync**s. Legacy alias: `AURA_API_JOURNEY_JSONL_PATH`. |
@@ -91,8 +93,8 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 - `POST /v1/emergency-alerts` — body `{ "mode": "silent" \| "visible" }`
 - `POST /v1/journeys/:journeyId/location-shares` — UUID journey id **registered via** `POST /v1/journeys` **for this token**; otherwise `404 journey_not_found` or `403 journey_forbidden`. JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
 - `POST /v1/journeys/:journeyId/im-safe` — same ownership rules as location-shares; **hourly** rate limit (layered under global + per-minute journey limits)
-- `GET /health` — liveness (process up).
-- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and directories for `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` writable (**503** `not_ready` otherwise). Use for orchestration / load balancer health when persistence must succeed.
+- `GET /health` — liveness (process up). JSON is `{ ok, service }`; when `AURA_API_DEPLOY_VERSION` and/or `AURA_API_GIT_SHA` are set, response also includes **`deployVersion`** and/or **`gitSha`**.
+- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and directories for `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` writable (**503** `not_ready` otherwise). Base JSON includes `ready`; optional **`deployVersion`** / **`gitSha`** are merged into both **200** and **503** responses when those env vars are set.
 
 All JSON responses include baseline headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and **`X-Request-Id`** (request correlation; see [`API_CONTRACT.md`](../web/docs/API_CONTRACT.md)).
 

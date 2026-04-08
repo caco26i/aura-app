@@ -31,8 +31,8 @@ HTTP **201** (creates) or **200** (`GET /health`, `GET /ready` when ready). Body
 | `POST /v1/emergency-alerts` | `{ "alertId": "<uuid>" }` |
 | `POST /v1/journeys/:id/location-shares` | `{ "shareId": "<uuid>" }` |
 | `POST /v1/journeys/:id/im-safe` | `{ "receivedAt": "<ISO-8601>" }` |
-| `GET /health` | `{ "ok": true, "service": "aura-api" }` (no nested `data`) |
-| `GET /ready` | `{ "ok": true, "service": "aura-api", "ready": true }` when configured and audit dir writable; **503** with `error: "not_ready"` otherwise (no nested `data`) |
+| `GET /health` | `{ "ok": true, "service": "aura-api" }` (no nested `data`). If `AURA_API_DEPLOY_VERSION` / `AURA_API_GIT_SHA` are set on the server, responses may also include string fields **`deployVersion`** and/or **`gitSha`**. |
+| `GET /ready` | `{ "ok": true, "service": "aura-api", "ready": true }` when configured and audit dir writable; **503** with `error: "not_ready"` otherwise (no nested `data`). Optional **`deployVersion`** / **`gitSha`** use the same env vars and appear on both **200** and **503** when configured. |
 
 **Note:** `/health` and `/ready` are documented JSON successes without `{ ok, data }`; the web app does not call them through `auraBackend.ts`.
 
