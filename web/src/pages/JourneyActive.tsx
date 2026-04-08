@@ -66,10 +66,12 @@ export function JourneyActive() {
     return (
       <div>
         <h1 style={{ marginTop: 0 }}>No active journey</h1>
-        <p style={{ color: 'var(--aura-muted)' }} role="status">
-          You don&apos;t have an active journey on this device. Start one to enable live tracking and backend actions when
-          Aura is connected.
-        </p>
+        <div style={{ color: 'var(--aura-muted)' }} role="status">
+          <p style={{ margin: 0 }}>You don&apos;t have an active journey on this device.</p>
+          <p style={{ margin: '10px 0 0' }}>
+            Start one to enable live tracking and backend actions when Aura is connected.
+          </p>
+        </div>
         {contacts.length === 0 ? (
           <p>
             <Link to="/trusted">Add trusted contacts</Link> so someone can be notified when you share location.

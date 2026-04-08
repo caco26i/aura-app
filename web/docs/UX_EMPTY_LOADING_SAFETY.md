@@ -12,10 +12,10 @@
 |--------|----------------|----------------|-----------------|
 | **Home** | N/A (cards always shown) | N/A | N/A |
 | **JourneyNew** | N/A | Button `Starting…` | `role="alert"` via `startError` |
-| **JourneyActive** | No journey: title + status + link | `Sending…` / `Sharing…` on actions | `role="alert"` shared for API failures |
+| **JourneyActive** | No journey: title + device clarifier (`role="status"`) + next-step line + link | `Sending…` / `Sharing…` on actions | `role="alert"` shared for API failures |
 | **Emergency** | N/A | Both buttons `Sending…` | `role="alert"` + optional `role="status"` notice |
 | **MapPage** | All layers off → `role="status"` hint | Via `AuraMap`: `aria-busy`, overlay, `role="status"` *Loading map…* until tiles `load` (timeout fallback) | **None** (tile errors → telemetry only) |
-| **Trusted** | Zero contacts → dashed card + form | N/A | N/A |
+| **Trusted** | Zero contacts → dashed card (*stored on this device until the live backend…*) + form | N/A | N/A |
 | **Settings** | N/A | N/A | N/A |
 | **App / routing** | `*` → redirect home | N/A | **`AuraErrorBoundary`** wraps routes in `App.tsx` (fallback UI + reload) |
 | **AuraMap** | N/A | **Shipped:** overlay + `aria-busy` + status line while tiles load | Tiles fail silently to user |
@@ -34,13 +34,13 @@
 
 ### 2.2 Empty & edge states
 
-1. **JourneyActive (no journey)** — Strong baseline. **Optional polish:** Add one line clarifying *why* (e.g. *“You don’t have an active journey on this device.”*) to reduce confusion after storage clear or new device.
+1. **JourneyActive (no journey)** — **Shipped:** Dedicated first line *“You don’t have an active journey on this device.”* plus a separate next-step line (`JourneyActive.tsx`).
 
 2. **MapPage (all layers off)** — Good. **Optional:** If `visible.length === 0`, set focus or scroll not required; keep as-is.
 
 3. **Home — deep link to `/journey/active` with no journey** — User lands on Journey empty state via nav; OK. **Optional:** On Home card, if `!activeJourney`, microcopy could say *“Plan a route and start tracking”* (already close).
 
-4. **Trusted empty** — Clear. **Optional:** Add *“Contacts are stored on this device until the live backend is connected.”* (shortens the long sentence).
+4. **Trusted empty** — **Shipped:** *“Contacts are stored on this device until the live backend is connected.”* plus add-contact prompt (`Trusted.tsx`).
 
 ### 2.3 Safety-critical microcopy & flow
 

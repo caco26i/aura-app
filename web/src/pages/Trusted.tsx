@@ -36,7 +36,7 @@ export function Trusted() {
             marginBottom: 16,
           }}
         >
-          Contacts stay on this device until a live backend is connected. Add someone you trust to get started.
+          Contacts are stored on this device until the live backend is connected. Add someone you trust to get started.
         </div>
         <ContactForm
           name={name}
