@@ -31,13 +31,17 @@ Routing reference: [`design/AURA_SCREEN_SPECS.md`](./design/AURA_SCREEN_SPECS.md
 
 ## Screenshots
 
-Use real product captures so newcomers see Aura at a glance. With `main` on GitHub, add images whenever you have stable UI shots; use the same PR as visual changes when possible so paths always resolve on the default branch.
+Mobile-width captures (390×844 CSS pixels) of the current [`web/`](./web/) client. Files live in [`docs/assets/`](./docs/assets/) as PNG; swap in WebP with the same basename if you prefer smaller binaries—update the paths below accordingly.
 
-1. **Home / safety dashboard** — replace `<!-- TODO: docs/assets/screenshot-home.png -->` with `![Aura home — safety dashboard](docs/assets/screenshot-home.png)` (adjust alt text to match the UI).
-2. **Live journey** — `docs/assets/screenshot-journey.png`
-3. **Emergency (SOS)** — `docs/assets/screenshot-sos.png`
+**Regenerate** (from `web/` after `npm install`): `npm run capture:readme-screens` — this runs an opt-in Playwright pass (`readme-screenshots.spec.ts`) that writes `screenshot-home.png`, `screenshot-journey.png`, and `screenshot-sos.png`.
 
-**Layout:** create `docs/assets/` at the repo root, drop PNG or WebP files there, and use relative Markdown image syntax as above. Keep alt text concrete and calm (no alarmist wording); see [`design/AURA_LAUNCH_UX.md`](./design/AURA_LAUNCH_UX.md) for voice guidance.
+![Aura home — safety dashboard with status, journey entry, and quick links](docs/assets/screenshot-home.png)
+
+![Aura live journey — map with trip summary and calm tracking actions](docs/assets/screenshot-journey.png)
+
+![Aura emergency — choice between visible and silent alert paths, calm wording](docs/assets/screenshot-sos.png)
+
+Alt text stays concrete and non-alarmist; voice rules: [`design/AURA_LAUNCH_UX.md`](./design/AURA_LAUNCH_UX.md).
 
 ---
 
