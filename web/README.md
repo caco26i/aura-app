@@ -4,6 +4,8 @@ React (Vite + TypeScript) SPA for the Aura safety companion: journey tracking, m
 
 **Repo visitors:** start at the root [`README.md`](../README.md) for stack overview, screenshot checklist, and maintainer publish notes. This file focuses on **running and shipping** the `web/` package.
 
+**Package manager:** use **npm** with the committed [`package-lock.json`](./package-lock.json). GitHub Actions (`.github/workflows/web-ci.yml`) runs `npm ci` in `web/`. Do not commit `pnpm-lock.yaml` or `yarn.lock` here — they are gitignored to avoid accidental drift from the npm lockfile.
+
 ## Run locally
 
 ```bash
