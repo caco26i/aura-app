@@ -106,6 +106,7 @@ Use this PDR as the parent narrative; break execution into Paperclip issues per 
 | Routes | [`AURA_SCREEN_SPECS.md`](./AURA_SCREEN_SPECS.md) |
 | Copy / errors / SOS | [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md) |
 | Onboarding & settings UX | [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) |
+| PDR §3–4 web trace & gap register | [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) |
 | Design tokens | [`AURA_DESIGN_SYSTEM.md`](./AURA_DESIGN_SYSTEM.md) |
 | API contract (beta) | [`server/README.md`](../server/README.md), [`web/docs/BETA_BACKEND.md`](../web/docs/BETA_BACKEND.md) |
 
@@ -116,3 +117,4 @@ Use this PDR as the parent narrative; break execution into Paperclip issues per 
 | Date | Change |
 |------|--------|
 | 2026-04-08 | Initial PDR authored for [AURA-41](/AURA/issues/AURA-41); consolidates existing design package into one entry document. |
+| 2026-04-08 | Added [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) to detail index ([AURA-47](/AURA/issues/AURA-47)). |

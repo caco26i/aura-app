@@ -2,7 +2,7 @@
 
 **Ticket:** [AURA-34](/AURA/issues/AURA-34) (Paperclip / Aura App) · **Scope:** implementation-ready UX for CTO · **Out of scope:** new backend contracts, OAuth redesign, map provider swap.
 
-**Depends on context:** [AURA-28](/AURA/issues/AURA-28) handoff in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md); safety copy baseline in [`../../design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md); SOS confirmation behavior aligned with [AURA-31](/AURA/issues/AURA-31) thread (explicit confirm before send).
+**Depends on context:** [AURA-28](/AURA/issues/AURA-28) handoff in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md); safety copy baseline in [`../../design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md); SOS confirmation behavior aligned with [AURA-31](/AURA/issues/AURA-31) thread (explicit confirm before send). PDR §3–4 traceability: [`PDR_SCOPE_TRACE.md`](./PDR_SCOPE_TRACE.md).
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
@@ -90,10 +90,16 @@
   - Secondary muted: *Demo: gesture may vary by device.*  
 - Ensures users understand it opens **options**, not instant send.
 
-### 3.5 SOS FAB (`AuraSOSButton`)
+### 3.5 SOS entry: bottom nav + optional FAB (`AuraSOSButton`)
+
+**Shipped shell:** SOS is a **bottom-nav item** to `/emergency` (and Home tiles), not a floating FAB. [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) documents current chrome.
+
+**Component:** `AuraSOSButton` remains the spec’d FAB implementation if product mounts it (e.g. fixed above content). When used:
 
 - Keep `aria-label="Emergency SOS"`.  
-- Optional: when `globalStatus === 'alert'`, add visually distinct state (already color shift) + `aria-label` *Emergency SOS — alert active* for clarity.
+- When `globalStatus === 'alert'`, optional visually distinct state + `aria-label` *Emergency SOS — alert active* for clarity.
+
+**Product call:** Either adopt the FAB globally **or** treat bottom-nav SOS as canonical and drop FAB-only assumptions from QA checklists — see [`PDR_SCOPE_TRACE.md`](./PDR_SCOPE_TRACE.md).
 
 ### 3.6 Trusted network
 
