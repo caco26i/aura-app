@@ -49,13 +49,60 @@ test.describe('shell smoke', () => {
 
   test('home hub navigates to Safety map', async ({ page }) => {
     const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
 
     await page.goto('/');
     await page.getByRole('link', { name: 'Safety map', exact: true }).click();
     await expect(page).toHaveURL(/\/map$/);
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Map intel: layer toggle exposes switch role and aria-checked, no page/console errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/map');
+    await expect(page.getByRole('heading', { name: 'Map intel', level: 1 })).toBeVisible();
+
+    const riskSwitch = page.getByRole('switch', { name: /Risk signals/i });
+    await expect(riskSwitch).toBeVisible();
+    await expect(riskSwitch).toHaveAttribute('aria-checked', 'true');
+
+    await riskSwitch.click();
+    await expect(riskSwitch).toHaveAttribute('aria-checked', 'false');
+
+    await riskSwitch.click();
+    await expect(riskSwitch).toHaveAttribute('aria-checked', 'true');
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Modo Cita shell from home grid: h1 and no page/console errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/');
+    await page.getByRole('link', { name: /Modo Cita/i }).click();
+    await expect(page).toHaveURL(/\/cita$/);
+    await expect(page.getByRole('heading', { name: 'Modo Cita', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
   test('Trusted: open from bootstrapped shell, h1 and no page/console errors', async ({ page }) => {
