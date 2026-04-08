@@ -6,6 +6,8 @@
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
+**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only.
+
 ---
 
 ## 1. Problem statement (current gaps)
@@ -151,13 +153,13 @@ Do not duplicate full tables here; implement alongside onboarding/trust work whe
 
 ## 6. Engineering checklist (summary)
 
-- [ ] Onboarding route + `onboardingCompleted` + migration for existing `aura:v1` users  
-- [ ] Copy and layout per §2–§4  
-- [ ] First-time sheet for *Share live location* (local flag)  
-- [ ] Map double-tap copy split (§3.4)  
-- [ ] Settings: data explainer + clear-local flow  
-- [ ] Update [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) with new route(s)  
-- [ ] Telemetry: `onboarding_completed`, `share_location_primer_shown`, `local_data_cleared` (names illustrative)
+- [x] Onboarding route + `onboardingCompleted` + migration for existing `aura:v1` users — verified [AURA-205](/AURA/issues/AURA-205)  
+- [x] Copy and layout per §2–§4  
+- [x] First-time sheet for *Share live location* (local flag)  
+- [x] Map double-tap copy split (§3.4)  
+- [x] Settings: data explainer + clear-local flow  
+- [x] Update [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) with new route(s)  
+- [x] Telemetry: `onboarding_completed`, `share_location_primer_shown`, `local_data_cleared` (names illustrative)
 
 ---
 
