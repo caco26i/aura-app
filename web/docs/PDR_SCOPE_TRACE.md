@@ -47,7 +47,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 | Clause | Verified in |
 |--------|-------------|
-| §5 Accessibility (SOS, journey paths) | `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
+| §5 Accessibility (SOS, journey paths) | `RouteDocumentTitle` (`App.tsx`) — route-aware `document.title`; `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
 | §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
 | §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
 | §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
@@ -92,5 +92,6 @@ _None at present._
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): server integration tests for unknown-path `not_found` (404); API_CONTRACT regression line updated. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): skip-to-main link + `#main-content` landmark on shell, welcome, and emergency (PDR §5 / WCAG 2.4.1). |
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): integration tests for GET-on-POST-only `not_found` + OPTIONS CORS preflight headers. |
+| 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): centralized `RouteDocumentTitle` for all primary routes; removed per-page title effects from modo shells. |
 | 2026-04-08 | [AURA-75](/AURA/issues/AURA-75): **G-IA-01** closed — IA vs PDR §3.1 confirmed per [AURA-74](/AURA/issues/AURA-74); open-questions section cleared. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): related-work index linked [AURA-74](/AURA/issues/AURA-74) / [AURA-75](/AURA/issues/AURA-75) after CEO clarification ([comment 510069eb](/AURA/issues/AURA-61#comment-510069eb-fced-48c6-866c-9ad6993a4ee6)). |

@@ -1,14 +1,6 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export function ModoTransporte() {
-  useEffect(() => {
-    document.title = 'Modo Transporte · Aura';
-    return () => {
-      document.title = 'Aura';
-    };
-  }, []);
-
   return (
     <div>
       <header className="m3-tbar">

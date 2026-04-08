@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuraProvider } from './context/AuraContext';
 import { AuraErrorBoundary } from './components/AuraErrorBoundary';
 import { AppShell } from './components/AppShell';
+import { RouteDocumentTitle } from './components/RouteDocumentTitle';
 import { RequireOnboarding } from './components/RequireOnboarding';
 import { Home } from './pages/Home';
 import { JourneyNew } from './pages/JourneyNew';
@@ -21,6 +22,7 @@ export default function App() {
   return (
     <AuraProvider>
       <BrowserRouter>
+        <RouteDocumentTitle />
         <AuraErrorBoundary>
           <Routes>
             <Route path="/welcome" element={<Welcome />} />

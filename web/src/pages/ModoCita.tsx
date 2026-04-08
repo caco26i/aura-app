@@ -1,14 +1,6 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export function ModoCita() {
-  useEffect(() => {
-    document.title = 'Modo Cita · Aura';
-    return () => {
-      document.title = 'Aura';
-    };
-  }, []);
-
   return (
     <div>
       <header className="m3-tbar">
