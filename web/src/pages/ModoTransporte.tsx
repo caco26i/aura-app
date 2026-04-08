@@ -4,7 +4,7 @@ export function ModoTransporte() {
   return (
     <div>
       <header className="m3-tbar">
-        <Link to="/" className="ibtn" aria-label="Back to home">
+        <Link to="/" className="ibtn" aria-label="Volver al inicio">
           <span className="mi material-symbols-rounded">arrow_back</span>
         </Link>
         <h1 className="m3-tbar-title" style={{ margin: 0 }}>
