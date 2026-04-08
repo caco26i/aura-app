@@ -10,6 +10,8 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 **Local dev with BFF + JWT (no static token in bundle):** run [`server/bff`](../../server/bff) on `:8790` (see `server/bff/README.md`), share **`AURA_API_BFF_JWT_SECRET`** with `server/`. In `web/.env.local`: **`VITE_AURA_BFF_URL=/aura-bff`** (Vite proxies `/aura-bff` → `VITE_AURA_DEV_BFF_PROXY`, default `http://127.0.0.1:8790`), **`VITE_GOOGLE_CLIENT_ID`** same as BFF `AURA_BFF_GOOGLE_CLIENT_ID`, and **omit** `VITE_AURA_API_TOKEN`. Use **Settings → Beta API session → Continue with Google** to bind the httpOnly BFF session; the app then calls **`GET /session`** (credentialed) for a short-lived access JWT and sends **`Authorization: Bearer …`** to `/v1/*`.
 
+**Staging / production (BFF-first):** Follow the operator matrix in [DEPLOY.md — BFF-first env matrix](./DEPLOY.md#bff-first-env-matrix-staging--production): reverse-proxy the BFF under the same browser-visible base you set as `VITE_AURA_BFF_URL`, keep **`AURA_API_BFF_JWT_SECRET`** in lockstep on API + BFF, and set **`AURA_BFF_CORS_ORIGIN`** to your SPA origin(s). Production `vite build` rejects non-empty **`VITE_AURA_API_TOKEN`** when **`VITE_AURA_BFF_URL`** is set.
+
 ## Swap path
 
 1. Implement real HTTP or SDK calls inside `auraBackend.ts` (or split per domain).

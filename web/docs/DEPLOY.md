@@ -19,6 +19,27 @@
 
 Vite exposes only `VITE_*` variables to the client — **never** put secrets in `VITE_` keys.
 
+### BFF-first env matrix (staging / production)
+
+Use this when the browser authenticates via **Google → BFF session → short-lived JWT** (no static API secret in the SPA). Same end-to-end path as [Staging smoke: BFF JWT path](#staging-smoke-bff-jwt-path-no-static-web-token) below.
+
+| Layer | Variable / setting | Staging | Production |
+| ----- | ------------------- | ------- | ----------- |
+| **Web (build-time)** | `VITE_AURA_BFF_URL` | Same-origin path such as `/aura-bff`, or absolute BFF URL if cross-origin | Same; must match how users reach the BFF |
+| **Web (build-time)** | `VITE_AURA_API_TOKEN` | **Empty** — do not bake a static bearer | **Empty** |
+| **Web (build-time)** | `VITE_GOOGLE_CLIENT_ID` | Staging OAuth client | Production OAuth client |
+| **Web (build-time)** | `VITE_AURA_API_URL` | Omit when API is same-origin behind the same host as the SPA (Compose / nginx `/v1` proxy); set public API origin if split | Same |
+| **Reverse proxy** | BFF path | Forward `/aura-bff/` (or your chosen prefix) to the BFF service; align strip rules with [`nginx-docker-bff.conf`](../nginx-docker-bff.conf) | Same + TLS at edge |
+| **BFF (runtime)** | `AURA_API_BFF_JWT_SECRET` | Strong random secret | Rotate with API together |
+| **BFF (runtime)** | `AURA_BFF_SESSION_SECRET` | Strong random (≥16 chars) | Same |
+| **BFF (runtime)** | `AURA_BFF_GOOGLE_CLIENT_ID` | **Same string** as `VITE_GOOGLE_CLIENT_ID` for that build | Same |
+| **BFF (runtime)** | `AURA_BFF_CORS_ORIGIN` | Comma-separated **browser origins** that load the SPA (required when SPA origin ≠ BFF origin) | Tight allowlist only |
+| **BFF (runtime)** | Rate limit envs | Optional; defaults are permissive — tighten (`server/bff/README.md`) | Prefer stricter windows (e.g. 15‑minute throttle on `POST /auth/google`) |
+| **API (runtime)** | `AURA_API_BFF_JWT_SECRET` | **Identical** to BFF | Identical |
+| **API (runtime)** | `AURA_API_BEARER_TOKEN` | Omit for JWT-only stacks | Omit for JWT-only stacks |
+
+**Build guardrail:** `npm run build` (production mode) **fails** if both `VITE_AURA_BFF_URL` and `VITE_AURA_API_TOKEN` are non-empty, so CI cannot accidentally ship a static bearer alongside the BFF path. Clear the token build-arg / env when using BFF.
+
 ## Secrets handling
 
 - **Google OAuth client ID** is public; keep **client secret** (if any server component) only on backend — not in this repo’s client env.

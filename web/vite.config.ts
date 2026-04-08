@@ -37,24 +37,40 @@ function auraTelemetryDevIngestStub(): Plugin {
   }
 }
 
+function assertBffFirstProductionAuth(): void {
+  const bff = process.env.VITE_AURA_BFF_URL?.trim() ?? ''
+  const token = process.env.VITE_AURA_API_TOKEN?.trim() ?? ''
+  if (bff === '' || token === '') return
+  throw new Error(
+    'Production build: VITE_AURA_BFF_URL is set but VITE_AURA_API_TOKEN is also non-empty. ' +
+      'Ship BFF-first without a static bearer in the bundle (clear VITE_AURA_API_TOKEN / build-arg). ' +
+      'See web/docs/DEPLOY.md — BFF-first env matrix.',
+  )
+}
+
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), productionCspMeta(), auraTelemetryDevIngestStub()],
-  server: {
-    proxy: {
-      '/v1': { target: apiTarget, changeOrigin: true },
-      '/health': { target: apiTarget, changeOrigin: true },
-      '/ready': { target: apiTarget, changeOrigin: true },
-      '/aura-bff': {
-        target: bffTarget,
-        changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/aura-bff/, '') || '/',
+export default defineConfig(({ mode }) => {
+  if (mode === 'production') {
+    assertBffFirstProductionAuth()
+  }
+  return {
+    plugins: [react(), productionCspMeta(), auraTelemetryDevIngestStub()],
+    server: {
+      proxy: {
+        '/v1': { target: apiTarget, changeOrigin: true },
+        '/health': { target: apiTarget, changeOrigin: true },
+        '/ready': { target: apiTarget, changeOrigin: true },
+        '/aura-bff': {
+          target: bffTarget,
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/aura-bff/, '') || '/',
+        },
+        ...(telemetryProxyTarget
+          ? {
+              '/ingest/aura': { target: telemetryProxyTarget, changeOrigin: true },
+            }
+          : {}),
       },
-      ...(telemetryProxyTarget
-        ? {
-            '/ingest/aura': { target: telemetryProxyTarget, changeOrigin: true },
-          }
-        : {}),
     },
-  },
+  }
 })

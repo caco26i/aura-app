@@ -37,6 +37,12 @@ Small **backend-for-frontend** that turns **Google sign-in** into **short-lived 
 
 Aliases: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` are accepted.
 
+## Staging and production (reverse proxy + CORS)
+
+- **Same-origin BFF (typical):** The SPA is built with `VITE_AURA_BFF_URL=/aura-bff` (or another path). Terminate TLS at your edge, then forward that path to this process. Match prefix handling to your web server (reference: [`web/nginx-docker-bff.conf`](../../web/nginx-docker-bff.conf) in the repo root stack).
+- **Cross-origin BFF:** If the browser calls a different host than the static SPA, set **`AURA_BFF_CORS_ORIGIN`** to the exact SPA origin(s); credentialed `fetch` to `POST /auth/google` and `GET /session` requires an explicit allowlist in production.
+- **JWT secret parity:** `AURA_API_BFF_JWT_SECRET` must match the Aura API service **byte-for-byte**. Rotate by deploying API and BFF together with the new value.
+
 ## Run
 
 ```bash
