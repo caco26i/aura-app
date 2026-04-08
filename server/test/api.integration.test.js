@@ -33,6 +33,18 @@ describe('Aura API', () => {
     assert.equal(res.body.service, 'aura-api');
   });
 
+  test('unknown GET path returns not_found', async () => {
+    const res = await request(app).get('/v1/no-such-route').expect(404);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'not_found');
+  });
+
+  test('unknown POST path returns not_found', async () => {
+    const res = await request(app).post('/v1/obsolete-endpoint').set(bearer).send({}).expect(404);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'not_found');
+  });
+
   test('mutating routes require bearer token', async () => {
     await request(app).post('/v1/journeys').send({}).expect(401);
   });
