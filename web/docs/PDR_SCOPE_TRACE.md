@@ -47,7 +47,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 | Clause | Verified in |
 |--------|-------------|
-| §5 Accessibility (SOS, journey paths) | `RouteDocumentTitle` (`App.tsx`) — route-aware `document.title`; `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
+| §5 Accessibility (SOS, journey paths) | `RouteDocumentTitle` (`App.tsx`) — route-aware `document.title`; `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx` (`htmlFor`/`id` on safety inputs; location `fieldset` `aria-describedby` privacy note), `Trusted.tsx` |
 | §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
 | §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
 | §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
@@ -96,5 +96,6 @@ _None at present._
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): integration test for SOS `rate_limited` (429) + `audit.rate_limited` line after hourly cap. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59) / [AURA-60](/AURA/issues/AURA-60): live journey share control `aria-describedby` + hint copy; SOS tests grouped at end of suite (no mid-file `emergency-alerts` traffic before rate limit case). |
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): integration test for `im-safe` with non-empty JSON → `validation_failed`; API_CONTRACT request-body row clarified. |
+| 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): Settings safety controls use explicit `label htmlFor` + input `id`; location fieldset `aria-describedby` → privacy copy. |
 | 2026-04-08 | [AURA-75](/AURA/issues/AURA-75): **G-IA-01** closed — IA vs PDR §3.1 confirmed per [AURA-74](/AURA/issues/AURA-74); open-questions section cleared. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): related-work index linked [AURA-74](/AURA/issues/AURA-74) / [AURA-75](/AURA/issues/AURA-75) after CEO clarification ([comment 510069eb](/AURA/issues/AURA-61#comment-510069eb-fced-48c6-866c-9ad6993a4ee6)). |

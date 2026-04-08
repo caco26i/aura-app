@@ -42,31 +42,32 @@ export function Settings() {
           Safety defaults
         </h2>
 
-        <label style={label}>
+        <label htmlFor="settings-display-name" style={label}>
           Display name (home header)
           <input
+            id="settings-display-name"
             value={settings.displayName}
             onChange={(e) => updateSettings({ displayName: e.target.value })}
-            aria-label="Display name shown on home"
             placeholder="e.g. Sofia García"
             style={field}
             autoComplete="name"
           />
         </label>
 
-        <label style={label}>
+        <label htmlFor="settings-voice-keyword" style={label}>
           Voice keyword phrase
           <input
+            id="settings-voice-keyword"
             value={settings.voiceKeyword}
             onChange={(e) => updateSettings({ voiceKeyword: e.target.value })}
-            aria-label="Voice keyword phrase"
             style={field}
           />
         </label>
 
-        <label style={label}>
+        <label htmlFor="settings-silent-trigger-ms" style={label}>
           Silent trigger window (ms)
           <input
+            id="settings-silent-trigger-ms"
             type="range"
             min={400}
             max={2000}
@@ -83,9 +84,10 @@ export function Settings() {
           </span>
         </label>
 
-        <label style={label}>
+        <label htmlFor="settings-journey-timer-minutes" style={label}>
           Default journey timer (minutes)
           <input
+            id="settings-journey-timer-minutes"
             type="number"
             min={1}
             value={settings.timerDefaultMinutes}
@@ -94,7 +96,10 @@ export function Settings() {
           />
         </label>
 
-        <fieldset style={{ border: '1px solid var(--aura-border)', borderRadius: 12, padding: 12, marginTop: 12 }}>
+        <fieldset
+          aria-describedby="settings-privacy-sharing"
+          style={{ border: '1px solid var(--aura-border)', borderRadius: 12, padding: 12, marginTop: 12 }}
+        >
           <legend style={{ fontWeight: 700 }}>Location precision</legend>
           <label style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <input
