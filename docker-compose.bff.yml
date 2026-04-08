@@ -1,0 +1,61 @@
+# JWT + BFF stack: use with root compose — no static token baked into the web bundle.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build
+#
+# Required in `.env` (example values):
+#   AURA_API_BFF_JWT_SECRET=<hex 32+ chars, shared API + BFF>
+#   AURA_BFF_SESSION_SECRET=<hex 16+ chars>
+#   VITE_GOOGLE_CLIENT_ID=<Google OAuth client id, same as web>
+# Optional:
+#   AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080  (comma-separated allowlist)
+
+services:
+  aura-bff:
+    build:
+      context: ./server/bff
+      dockerfile: Dockerfile
+    expose:
+      - "8790"
+    environment:
+      PORT: "8790"
+      NODE_ENV: production
+      AURA_API_BFF_JWT_SECRET: ${AURA_API_BFF_JWT_SECRET:?Set AURA_API_BFF_JWT_SECRET in .env}
+      AURA_BFF_SESSION_SECRET: ${AURA_BFF_SESSION_SECRET:?Set AURA_BFF_SESSION_SECRET in .env}
+      AURA_BFF_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:?Set VITE_GOOGLE_CLIENT_ID in .env}
+      AURA_BFF_CORS_ORIGIN: ${AURA_BFF_CORS_ORIGIN:-http://127.0.0.1:8080}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8790/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+
+  aura-api:
+    environment:
+      AURA_API_BEARER_TOKEN: ""
+      AURA_API_BFF_JWT_SECRET: ${AURA_API_BFF_JWT_SECRET:?Set AURA_API_BFF_JWT_SECRET in .env}
+
+  aura-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_AURA_API_TOKEN: ""
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+        VITE_AURA_API_URL: ${VITE_AURA_API_URL:-}
+        VITE_AURA_BFF_URL: /aura-bff
+        VITE_AURA_TELEMETRY_ENDPOINT: ${VITE_AURA_TELEMETRY_ENDPOINT:-}
+        VITE_AURA_TELEMETRY_DEBUG: ${VITE_AURA_TELEMETRY_DEBUG:-}
+    volumes:
+      - ./web/nginx-docker-bff.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      aura-api:
+        condition: service_healthy
+      aura-bff:
+        condition: service_healthy

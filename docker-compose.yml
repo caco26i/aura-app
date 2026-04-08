@@ -1,6 +1,7 @@
 # Full stack for operators: static web (nginx + Vite dist) + Aura API.
-# From repo root: copy or create `.env` with at least `AURA_API_BEARER_TOKEN` (same value
-# is passed into the web image as `VITE_AURA_API_TOKEN` at build time).
+# Default: static bearer — `.env` needs `AURA_API_BEARER_TOKEN` (also passed into the web
+# image as `VITE_AURA_API_TOKEN` at build time). For **JWT + BFF** without a static token in
+# the web bundle, use `docker-compose.bff.yml` as a second compose file (see web/docs/DEPLOY.md).
 #
 #   docker compose up --build
 #
@@ -16,7 +17,7 @@ services:
       - "${API_PORT:-8787}:8787"
     environment:
       PORT: "8787"
-      AURA_API_BEARER_TOKEN: ${AURA_API_BEARER_TOKEN:?Set AURA_API_BEARER_TOKEN in .env or the environment}
+      AURA_API_BEARER_TOKEN: ${AURA_API_BEARER_TOKEN:-}
       AUDIT_LOG_PATH: /app/data/audit.log
       AURA_API_JOURNEY_STORE_SQLITE_PATH: /app/data/journeys.sqlite
       AURA_API_JOURNEY_STORE_JSONL_PATH: /app/data/journeys.jsonl
@@ -40,7 +41,7 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        VITE_AURA_API_TOKEN: ${AURA_API_BEARER_TOKEN}
+        VITE_AURA_API_TOKEN: ${VITE_AURA_API_TOKEN:-${AURA_API_BEARER_TOKEN:-}}
         VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
         VITE_AURA_API_URL: ${VITE_AURA_API_URL:-}
         VITE_AURA_TELEMETRY_ENDPOINT: ${VITE_AURA_TELEMETRY_ENDPOINT:-}

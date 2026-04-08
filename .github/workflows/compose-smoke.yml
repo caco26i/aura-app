@@ -44,3 +44,49 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose down -v --remove-orphans
+
+  compose-bff-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JWT + BFF .env (no static bearer / no VITE token)
+        run: |
+          cat > .env <<EOF
+          AURA_API_BFF_JWT_SECRET=$(openssl rand -hex 32)
+          AURA_BFF_SESSION_SECRET=$(openssl rand -hex 32)
+          VITE_GOOGLE_CLIENT_ID=ci-smoke-placeholder.apps.googleusercontent.com
+          AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080
+          EOF
+
+      - name: Build and start stack (merged compose)
+        run: docker compose -f docker-compose.yml -f docker-compose.bff.yml up -d --build
+
+      - name: Wait for /health, /ready, and BFF via nginx
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8080/health" >/dev/null 2>&1; then
+              echo "health ok (attempt $i)"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "::group::compose ps + logs"
+              docker compose -f docker-compose.yml -f docker-compose.bff.yml ps
+              docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=200
+              echo "::endgroup::"
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS "http://127.0.0.1:8080/health"
+          echo
+          curl -fsS "http://127.0.0.1:8080/ready"
+          echo
+          curl -fsS "http://127.0.0.1:8080/aura-bff/health"
+          echo
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.bff.yml down -v --remove-orphans
