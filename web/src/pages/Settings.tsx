@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { establishAuraBffSessionWithGoogleIdToken } from '../api/auraBackendAuth';
+import {
+  establishAuraBffSessionWithGoogleIdToken,
+  resolveAuraApiBearer,
+} from '../api/auraBackendAuth';
+import { userMessageForBffSessionFetchFailure } from '../api/auraApiMessages';
 import { firebaseAuthConfigured } from '../lib/firebaseClient';
 import { useAura } from '../context/useAura';
 
@@ -13,6 +17,21 @@ export function Settings() {
   const { settings, updateSettings, clearLocalAuraData } = useAura();
   const clearDialogRef = useRef<HTMLDialogElement>(null);
   const [bffHint, setBffHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!bffUrlConfigured) return;
+    let cancelled = false;
+    void (async () => {
+      const auth = await resolveAuraApiBearer();
+      if (cancelled) return;
+      if (auth.kind === 'error') {
+        setBffHint(userMessageForBffSessionFetchFailure());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const openClearDialog = () => {
     clearDialogRef.current?.showModal();

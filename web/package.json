@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:bff-stub": "PLAYWRIGHT_BFF_STUB=1 playwright test",
     "capture:readme-screens": "CAPTURE_README_SCREENSHOTS=1 playwright test e2e/readme-screenshots.spec.ts",
     "lint": "eslint .",
     "preview": "vite preview"

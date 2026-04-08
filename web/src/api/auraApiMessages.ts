@@ -125,6 +125,11 @@ export function userMessageForBffSignIn(): string {
   );
 }
 
+/** BFF is configured but `GET /session` failed (network, proxy, or unexpected response). */
+export function userMessageForBffSessionFetchFailure(): string {
+  return 'Could not reach the sign-in service. Check that the BFF is running and CORS allows this origin.';
+}
+
 export function noticeForAnomalyHeader(header: string | null): string | undefined {
   if (!header || !header.trim()) return undefined;
   const flags = header.split(',').map((s) => s.trim()).filter(Boolean);
