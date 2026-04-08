@@ -45,6 +45,26 @@ Use real product captures so newcomers see Aura at a glance. With `main` on GitH
 | [`server/`](./server/) | Aura API — validated POST routes, audit log, rate limits |
 | [`web/docs/`](./web/docs/) | Auth, deploy, security, observability, beta backend notes |
 | [`design/`](./design/) | Design system, screen specs, launch UX copy guidance |
+| [`.agents/skills/`](./.agents/skills/) | Checked-in agent skills for Cursor / Paperclip (see below) |
+
+---
+
+## Agent skills (AI-assisted development)
+
+Aura keeps **Vercel’s React performance skill** in-repo so agents and editors that load skills from this workspace pick up the same guidance. The lockfile records the source revision for reproducible installs.
+
+| Path | Role |
+|------|------|
+| [`skills-lock.json`](./skills-lock.json) | Declares installed skills and content hash |
+| [`.agents/skills/vercel-react-best-practices/`](./.agents/skills/vercel-react-best-practices/) | Vercel React / Next.js performance rules (use when writing or reviewing `web/`) |
+
+**Install or refresh** (from the repo root, non-interactive):
+
+```bash
+npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices -y
+```
+
+That updates `.agents/skills/` and `skills-lock.json`. Commit both when the skill version changes. For day-to-day React work in this repo, prefer loading that skill when tasks touch components, data fetching, bundles, or render performance — see [`web/README.md`](./web/README.md).
 
 ---
 

@@ -19,6 +19,8 @@ npm run dev
 
 **Setup and operations:** all handoff docs for the web app live under **[`./docs/`](./docs/)** (repo path **`web/docs/`**): [`AUTH.md`](./docs/AUTH.md), [`BETA_BACKEND.md`](./docs/BETA_BACKEND.md), [`DEPLOY.md`](./docs/DEPLOY.md), [`SECURITY.md`](./docs/SECURITY.md), [`OBSERVABILITY.md`](./docs/OBSERVABILITY.md). The repo overview and screenshot checklist are in **[`../README.md`](../README.md)**; API env and routes are in **[`../server/README.md`](../server/README.md)**.
 
+**React performance (agents):** the root repo includes Vercel’s **`vercel-react-best-practices`** skill under **[`../.agents/skills/vercel-react-best-practices/`](../.agents/skills/vercel-react-best-practices/)**. Use it when implementing or reviewing UI in `web/` (rendering, fetching, bundle size). Install/sync from the repo root with `npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices -y` — see **[`../README.md`](../README.md)** *Agent skills*.
+
 ## Scripts
 
 | Command | Purpose |
