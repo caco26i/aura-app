@@ -51,6 +51,46 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
     assert.match(String(res.headers['x-request-id']), /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 
+  test('GET /ready returns 200 with ready true when JWT and session secrets are configured (test harness)', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const res = await request(app).get('/ready').expect(200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.service, 'aura-bff');
+    assert.equal(res.body.ready, true);
+    assertResponseSecurityHeaders(res);
+  });
+
+  test('GET /ready returns 503 not_ready when secrets are missing', async () => {
+    const prevJwt = process.env.AURA_API_BFF_JWT_SECRET;
+    const prevSess = process.env.AURA_BFF_SESSION_SECRET;
+    delete process.env.AURA_API_BFF_JWT_SECRET;
+    delete process.env.AURA_BFF_SESSION_SECRET;
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      const res = await request(app).get('/ready').set('X-Request-Id', 'ready-missing-secrets').expect(503);
+      assert.equal(res.body.ok, false);
+      assert.equal(res.body.error, 'not_ready');
+      assert.equal(res.body.ready, false);
+      assert.equal(res.body.service, 'aura-bff');
+      assert.ok(typeof res.body.detail === 'string' && res.body.detail.length > 0);
+      assertResponseSecurityHeaders(res, { requestId: 'ready-missing-secrets' });
+    } finally {
+      if (prevJwt === undefined) delete process.env.AURA_API_BFF_JWT_SECRET;
+      else process.env.AURA_API_BFF_JWT_SECRET = prevJwt;
+      if (prevSess === undefined) delete process.env.AURA_BFF_SESSION_SECRET;
+      else process.env.AURA_BFF_SESSION_SECRET = prevSess;
+    }
+  });
+
+  test('GET /ready accepts X-Correlation-Id when X-Request-Id omitted', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const res = await request(app)
+      .get('/ready')
+      .set('X-Correlation-Id', 'corr-bff-ready-1')
+      .expect(200);
+    assertResponseSecurityHeaders(res, { requestId: 'corr-bff-ready-1' });
+  });
+
   test('GET /session returns 401 when no session cookie', async () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
     const res = await request(app).get('/session').expect(401);

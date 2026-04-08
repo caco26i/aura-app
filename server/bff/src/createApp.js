@@ -282,6 +282,21 @@ export function createApp(overrides = {}) {
     res.json({ ok: true, service: 'aura-bff' });
   });
 
+  app.get('/ready', (_req, res) => {
+    const cfgErrors = readBffConfigErrors();
+    if (cfgErrors.length === 0) {
+      res.json({ ok: true, service: 'aura-bff', ready: true });
+      return;
+    }
+    res.status(503).json({
+      ok: false,
+      service: 'aura-bff',
+      ready: false,
+      error: 'not_ready',
+      detail: cfgErrors[0],
+    });
+  });
+
   app.post('/auth/google', authGoogleLimiter, async (req, res) => {
     const errors = [...readBffConfigErrors(), ...readGoogleOAuthConfigErrors()];
     if (errors.length) {

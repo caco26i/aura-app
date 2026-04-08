@@ -196,6 +196,7 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
+          curl -fsS "http://127.0.0.1:8080/aura-bff/ready"
           echo
 
       - name: Assert nginx serves SPA index shell at /
@@ -487,6 +488,7 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
+          curl -fsS "http://127.0.0.1:8080/aura-bff/ready"
           echo
           code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
           if [ "${code}" != "200" ]; then

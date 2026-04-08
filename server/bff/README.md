@@ -4,7 +4,7 @@ Small **backend-for-frontend** that turns **Google or Firebase Authentication** 
 
 ## Request correlation and response headers
 
-Every response includes the same baseline headers as the authoritative Aura API ([`../src/index.js`](../src/index.js), [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)):
+Every response includes the same baseline headers as the authoritative Aura API ([`../src/index.js`](../src/index.js), [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)). That includes **`GET /ready`** (readiness): **200** `{ ok, service, ready: true }` when **`AURA_API_BFF_JWT_SECRET`** and **`AURA_BFF_SESSION_SECRET`** meet the same minimum rules as `POST /auth/google` / `GET /session` (≥16 chars, non-empty — see `readBffConfigErrors()` in [`src/createApp.js`](src/createApp.js)); otherwise **503** with `{ ok: false, error: "not_ready", detail, service, ready: false }`, matching the API’s `not_ready` pattern in [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md). **`GET /health`** stays **200** whenever the process is up (liveness); the BFF image **`HEALTHCHECK`** continues to use **`/health`** so containers are not marked unhealthy during secret rotation or misconfiguration windows where **`/ready`** is **503**.
 
 - **`X-Request-Id`** — echoed from a valid **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max **128** chars) or a generated UUID when missing/invalid.
 - **`X-Content-Type-Options: nosniff`**, **`X-Frame-Options: DENY`**, **`Referrer-Policy: no-referrer`**.
@@ -80,7 +80,8 @@ Tests load minimal env via `test/load-test-env.mjs` (see `npm test` script). The
 
 ## Routes
 
-- `GET /health` — liveness
+- `GET /health` — liveness (process up)
+- `GET /ready` — readiness (JWT + session secrets configured for issuing tokens; **503** `not_ready` otherwise). Use behind a load balancer for traffic routing; keep Docker **`HEALTHCHECK`** on **`/health`** (see above).
 - `POST /auth/google` — body `{ idToken }` (Google credential JWT)
 - `POST /auth/firebase` — body `{ idToken }` (Firebase ID token from the Web SDK)
 - `GET /session` — `{ ok, accessToken, expiresAt }` or `401 not_authenticated`
