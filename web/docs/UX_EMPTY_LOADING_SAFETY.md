@@ -55,7 +55,7 @@
 | Page title | `Emergency` | Keep — scannable. |
 | Silent path explainer | Mentions future build + demo | Keep honesty; when silent UX ships, replace with concrete behavior (what is hidden / haptics). |
 | Primary actions | Visible first, then silent | **Shipped:** Visible alert uses a confirmation sheet before any SOS network call. Silent alert uses **two confirmation steps** before send so it is strictly harder to trigger than visible (no one-tap silent send). |
-| `Go back` | OK | Ensure focus returns to SOS FAB trigger when returning (focus management — eng). |
+| `Go back` | OK | Ensure focus returns to the control that opened Emergency (bottom nav SOS, Home tile, or FAB if mounted) (focus management — eng). |
 | Error + emergency services | Covered in `auraApiMessages.ts` for SOS | **Do not** soften SOS offline copy; keep emergency services line. |
 
 **Silent sheet (JourneyActive)**
@@ -63,9 +63,10 @@
 - Title *“Silent alert”* + body OK.  
 - **Shipped:** Primary button label *“Open emergency options”* (avoids implying an immediate network send from the sheet).
 
-**SOS FAB**
+**SOS entry (bottom nav / Home / optional `AuraSOSButton`)**
 
-- `aria-label="Emergency SOS"` — Good.  
+- Shipped chrome uses bottom-nav **SOS**; FAB component exists but may be unmounted — see [`PDR_SCOPE_TRACE.md`](./PDR_SCOPE_TRACE.md).
+- When FAB is used: `aria-label="Emergency SOS"` — Good.  
 - **Spec:** When `globalStatus === 'alert'`, consider tooltip or `aria-live` polite announcement *“Alert status active”* (optional, avoid duplicate nagging).
 
 **End journey**
