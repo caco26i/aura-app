@@ -4,7 +4,7 @@
 
 > *You are never alone.*
 
-Aura pairs a mobile-first React client with an optional Node API that validates SOS, location share, and “I’m safe” events behind bearer auth, rate limits, and an append-only audit trail. The experience follows the product and UX spec in [`design/`](./design/) (lavender gradient, soft neutrals, non-alarmist copy).
+Aura pairs a mobile-first React client with an optional Node API that validates SOS, location share, and “I’m safe” events behind bearer auth, rate limits, and an append-only audit trail. The experience follows the product and UX spec in [`design/`](./design/) (lavender gradient, soft neutrals, non-alarmist copy). **Product entry point:** [`design/AURA_PDR.md`](./design/AURA_PDR.md) (scope, requirements, traceability to detailed specs).
 
 ---
 
@@ -44,7 +44,7 @@ Use real product captures so newcomers see Aura at a glance. With `main` on GitH
 | [`web/`](./web/) | Vite + React + TypeScript SPA (maps, OAuth hook, app shell) |
 | [`server/`](./server/) | Aura API — validated POST routes, audit log, rate limits |
 | [`web/docs/`](./web/docs/) | Auth, deploy, security, observability, beta backend notes |
-| [`design/`](./design/) | Design system, screen specs, launch UX copy guidance |
+| [`design/`](./design/) | PDR, design system, screen specs, launch UX copy guidance |
 | [`.agents/skills/`](./.agents/skills/) | Checked-in agent skills for Cursor / Paperclip (see below) |
 
 ---
