@@ -56,7 +56,7 @@ For the Node API container, you can set **`AURA_API_DEPLOY_VERSION`** (e.g. rele
 ## Smoke checks after deploy
 
 - `/` loads; navigation between Home, Journey, Map, Trusted, Settings works.
-- `/emergency` reachable from SOS FAB.
+- `/emergency` reachable from shipped SOS entry points: **bottom-nav SOS**, Home feature tile, and journey surfaces that surface emergency (see [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md)). `AuraSOSButton` (floating FAB) exists in the repo but is **not** mounted in the production shell — smoke the nav/tile/journey paths, not a standalone FAB.
 - Map tiles load; if blocked, confirm telemetry `map.tile_error` appears in logs.
 - OAuth: sign-in flow completes against staging Google client.
 - **Telemetry (staging):** With `VITE_AURA_TELEMETRY_ENDPOINT` set, confirm the browser issues successful `POST` requests to the configured URL (Network tab) or temporarily enable `VITE_AURA_TELEMETRY_DEBUG` and run `window.__auraTelemetryMetrics()` — expect `telemetry.ship_ok` to increment after you trigger a journey or auth event. Details: [OBSERVABILITY.md](./OBSERVABILITY.md).
