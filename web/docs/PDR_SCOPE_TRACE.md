@@ -47,7 +47,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 | Clause | Verified in |
 |--------|-------------|
-| §5 Accessibility (SOS, journey paths) | `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
+| §5 Accessibility (SOS, journey paths) | `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
 | §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
 | §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
 | §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
@@ -88,3 +88,4 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60) / [AURA-59](/AURA/issues/AURA-59): integration tests for `invalid_journey_id`; screen specs wildcard note synced with shipped error boundary; server CI also on `API_CONTRACT.md` edits. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): GitHub Actions **Web lint & build** for `web/` (ESLint + `tsc` + Vite production build). |
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): server integration tests for unknown-path `not_found` (404); API_CONTRACT regression line updated. |
+| 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): skip-to-main link + `#main-content` landmark on shell, welcome, and emergency (PDR §5 / WCAG 2.4.1). |

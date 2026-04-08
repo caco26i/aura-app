@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { SkipToContent } from './SkipToContent';
 
 function NavItem({
   to,
@@ -24,7 +25,8 @@ function NavItem({
 export function AppShell() {
   return (
     <div className="aura-m3-app">
-      <main className="aura-m3-main">
+      <SkipToContent />
+      <main id="main-content" className="aura-m3-main" tabIndex={-1}>
         <Outlet />
       </main>
       <nav className="nbar" aria-label="Navegación principal">

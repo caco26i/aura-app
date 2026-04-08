@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SkipToContent } from '../components/SkipToContent';
 import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
@@ -32,14 +33,18 @@ export function Welcome() {
 
   if (locationReview) {
     return (
-      <div
-        style={{
-          minHeight: '100%',
-          padding: '24px 20px calc(32px + var(--aura-safe-area-bottom))',
-          background: 'linear-gradient(180deg, var(--aura-lavender-wash), var(--aura-canvas))',
-          color: 'var(--aura-text)',
-        }}
-      >
+      <div style={{ position: 'relative', minHeight: '100%' }}>
+        <SkipToContent />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          style={{
+            minHeight: '100%',
+            padding: '24px 20px calc(32px + var(--aura-safe-area-bottom))',
+            background: 'linear-gradient(180deg, var(--aura-lavender-wash), var(--aura-canvas))',
+            color: 'var(--aura-text)',
+          }}
+        >
         <div style={{ maxWidth: 440, margin: '0 auto' }}>
           <h1
             ref={headingRef}
@@ -61,6 +66,7 @@ export function Welcome() {
             Back to settings
           </button>
         </div>
+        </main>
       </div>
     );
   }
@@ -70,14 +76,18 @@ export function Welcome() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100%',
-        padding: '24px 20px calc(32px + var(--aura-safe-area-bottom))',
-        background: 'linear-gradient(180deg, var(--aura-lavender-wash), var(--aura-canvas))',
-        color: 'var(--aura-text)',
-      }}
-    >
+    <div style={{ position: 'relative', minHeight: '100%' }}>
+      <SkipToContent />
+      <main
+        id="main-content"
+        tabIndex={-1}
+        style={{
+          minHeight: '100%',
+          padding: '24px 20px calc(32px + var(--aura-safe-area-bottom))',
+          background: 'linear-gradient(180deg, var(--aura-lavender-wash), var(--aura-canvas))',
+          color: 'var(--aura-text)',
+        }}
+      >
       <div aria-live="polite" style={{ maxWidth: 440, margin: '0 auto' }}>
         {step === 0 ? (
           <>
@@ -144,6 +154,7 @@ export function Welcome() {
           </button>
         ) : null}
       </div>
+      </main>
     </div>
   );
 }

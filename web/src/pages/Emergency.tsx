@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { postEmergencyAlert } from '../api/auraBackend';
+import { SkipToContent } from '../components/SkipToContent';
 import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
@@ -86,8 +87,11 @@ export function Emergency() {
         padding: 20,
         background: 'linear-gradient(180deg, #2a1530, #1a0d22)',
         color: '#fff',
+        position: 'relative',
       }}
     >
+      <SkipToContent />
+      <main id="main-content" tabIndex={-1}>
       <h1 style={{ marginTop: 0 }}>Emergency</h1>
       <p style={{ opacity: 0.85, lineHeight: 1.5 }}>
         {silentPreferred
@@ -288,6 +292,7 @@ export function Emergency() {
           </div>
         </div>
       ) : null}
+      </main>
     </div>
   );
 }

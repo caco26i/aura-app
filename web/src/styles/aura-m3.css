@@ -38,6 +38,30 @@
   --r5: 100px;
 }
 
+/* Skip link: off-screen until focused (WCAG 2.4.1); pair with #main-content + tabIndex={-1} on <main>. */
+.aura-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  padding: 12px 16px;
+  border-radius: var(--r2);
+  background: var(--Pk);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.aura-skip-link:focus {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  outline: 3px solid var(--Pc);
+  outline-offset: 2px;
+}
+
 .aura-m3-body {
   font-family: var(--fb);
   color: var(--k1);
