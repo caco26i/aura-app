@@ -46,6 +46,107 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
 
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
+      - name: Assert POST /v1/journeys via nginx (static bearer)
+        run: |
+          set -euo pipefail
+          if [ ! -f .env ]; then
+            echo "::error::compose-smoke: .env missing (expected AURA_API_BEARER_TOKEN from prior step)"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          if [ -z "${AURA_API_BEARER_TOKEN:-}" ]; then
+            echo "::error::compose-smoke: AURA_API_BEARER_TOKEN is empty"
+            exit 1
+          fi
+          code="$(curl -sS -o /tmp/aura_compose_journey.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST /v1/journeys: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_journey.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.journeyId | type == "string") and (.data.journeyId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_compose_journey.json >/dev/null; then
+            echo "::error::compose-smoke: POST /v1/journeys JSON missing ok=true and data.journeyId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_journey.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          journey_id="$(jq -r '.data.journeyId' /tmp/aura_compose_journey.json)"
+          echo "compose-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=${journey_id}"
+
+          code="$(curl -sS -o /tmp/aura_compose_location_share.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/location-shares" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST .../location-shares: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_location_share.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.shareId | type == "string") and (.data.shareId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_compose_location_share.json >/dev/null; then
+            echo "::error::compose-smoke: POST .../location-shares JSON missing ok=true and data.shareId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_location_share.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          echo "compose-smoke POST .../location-shares ok: HTTP ${code}, shareId=$(jq -r '.data.shareId' /tmp/aura_compose_location_share.json)"
+
+          code="$(curl -sS -o /tmp/aura_compose_im_safe.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/im-safe" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}")"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST .../im-safe: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_im_safe.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.receivedAt | type == "string") and (.data.receivedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"))' /tmp/aura_compose_im_safe.json >/dev/null; then
+            echo "::error::compose-smoke: POST .../im-safe JSON missing ok=true and data.receivedAt (ISO-8601)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_im_safe.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          echo "compose-smoke POST .../im-safe ok: HTTP ${code}, receivedAt=$(jq -r '.data.receivedAt' /tmp/aura_compose_im_safe.json)"
+
       - name: Tear down
         if: always()
         run: docker compose down -v --remove-orphans
@@ -97,6 +198,145 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
           echo
 
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-bff-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-bff-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
+      - name: Assert POST journey + location-share + im-safe via nginx (BFF JWT)
+        run: |
+          set -euo pipefail
+          if [ ! -f .env ]; then
+            echo "::error::compose-bff-smoke: .env missing (expected AURA_API_BFF_JWT_SECRET from prior step)"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          if [ -z "${AURA_API_BFF_JWT_SECRET:-}" ]; then
+            echo "::error::compose-bff-smoke: AURA_API_BFF_JWT_SECRET is empty"
+            exit 1
+          fi
+          api_jwt="$(node -e "
+          const { createHmac } = require('node:crypto');
+          const secret = process.env.AURA_API_BFF_JWT_SECRET;
+          if (!secret) process.exit(1);
+          const sub = 'compose-bff-smoke-ci';
+          const now = Math.floor(Date.now() / 1000);
+          const exp = now + 3600;
+          const payload = { sub, exp, iat: now };
+          const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+          const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+          const signingInput = header + '.' + body;
+          const sig = createHmac('sha256', secret).update(signingInput).digest('base64url');
+          process.stdout.write(signingInput + '.' + sig);
+          ")"
+          code="$(curl -sS -o /tmp/aura_bff_compose_journey.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke POST /v1/journeys: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_journey.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.journeyId | type == "string") and (.data.journeyId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_compose_journey.json >/dev/null; then
+            echo "::error::compose-bff-smoke: POST /v1/journeys JSON missing ok=true and data.journeyId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_journey.json || true
+            echo "::endgroup::"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            exit 1
+          fi
+          journey_id="$(jq -r '.data.journeyId' /tmp/aura_bff_compose_journey.json)"
+          echo "compose-bff-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=${journey_id}"
+
+          code="$(curl -sS -o /tmp/aura_bff_compose_location_share.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/location-shares" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke POST .../location-shares: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_location_share.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.shareId | type == "string") and (.data.shareId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_compose_location_share.json >/dev/null; then
+            echo "::error::compose-bff-smoke: POST .../location-shares JSON missing ok=true and data.shareId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_location_share.json || true
+            echo "::endgroup::"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-smoke POST .../location-shares ok: HTTP ${code}, shareId=$(jq -r '.data.shareId' /tmp/aura_bff_compose_location_share.json)"
+
+          code="$(curl -sS -o /tmp/aura_bff_compose_im_safe.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/im-safe" \
+            -H "Authorization: Bearer ${api_jwt}")"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke POST .../im-safe: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_im_safe.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.receivedAt | type == "string") and (.data.receivedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"))' /tmp/aura_bff_compose_im_safe.json >/dev/null; then
+            echo "::error::compose-bff-smoke: POST .../im-safe JSON missing ok=true and data.receivedAt (ISO-8601)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_im_safe.json || true
+            echo "::endgroup::"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-smoke POST .../im-safe ok: HTTP ${code}, receivedAt=$(jq -r '.data.receivedAt' /tmp/aura_bff_compose_im_safe.json)"
+
+          code="$(curl -sS -o /tmp/aura_bff_compose_emergency_alert.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/emergency-alerts" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"silent"}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke POST /v1/emergency-alerts: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.alertId | type == "string") and (.data.alertId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_compose_emergency_alert.json >/dev/null; then
+            echo "::error::compose-bff-smoke: POST /v1/emergency-alerts JSON missing ok=true and data.alertId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-smoke POST /v1/emergency-alerts ok: HTTP ${code}, alertId=$(jq -r '.data.alertId' /tmp/aura_bff_compose_emergency_alert.json)"
+
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.bff.yml down -v --remove-orphans
@@ -118,7 +358,7 @@ jobs:
       - name: Build and start stack (telemetry stub override)
         run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up -d --build
 
-      - name: Wait for /health then POST /ingest/aura via nginx proxy
+      - name: Wait for /health via aura-web (proxied)
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
@@ -135,6 +375,25 @@ jobs:
             fi
             sleep 2
           done
+
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-telemetry-proxy-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-telemetry-proxy-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-telemetry-proxy-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
+      - name: POST /ingest/aura via nginx proxy
+        run: |
+          set -euo pipefail
           code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
             -H "Content-Type: application/json" -d '{"smoke":true}')"
           echo "POST /ingest/aura HTTP ${code}"
@@ -229,10 +488,146 @@ jobs:
           echo
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
           echo
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-bff-telemetry-proxy-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-bff-telemetry-proxy-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
           code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
             -H "Content-Type: application/json" -d '{"smoke":true}')"
           echo "POST /ingest/aura HTTP ${code}"
           test "${code}" = "200"
+
+      - name: Assert POST journey + location-share + im-safe via nginx (BFF JWT)
+        run: |
+          set -euo pipefail
+          COMPOSE_FILES=(-f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml)
+          if [ ! -f .env ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: .env missing (expected AURA_API_BFF_JWT_SECRET from prior step)"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          if [ -z "${AURA_API_BFF_JWT_SECRET:-}" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: AURA_API_BFF_JWT_SECRET is empty"
+            exit 1
+          fi
+          api_jwt="$(node -e "
+          const { createHmac } = require('node:crypto');
+          const secret = process.env.AURA_API_BFF_JWT_SECRET;
+          if (!secret) process.exit(1);
+          const sub = 'compose-bff-telemetry-proxy-smoke-ci';
+          const now = Math.floor(Date.now() / 1000);
+          const exp = now + 3600;
+          const payload = { sub, exp, iat: now };
+          const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+          const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+          const signingInput = header + '.' + body;
+          const sig = createHmac('sha256', secret).update(signingInput).digest('base64url');
+          process.stdout.write(signingInput + '.' + sig);
+          ")"
+          code="$(curl -sS -o /tmp/aura_bff_telemetry_compose_journey.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke POST /v1/journeys: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_journey.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.journeyId | type == "string") and (.data.journeyId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_telemetry_compose_journey.json >/dev/null; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: POST /v1/journeys JSON missing ok=true and data.journeyId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_journey.json || true
+            echo "::endgroup::"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            exit 1
+          fi
+          journey_id="$(jq -r '.data.journeyId' /tmp/aura_bff_telemetry_compose_journey.json)"
+          echo "compose-bff-telemetry-proxy-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=${journey_id}"
+
+          code="$(curl -sS -o /tmp/aura_bff_telemetry_compose_location_share.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/location-shares" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke POST .../location-shares: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_location_share.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.shareId | type == "string") and (.data.shareId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_telemetry_compose_location_share.json >/dev/null; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: POST .../location-shares JSON missing ok=true and data.shareId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_location_share.json || true
+            echo "::endgroup::"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-telemetry-proxy-smoke POST .../location-shares ok: HTTP ${code}, shareId=$(jq -r '.data.shareId' /tmp/aura_bff_telemetry_compose_location_share.json)"
+
+          code="$(curl -sS -o /tmp/aura_bff_telemetry_compose_im_safe.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/im-safe" \
+            -H "Authorization: Bearer ${api_jwt}")"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke POST .../im-safe: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_im_safe.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.receivedAt | type == "string") and (.data.receivedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"))' /tmp/aura_bff_telemetry_compose_im_safe.json >/dev/null; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: POST .../im-safe JSON missing ok=true and data.receivedAt (ISO-8601)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_im_safe.json || true
+            echo "::endgroup::"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-telemetry-proxy-smoke POST .../im-safe ok: HTTP ${code}, receivedAt=$(jq -r '.data.receivedAt' /tmp/aura_bff_telemetry_compose_im_safe.json)"
+
+          code="$(curl -sS -o /tmp/aura_bff_telemetry_compose_emergency_alert.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/emergency-alerts" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"silent"}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke POST /v1/emergency-alerts: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.alertId | type == "string") and (.data.alertId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_telemetry_compose_emergency_alert.json >/dev/null; then
+            echo "::error::compose-bff-telemetry-proxy-smoke: POST /v1/emergency-alerts JSON missing ok=true and data.alertId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_telemetry_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            docker compose "${COMPOSE_FILES[@]}" logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-telemetry-proxy-smoke POST /v1/emergency-alerts ok: HTTP ${code}, alertId=$(jq -r '.data.alertId' /tmp/aura_bff_telemetry_compose_emergency_alert.json)"
 
       - name: Tear down
         if: always()

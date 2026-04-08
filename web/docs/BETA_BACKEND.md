@@ -32,4 +32,4 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 Client structured logs and staging HTTP mirror: [OBSERVABILITY.md](./OBSERVABILITY.md).
 
-**Server:** `GET /health` (liveness) and `GET /ready` (readiness: auth env + writable audit log dir) — see [`API_CONTRACT.md`](./API_CONTRACT.md) and [`server/README.md`](../../server/README.md). JSON POST bodies default to **32kb** on both the authoritative API (`AURA_API_JSON_BODY_LIMIT`) and the in-repo BFF (`server/bff`).
+**Server:** `GET /health` (liveness) and `GET /ready` (readiness: auth env + writable audit log dir) — see [`API_CONTRACT.md`](./API_CONTRACT.md) and [`server/README.md`](../../server/README.md). JSON POST bodies default to **32kb** on both the authoritative API (`AURA_API_JSON_BODY_LIMIT`) and the in-repo BFF (`AURA_BFF_JSON_BODY_LIMIT` in [`server/bff/README.md`](../../server/bff/README.md)).

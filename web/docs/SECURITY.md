@@ -8,6 +8,7 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 - **Stub mode:** Without `VITE_GOOGLE_CLIENT_ID`, the app runs without `GoogleOAuthProvider`. Do not ship production builds that rely on stub auth for protected data.
 - **Session:** When a backend exists, use short-lived credentials, refresh rotation, and revoke on logout.
 - **BFF + JWT (no static web token):** To smoke-test staging (or staging-like local) without `VITE_AURA_API_TOKEN`, follow the numbered checklist in [DEPLOY.md — Staging smoke: BFF JWT path](./DEPLOY.md#staging-smoke-bff-jwt-path-no-static-web-token).
+- **BFF rate limits:** The in-repo BFF (`server/bff`) applies per-IP `express-rate-limit` on `POST /auth/google`, `GET /session`, and `POST /logout`, tunable via `AURA_BFF_RATE_LIMIT_*` env vars (`server/bff/README.md`). Responses use the same **`rate_limited`** JSON envelope as the Aura API where applicable. Edge WAF/CDN rules remain the first line of defense; BFF limits complement those at origin.
 
 ## Location and map data
 
