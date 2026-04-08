@@ -22,7 +22,7 @@ npm run dev
 npm test
 ```
 
-Integration tests exercise auth, Zod validation, journey ownership, wrong-method and CORS preflight behavior, SOS **`429 rate_limited`** (hourly cap counts every POST; emergency tests are grouped at the end of the file so the limiter state is predictable), and append-only audit writes (see `test/api.integration.test.js`). They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
+Integration tests exercise auth, Zod validation, journey ownership, wrong-method and CORS preflight behavior, malformed JSON → **`400 invalid_json`** (standard envelope), SOS **`429 rate_limited`** (hourly cap counts every POST; emergency tests are grouped at the end of the file so the limiter state is predictable), and append-only audit writes (see `test/api.integration.test.js`). They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
 
 On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` when `server/` or that workflow file changes.
 
