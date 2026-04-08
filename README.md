@@ -104,6 +104,7 @@ After the commands above, use the **web package’s** [`web/docs/`](./web/docs/)
 | [`web/docs/DEPLOY.md`](./web/docs/DEPLOY.md) | Staging / production deploy |
 | [`web/docs/SECURITY.md`](./web/docs/SECURITY.md) | Threat model and safety notes |
 | [`web/docs/OBSERVABILITY.md`](./web/docs/OBSERVABILITY.md) | Logs and telemetry |
+| [`web/docs/UX_EMPTY_LOADING_SAFETY.md`](./web/docs/UX_EMPTY_LOADING_SAFETY.md) | Empty states, loading, safety microcopy (UX spec) |
 
 The **server** package documents API env vars and routes in [`server/README.md`](./server/README.md) (pair it with `BETA_BACKEND` when wiring the web app to a real backend).
 
@@ -122,6 +123,7 @@ The **server** package documents API env vars and routes in [`server/README.md`]
 | [`design/AURA_DESIGN_SYSTEM.md`](./design/AURA_DESIGN_SYSTEM.md) | Tokens, type, components |
 | [`design/AURA_SCREEN_SPECS.md`](./design/AURA_SCREEN_SPECS.md) | Routes and shell behavior |
 | [`design/AURA_LAUNCH_UX.md`](./design/AURA_LAUNCH_UX.md) | Error and SOS-adjacent copy rules |
+| [`web/docs/UX_EMPTY_LOADING_SAFETY.md`](./web/docs/UX_EMPTY_LOADING_SAFETY.md) | Empty / loading / safety microcopy (implementation-ready UX notes) |
 
 ---
 
