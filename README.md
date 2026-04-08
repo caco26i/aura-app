@@ -25,7 +25,7 @@ Routing reference: [`design/AURA_SCREEN_SPECS.md`](./design/AURA_SCREEN_SPECS.md
 
 ### Public beta (install, env, flows)
 
-**Testers and external integrators:** start with **[`docs/PUBLIC_BETA.md`](./docs/PUBLIC_BETA.md)** — Node version, `web/.env.local` from [`web/.env.example`](./web/.env.example), end-to-end flows (welcome → home → journey → SOS → settings), optional Node API, [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) (there is no env var literally named `BETA_BACKEND`), and [`web/docs/OBSERVABILITY.md`](./web/docs/OBSERVABILITY.md). **Approved marketing narrative** for the beta is tracked on [AURA-64](/AURA/issues/AURA-64); until then, see the draft one-pager in [`docs/launch-narrative.md`](./docs/launch-narrative.md).
+**Testers and external integrators:** start with **[`docs/PUBLIC_BETA.md`](./docs/PUBLIC_BETA.md)** — Node version, `web/.env.local` from [`web/.env.example`](./web/.env.example), end-to-end flows (welcome → home → journey → SOS → settings), optional Node API, [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) (there is no env var literally named `BETA_BACKEND`), and [`web/docs/OBSERVABILITY.md`](./web/docs/OBSERVABILITY.md). **CEO-approved marketing narrative** for the beta is in [`docs/launch-narrative.md`](./docs/launch-narrative.md) (approval trail: [AURA-64](/AURA/issues/AURA-64)).
 
 ---
 
@@ -48,7 +48,7 @@ Use real product captures so newcomers see Aura at a glance. With `main` on GitH
 | [`web/`](./web/) | Vite + React + TypeScript SPA (maps, OAuth hook, app shell) |
 | [`server/`](./server/) | Aura API — validated POST routes, audit log, rate limits |
 | [`web/docs/`](./web/docs/) | Auth, deploy, security, observability, beta backend notes |
-| [`docs/`](./docs/) | Public beta runbook, draft external narrative (see `PUBLIC_BETA.md`, `launch-narrative.md`) |
+| [`docs/`](./docs/) | Public beta runbook, CEO-approved external narrative (see `PUBLIC_BETA.md`, `launch-narrative.md`) |
 | [`design/`](./design/) | PDR, design system, screen specs, launch UX copy guidance |
 | [`.agents/skills/`](./.agents/skills/) | Checked-in agent skills for Cursor / Paperclip (see below) |
 
@@ -136,7 +136,7 @@ The **server** package documents API env vars and routes in [`server/README.md`]
 | Document | Topic |
 |----------|--------|
 | [`docs/PUBLIC_BETA.md`](./docs/PUBLIC_BETA.md) | Public beta: install, env, flows, optional API, observability pointers |
-| [`docs/launch-narrative.md`](./docs/launch-narrative.md) | Draft external narrative (replace with approved copy from [AURA-64](/AURA/issues/AURA-64) when ready) |
+| [`docs/launch-narrative.md`](./docs/launch-narrative.md) | CEO-approved external narrative one-pager ([AURA-64](/AURA/issues/AURA-64)) |
 | [`web/docs/AUTH.md`](./web/docs/AUTH.md) | Google sign-in and stub mode |
 | [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) | Client ↔ API wiring, journey ownership, swap path |
 | [`web/docs/DEPLOY.md`](./web/docs/DEPLOY.md) | Staging / production deployment notes |

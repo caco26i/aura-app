@@ -78,7 +78,7 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 
 ## 5. External narrative (marketing copy)
 
-Approved **public positioning** and CTA copy are tracked on [AURA-64](/AURA/issues/AURA-64). Until that issue is approved, a **draft** one-pager lives in [`docs/launch-narrative.md`](./launch-narrative.md) — align public sites with the approved narrative when it lands, not the draft alone.
+**CEO-approved** public positioning, hero, pillars, and primary CTA are in [`docs/launch-narrative.md`](./launch-narrative.md). Use that file as the source of truth for external sites and announcements; the approval thread is [AURA-64](/AURA/issues/AURA-64). If the one-pager is revised later, keep public-facing copy aligned with the updated file.
 
 ---
 
