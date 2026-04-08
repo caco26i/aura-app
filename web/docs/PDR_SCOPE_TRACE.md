@@ -76,9 +76,11 @@ _None at present._
 
 ### Resolved / aligned
 
-1. **G-IA-01 — IA vs PDR MVP table** — **Resolved / confirmed.** CEO decision [AURA-74](/AURA/issues/AURA-74): **Journey stays off** the primary bottom nav for launch. Primary chrome remains **Home, Cita, Transport, Check-in, SOS**; **Journey**, Map, Trusted, and Settings stay **secondary** (Home hero / feature grid / deep links / stack). PDR §3.1 hub areas are **capability buckets** traced in this file and [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md); they are not required to mirror every bottom-bar slot.
+1. **API production auth path** — **Aligned.** `server/` accepts **BFF-issued HS256 JWTs** (`sub` + `exp`; optional `iss`/`aud`) alongside legacy static bearer; journey ownership follows `sub` so token refresh does not strand active journeys. Documented in [`server/README.md`](../../server/README.md), [`API_CONTRACT.md`](./API_CONTRACT.md), [`BETA_BACKEND.md`](./BETA_BACKEND.md), [`SECURITY.md`](./SECURITY.md).
 
-2. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
+2. **G-IA-01 — IA vs PDR MVP table** — **Resolved / confirmed.** CEO decision [AURA-74](/AURA/issues/AURA-74): **Journey stays off** the primary bottom nav for launch. Primary chrome remains **Home, Cita, Transport, Check-in, SOS**; **Journey**, Map, Trusted, and Settings stay **secondary** (Home hero / feature grid / deep links / stack). PDR §3.1 hub areas are **capability buckets** traced in this file and [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md); they are not required to mirror every bottom-bar slot.
+
+3. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
 
 ### Nice-to-have (polish)
 
@@ -126,3 +128,4 @@ _None at present._
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 map + page chrome table; §5 rows for `MapPage` toggle `aria-label` / `aria-pressed`, demo route control + status, and `index.html` `theme-color`. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): `RouteDocumentTitle` `/map` → **Map intel · Aura** (aligns with on-page `h1`). |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 **MapIntel.tsx** naming clarified — canonical surface is `MapPage.tsx` (`/map`); CTO wake [52b19e31](/AURA/issues/AURA-61#comment-52b19e31-76cf-457a-8570-5cbab2bc1eed). |
+| 2026-04-08 | [AURA-91](/AURA/issues/AURA-91): BFF **HS256 JWT** auth (`sub` ownership) + **im-safe** hourly rate limit + `AURA_API_JSON_BODY_LIMIT`; audit **RUNBOOK_AUDIT.md**; Resolved/aligned row for API production auth path. |

@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN (required), AURA_API_BEARER_TOKEN_ALT (optional second actor), PORT (default 8787), AUDIT_LOG_PATH, CORS_ORIGIN
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT
  */
 
 import cors from 'cors';
@@ -8,13 +8,18 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'node:fs';
 import path from 'node:path';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 
 const PORT = Number(process.env.PORT || 8787);
 const BEARER = process.env.AURA_API_BEARER_TOKEN;
 /** Optional second beta token (staging / integration tests) — distinct actor key from primary bearer. */
 const BEARER_ALT = process.env.AURA_API_BEARER_TOKEN_ALT || '';
+/** HS256 secret for BFF-issued access tokens (`sub` = stable user id). When set, three-segment Bearer tokens are verified as JWTs first. */
+const BFF_JWT_SECRET = process.env.AURA_API_BFF_JWT_SECRET || '';
+const BFF_JWT_ISSUER = process.env.AURA_API_BFF_JWT_ISSUER || '';
+const BFF_JWT_AUDIENCE = process.env.AURA_API_BFF_JWT_AUDIENCE || '';
+const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '24kb';
 const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
@@ -40,9 +45,74 @@ const locationShareBodySchema = z
   );
 
 function actorKey(req) {
+  if (req.auraActorKey) {
+    return req.auraActorKey;
+  }
   const raw = req.headers.authorization || '';
   const token = raw.startsWith('Bearer ') ? raw.slice(7) : '';
   return createHash('sha256').update(token || req.ip || 'unknown').digest('hex').slice(0, 16);
+}
+
+function looksLikeJwt(token) {
+  return token.split('.').length === 3;
+}
+
+/** @returns {Record<string, unknown> | null} */
+function verifyBffJwt(token) {
+  if (!BFF_JWT_SECRET || !looksLikeJwt(token)) {
+    return null;
+  }
+  const parts = token.split('.');
+  const [h64, p64, s64] = parts;
+  let header;
+  try {
+    header = JSON.parse(Buffer.from(h64, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  if (header.alg !== 'HS256') {
+    return null;
+  }
+  const signingInput = `${h64}.${p64}`;
+  const expectedSig = createHmac('sha256', BFF_JWT_SECRET).update(signingInput).digest();
+  let gotSig;
+  try {
+    gotSig = Buffer.from(s64, 'base64url');
+  } catch {
+    return null;
+  }
+  if (expectedSig.length !== gotSig.length || !timingSafeEqual(expectedSig, gotSig)) {
+    return null;
+  }
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(p64, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  if (typeof payload.sub !== 'string' || !payload.sub) {
+    return null;
+  }
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp !== undefined && typeof payload.exp === 'number' && payload.exp < now) {
+    return null;
+  }
+  if (BFF_JWT_ISSUER && payload.iss !== BFF_JWT_ISSUER) {
+    return null;
+  }
+  if (BFF_JWT_AUDIENCE) {
+    const audOk =
+      payload.aud === BFF_JWT_AUDIENCE ||
+      (Array.isArray(payload.aud) && payload.aud.includes(BFF_JWT_AUDIENCE));
+    if (!audOk) {
+      return null;
+    }
+  }
+  return payload;
+}
+
+function actorKeyFromJwtSub(sub) {
+  return createHash('sha256').update(`jwt|${sub}`).digest('hex').slice(0, 16);
 }
 
 /** In-memory burst detector: anomaly signal only (still allows request if under hard rate limit). */
@@ -121,10 +191,10 @@ function ensureAuditDir() {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-/** Verifies bearer is configured and audit log directory is writable (for load balancers / orchestration readiness). */
+/** Verifies auth is configured and audit log directory is writable (for load balancers / orchestration readiness). */
 function readinessResult() {
-  if (!BEARER) {
-    return { ok: false, detail: 'AURA_API_BEARER_TOKEN not set' };
+  if (!BEARER && !BFF_JWT_SECRET) {
+    return { ok: false, detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET' };
   }
   try {
     ensureAuditDir();
@@ -145,12 +215,16 @@ function appendAudit(entry) {
 }
 
 function bearerAccepted(rawToken) {
-  return rawToken === BEARER || (!!BEARER_ALT && rawToken === BEARER_ALT);
+  return (!!BEARER && rawToken === BEARER) || (!!BEARER_ALT && rawToken === BEARER_ALT);
 }
 
-function requireBearer(req, res, next) {
-  if (!BEARER) {
-    res.status(503).json({ ok: false, error: 'server_misconfigured', detail: 'AURA_API_BEARER_TOKEN not set' });
+function requireAuth(req, res, next) {
+  if (!BEARER && !BFF_JWT_SECRET) {
+    res.status(503).json({
+      ok: false,
+      error: 'server_misconfigured',
+      detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET',
+    });
     return;
   }
   const h = req.headers.authorization;
@@ -158,10 +232,26 @@ function requireBearer(req, res, next) {
     res.status(401).json({ ok: false, error: 'unauthorized' });
     return;
   }
-  if (!bearerAccepted(h.slice(7))) {
+  const raw = h.slice(7);
+  if (BFF_JWT_SECRET && looksLikeJwt(raw)) {
+    const jwtPayload = verifyBffJwt(raw);
+    if (jwtPayload) {
+      req.auraActorKey = actorKeyFromJwtSub(jwtPayload.sub);
+      next();
+      return;
+    }
     res.status(403).json({ ok: false, error: 'forbidden' });
     return;
   }
+  if (!BEARER) {
+    res.status(403).json({ ok: false, error: 'forbidden' });
+    return;
+  }
+  if (!bearerAccepted(raw)) {
+    res.status(403).json({ ok: false, error: 'forbidden' });
+    return;
+  }
+  req.auraActorKey = createHash('sha256').update(raw).digest('hex').slice(0, 16);
   next();
 }
 
@@ -208,6 +298,20 @@ const shareLimiter = rateLimit({
   },
 });
 
+/** Hourly cap on im-safe (abuse / accidental tap storms). */
+const imSafeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 36,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
+  message: { ok: false, error: 'rate_limited', detail: 'Too many I’m safe signals; try again later.' },
+  handler: (req, res, _next, options) => {
+    auditRateLimited('im-safe', req);
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
 const app = express();
 app.set('trust proxy', 1);
 app.use((_req, res, next) => {
@@ -224,7 +328,7 @@ app.use(
     exposedHeaders: ['X-Aura-Anomaly'],
   }),
 );
-app.use(express.json({ limit: '24kb' }));
+app.use(express.json({ limit: JSON_BODY_LIMIT }));
 app.use((err, req, res, next) => {
   if (err.status === 400 && err.type === 'entity.parse.failed') {
     res.status(400).json({ ok: false, error: 'invalid_json', detail: 'Malformed JSON request body' });
@@ -253,7 +357,7 @@ app.get('/ready', (_req, res) => {
   });
 });
 
-app.post('/v1/journeys', globalLimiter, journeyLimiter, requireBearer, (req, res) => {
+app.post('/v1/journeys', globalLimiter, requireAuth, journeyLimiter, (req, res) => {
   const parsed = emptyBodySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     appendAudit({
@@ -280,7 +384,7 @@ app.post('/v1/journeys', globalLimiter, journeyLimiter, requireBearer, (req, res
   res.status(201).json({ ok: true, data: { journeyId } });
 });
 
-app.post('/v1/emergency-alerts', globalLimiter, requireBearer, sosLimiter, (req, res) => {
+app.post('/v1/emergency-alerts', globalLimiter, requireAuth, sosLimiter, (req, res) => {
   const parsed = emergencyBodySchema.safeParse(req.body);
   if (!parsed.success) {
     appendAudit({
@@ -323,8 +427,8 @@ app.post('/v1/emergency-alerts', globalLimiter, requireBearer, sosLimiter, (req,
 app.post(
   '/v1/journeys/:journeyId/location-shares',
   globalLimiter,
+  requireAuth,
   journeyLimiter,
-  requireBearer,
   shareLimiter,
   (req, res) => {
     const jid = uuidSchema.safeParse(req.params.journeyId);
@@ -392,7 +496,7 @@ app.post(
   },
 );
 
-app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, journeyLimiter, requireBearer, (req, res) => {
+app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, requireAuth, journeyLimiter, imSafeLimiter, (req, res) => {
   const jid = uuidSchema.safeParse(req.params.journeyId);
   if (!jid.success) {
     appendAudit({

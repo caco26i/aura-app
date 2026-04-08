@@ -11,7 +11,7 @@ Canonical server behavior: [`../../server/README.md`](../../server/README.md). T
 | Item | Rule |
 |------|------|
 | Base URL | Same-origin in dev (Vite proxy → `server/`), or `VITE_AURA_API_URL` when set |
-| Auth | `Authorization: Bearer <token>` must match server `AURA_API_BEARER_TOKEN` (other schemes or missing `Bearer ` prefix → **401** `unauthorized`) |
+| Auth | `Authorization: Bearer <token>` — **static secret** matching `AURA_API_BEARER_TOKEN` (and optional `AURA_API_BEARER_TOKEN_ALT`), **or** a **three-segment HS256 JWT** signed with `AURA_API_BFF_JWT_SECRET` with claim **`sub`** (stable user id) and valid **`exp`**. Optional `iss` / `aud` enforced when `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE` are set. Other schemes or missing `Bearer ` → **401** `unauthorized`. Invalid JWT or wrong static secret → **403** `forbidden`. |
 | Fingerprint | Optional `X-Aura-Device-Fingerprint` (opaque); server stores a hash in audit only |
 | Content-Type | `application/json` on POST bodies when a body is sent |
 
@@ -55,8 +55,8 @@ The client reads **`error`** (string) for mapping; `detail` is diagnostic.
 | 404 | `journey_not_found` | Journey id unknown to server for this deployment |
 | 404 | `not_found` | Unknown path |
 | 429 | `rate_limited` | express-rate-limit (SOS or location-shares) |
-| 503 | `server_misconfigured` | e.g. `AURA_API_BEARER_TOKEN` unset |
-| 503 | `not_ready` | `GET /ready` only: bearer missing or audit log directory not writable |
+| 503 | `server_misconfigured` | Neither `AURA_API_BEARER_TOKEN` nor `AURA_API_BFF_JWT_SECRET` configured |
+| 503 | `not_ready` | `GET /ready` only: neither static bearer nor BFF JWT secret configured, or audit log directory not writable |
 
 ## Response headers
 
@@ -81,4 +81,4 @@ Allowed anomaly tokens today: `burst_sos`, `burst_location_share` (comma-separat
 
 ## Regression coverage
 
-Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`). Includes `invalid_journey_id` on `:journeyId` routes, **`im-safe` non-empty body → `validation_failed`**, malformed JSON → **`invalid_json`**, **`401`** for non-`Bearer` `Authorization` on mutating routes, unknown-path and wrong-method `not_found` (404), a sample **OPTIONS** preflight assertion for CORS (`Authorization` / `Content-Type` allowed), **`403` `journey_forbidden`** when a second valid beta bearer (`AURA_API_BEARER_TOKEN_ALT` in tests) calls **location-share** or **`im-safe`** on another actor’s journey, baseline **security headers** on `GET /health` and sample **error** responses (`404`, `401`), **`429` `rate_limited`** on `POST /v1/emergency-alerts` after the hourly SOS cap (emergency cases grouped at the **end** of the suite so the limiter is deterministic; `audit.rate_limited` in the audit file). Production typically sets only `AURA_API_BEARER_TOKEN` (one actor key); optional `AURA_API_BEARER_TOKEN_ALT` enables two distinct authenticated actors for staging or future multi-device beta.
+Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`). Includes **BFF JWT** path (`AURA_API_BFF_JWT_SECRET` in tests): same **`sub`** across two tokens can **`im-safe`** on an owned journey; invalid signature / expired **`exp`** → **`403`**. Also: `invalid_journey_id` on `:journeyId` routes, **`im-safe` non-empty body → `validation_failed`**, malformed JSON → **`invalid_json`**, **`401`** for non-`Bearer` `Authorization`, unknown-path / wrong-method **`not_found`**, **OPTIONS** CORS preflight, **`403` `journey_forbidden`** when a second static bearer (`AURA_API_BEARER_TOKEN_ALT`) calls **location-share** or **`im-safe`** on another actor’s journey, baseline **security headers** on `GET /health` and sample **error** responses (`404`, `401`), **`429` `rate_limited`** on **`POST /v1/emergency-alerts`** after the hourly SOS cap (emergency tests grouped at the **end** of the suite; `audit.rate_limited` in the audit file). **im-safe** has an additional hourly cap. Production: prefer **`AURA_API_BFF_JWT_SECRET`** without static bearer in the browser; optional `AURA_API_BEARER_TOKEN_ALT` for two static actors in staging.

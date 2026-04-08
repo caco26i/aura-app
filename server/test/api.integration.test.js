@@ -4,6 +4,7 @@
  */
 
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -12,11 +13,13 @@ import request from 'supertest';
 
 const TOKEN = 'integration-test-bearer-token';
 const TOKEN_ALT = 'integration-test-bearer-token-alt';
+const JWT_SECRET = 'integration-jwt-bff-secret-32chars-minimum!!';
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-api-test-'));
 const auditPath = path.join(tmpDir, 'audit.log');
 
 process.env.AURA_API_BEARER_TOKEN = TOKEN;
 process.env.AURA_API_BEARER_TOKEN_ALT = TOKEN_ALT;
+process.env.AURA_API_BFF_JWT_SECRET = JWT_SECRET;
 process.env.AURA_API_SKIP_LISTEN = '1';
 process.env.AUDIT_LOG_PATH = auditPath;
 
@@ -24,6 +27,23 @@ const { app } = await import('../src/index.js');
 
 const bearer = { Authorization: `Bearer ${TOKEN}` };
 const bearerAlt = { Authorization: `Bearer ${TOKEN_ALT}` };
+
+function mintJwt(payload) {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+  return `${header}.${body}.${sig}`;
+}
+
+function jwtAuth(sub, extra = {}) {
+  return {
+    Authorization: `Bearer ${mintJwt({
+      sub,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      ...extra,
+    })}`,
+  };
+}
 
 describe('Aura API', () => {
   after(() => {
@@ -240,6 +260,39 @@ describe('Aura API', () => {
     const last = log.trim().split('\n').pop();
     const row = JSON.parse(last);
     assert.equal(row.type, 'journey.created');
+  });
+
+  test('BFF JWT: same sub across two tokens can im-safe on owned journey', async () => {
+    const j1 = await request(app).post('/v1/journeys').set(jwtAuth('jwt-user-a', { iat: 1 })).send({}).expect(201);
+    const journeyId = j1.body.data.journeyId;
+    await request(app)
+      .post(`/v1/journeys/${journeyId}/im-safe`)
+      .set(jwtAuth('jwt-user-a', { iat: 2 }))
+      .send({})
+      .expect(201);
+  });
+
+  test('BFF JWT: different sub gets journey_forbidden on im-safe', async () => {
+    const j1 = await request(app).post('/v1/journeys').set(jwtAuth('jwt-owner-b')).send({}).expect(201);
+    await request(app)
+      .post(`/v1/journeys/${j1.body.data.journeyId}/im-safe`)
+      .set(jwtAuth('jwt-stranger-b'))
+      .send({})
+      .expect(403);
+  });
+
+  test('BFF JWT: invalid signature returns forbidden', async () => {
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(
+      JSON.stringify({ sub: 'x', exp: Math.floor(Date.now() / 1000) + 60 }),
+    ).toString('base64url');
+    const bad = `${header}.${body}.not-a-valid-signature`;
+    await request(app).post('/v1/journeys').set({ Authorization: `Bearer ${bad}` }).send({}).expect(403);
+  });
+
+  test('BFF JWT: expired token returns forbidden', async () => {
+    const tok = mintJwt({ sub: 'expired', exp: Math.floor(Date.now() / 1000) - 30 });
+    await request(app).post('/v1/journeys').set({ Authorization: `Bearer ${tok}` }).send({}).expect(403);
   });
 
   test('emergency-alerts rejects invalid mode', async () => {
