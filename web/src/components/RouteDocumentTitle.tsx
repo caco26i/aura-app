@@ -34,11 +34,15 @@ function titleForPath(pathname: string): string {
 }
 
 export function RouteDocumentTitle() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
+    if (pathname === '/settings' && hash === '#settings-privacy-and-visibility') {
+      document.title = `Privacy & visibility · ${APP_NAME}`;
+      return;
+    }
     document.title = titleForPath(pathname);
-  }, [pathname]);
+  }, [pathname, hash]);
 
   return null;
 }

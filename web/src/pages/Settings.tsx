@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   establishAuraBffSessionWithGoogleIdToken,
   resolveAuraApiBearer,
@@ -15,7 +15,9 @@ const googleClientConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.tr
 
 export function Settings() {
   const { settings, updateSettings, clearLocalAuraData } = useAura();
+  const { hash, pathname } = useLocation();
   const clearDialogRef = useRef<HTMLDialogElement>(null);
+  const privacyHeadingRef = useRef<HTMLHeadingElement>(null);
   const [bffHint, setBffHint] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,6 +34,16 @@ export function Settings() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (pathname !== '/settings' || hash !== '#settings-privacy-and-visibility') return;
+    const el = privacyHeadingRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => {
+      el.focus({ preventScroll: true });
+    }, 0);
+  }, [hash, pathname]);
 
   const openClearDialog = () => {
     clearDialogRef.current?.showModal();
@@ -178,7 +190,7 @@ export function Settings() {
         </label>
 
         <fieldset
-          aria-describedby="settings-privacy-sharing"
+          aria-describedby="settings-privacy-desc"
           style={{ border: '1px solid var(--aura-border)', borderRadius: 12, padding: 12, marginTop: 12 }}
         >
           <legend style={{ fontWeight: 700 }}>Location precision</legend>
@@ -202,10 +214,17 @@ export function Settings() {
           </label>
 
           <div
-            id="settings-privacy-sharing"
+            id="settings-privacy-desc"
             style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--aura-border)' }}
           >
-            <h3 style={{ fontSize: 16, margin: '0 0 8px', fontWeight: 800 }}>Privacy &amp; sharing</h3>
+            <h2
+              ref={privacyHeadingRef}
+              id="settings-privacy-and-visibility"
+              tabIndex={-1}
+              style={{ fontSize: 16, margin: '0 0 8px', fontWeight: 800 }}
+            >
+              Privacy &amp; visibility
+            </h2>
             <p role="note" style={{ color: 'var(--aura-muted)', lineHeight: 1.55, margin: 0, fontSize: 15 }}>
               <strong>Approximate</strong> location is better for routine map and journey views when you want less
               pinpoint detail. <strong>Precise</strong> location is intended when you share live location on an active

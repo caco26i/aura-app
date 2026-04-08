@@ -58,6 +58,27 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
+  test('settings privacy hash: title, announcer, and focus on Privacy h2', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/settings#settings-privacy-and-visibility');
+
+    await expect(page).toHaveURL(/\/settings#settings-privacy-and-visibility$/);
+    await expect.poll(async () => page.title()).toMatch(/^Privacy & visibility · /);
+    await expect(page.locator('#route-announcer-status')).toHaveText('Settings. Privacy and visibility.');
+    const privacyHeading = page.locator('#settings-privacy-and-visibility');
+    await expect(privacyHeading).toBeVisible();
+    await expect(privacyHeading).toBeFocused();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
   test('home hub navigates to Safety map', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];

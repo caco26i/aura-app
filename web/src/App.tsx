@@ -3,6 +3,7 @@ import { FirebaseProfileSync } from './components/FirebaseProfileSync';
 import { AuraProvider } from './context/AuraContext';
 import { AuraErrorBoundary } from './components/AuraErrorBoundary';
 import { AppShell } from './components/AppShell';
+import { RouteAnnouncer } from './components/RouteAnnouncer';
 import { RouteDocumentTitle } from './components/RouteDocumentTitle';
 import { RequireOnboarding } from './components/RequireOnboarding';
 import { Home } from './pages/Home';
@@ -26,6 +27,7 @@ export default function App() {
       <FirebaseProfileSync />
       <BrowserRouter>
         <RouteDocumentTitle />
+        <RouteAnnouncer />
         <AuraErrorBoundary>
           <Routes>
             <Route path="/welcome" element={<Welcome />} />
