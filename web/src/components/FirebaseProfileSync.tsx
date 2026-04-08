@@ -14,7 +14,10 @@ import {
 export function FirebaseProfileSync() {
   const { updateSettings, settings } = useAura();
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   useEffect(() => {
     if (!firebaseAuthConfigured()) return;
