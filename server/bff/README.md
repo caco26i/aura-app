@@ -9,7 +9,7 @@ Every response includes the same baseline headers as the authoritative Aura API 
 - **`X-Request-Id`** — echoed from a valid **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max **128** chars) or a generated UUID when missing/invalid.
 - **`X-Content-Type-Options: nosniff`**, **`X-Frame-Options: DENY`**, **`Referrer-Policy: no-referrer`**.
 
-CORS is configured with **`X-Request-Id` / `X-Correlation-Id`** in **allowed** and **exposed** headers so cross-origin browser clients can send and read the correlation id where applicable. Oversized or malformed JSON bodies on POST routes return **`413` `payload_too_large`** or **`400` `invalid_json`** (same envelope shape as the API) with these headers still present.
+CORS allows **`X-Request-Id`** and **`X-Correlation-Id`** on requests. **`Access-Control-Expose-Headers`** lists **`X-Request-Id`** only (same echo rules as above: either header can supply the value, but the response always surfaces it as **`X-Request-Id`**). Oversized or malformed JSON bodies on POST routes return **`413` `payload_too_large`** or **`400` `invalid_json`** (same envelope shape as the API) with these headers still present.
 
 ## Rate limiting
 
@@ -40,7 +40,7 @@ CORS is configured with **`X-Request-Id` / `X-Correlation-Id`** in **allowed** a
 | `AURA_BFF_GOOGLE_CLIENT_SECRET` | redirect only | OAuth client secret |
 | `AURA_BFF_PUBLIC_URL` | redirect only | Public base URL of this BFF (no trailing slash) |
 | `AURA_BFF_JWT_TTL_SECONDS` | no | Access JWT lifetime (default `900`) |
-| `AURA_BFF_JWT_ISSUER` / `AURA_BFF_JWT_AUDIENCE` | no | If set, must match API `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE` |
+| `AURA_BFF_JWT_ISSUER` / `AURA_BFF_JWT_AUDIENCE` | no | If set, must match API `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE`. The BFF also accepts **`AURA_API_BFF_JWT_ISSUER`** / **`AURA_API_BFF_JWT_AUDIENCE`** as aliases (same values as on the API process). |
 | `AURA_BFF_JSON_BODY_LIMIT` | no | Max JSON body size for `express.json` (default `32kb`; mirrors API `AURA_API_JSON_BODY_LIMIT`) |
 | `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX` | no | Per-IP window + max requests for `POST /auth/google` and `POST /auth/firebase` (defaults `60000` / `5000` — permissive for dev/CI; **lower in production**, e.g. `900000` / `30` for a 15‑minute brute-force throttle) |
 | `AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_SESSION_MAX` | no | Per-IP limits for `GET /session` (defaults `60000` / `10000`) |
