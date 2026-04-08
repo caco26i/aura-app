@@ -47,7 +47,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 | Clause | Verified in |
 |--------|-------------|
-| §5 Accessibility (SOS, journey paths) | `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Settings.tsx`, `Trusted.tsx` |
+| §5 Accessibility (SOS, journey paths) | `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Home.tsx` (hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx`, `Trusted.tsx` |
 | §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
 | §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
 | §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
@@ -84,3 +84,4 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | 2026-04-08 | §5 trace rows; SOS FAB gap closed vs screen specs; [AURA-50](/AURA/issues/AURA-50) telemetry for `X-Aura-Anomaly` on successful API calls. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): added PDR §7 authoritative index validation table (detail index cross-check). |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): UX trace inventory synced to shipped map loading + app error boundary. |
+| 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): PDR §3.1 Home SOS chrome wording aligned with screen specs; Home hub `role="status"` + `aria-live` for safe/alert headline. |

@@ -86,6 +86,9 @@ export function Home() {
           Protected · Home area
         </div>
         <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           style={{
             fontFamily: 'var(--fd)',
             fontSize: 56,

@@ -35,7 +35,7 @@ Aligned with repository areas and [`AURA_SCREEN_SPECS.md`](./AURA_SCREEN_SPECS.m
 | Area | User-facing capability | Spec depth |
 |------|------------------------|------------|
 | **Onboarding** | First-run explanation of Aura, data posture, SOS confirmation behavior | [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) |
-| **Home** | Safety hub, journey entry, quick actions, global SOS FAB | Screen specs |
+| **Home** | Safety hub, journey entry, quick actions; SOS via bottom nav + Home tile (optional `AuraSOSButton` FAB exists in repo but is not mounted — see [`AURA_SCREEN_SPECS.md`](./AURA_SCREEN_SPECS.md)) | Screen specs |
 | **Journey** | Configure trip, live map, share location (with primer), “I’m safe” | Screen specs + backend ownership rules |
 | **Emergency (SOS)** | Visible vs silent-style paths, confirm-before-send, calm errors | [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md) |
 | **Map** | Safety intel layers and safer-route thinking (UI + documented placeholders) | Screen specs |
@@ -118,3 +118,4 @@ Use this PDR as the parent narrative; break execution into Paperclip issues per 
 |------|--------|
 | 2026-04-08 | Initial PDR authored for [AURA-41](/AURA/issues/AURA-41); consolidates existing design package into one entry document. |
 | 2026-04-08 | Added [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) to detail index ([AURA-47](/AURA/issues/AURA-47)). |
+| 2026-04-08 | §3.1 Home row aligned with [`AURA_SCREEN_SPECS.md`](./AURA_SCREEN_SPECS.md) SOS chrome (no “global FAB” as shipped requirement) — [AURA-59](/AURA/issues/AURA-59). |
