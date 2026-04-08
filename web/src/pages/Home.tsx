@@ -17,7 +17,7 @@ export function Home() {
   const safeHeadline = globalStatus === 'alert' ? 'Alert active.' : 'Safe.';
   const monitorLine =
     contacts.length === 0
-      ? 'Add trusted contacts so someone can be notified when you share or alert.'
+      ? 'Trusted contacts stay on this device until Aura is connected. Add someone to be notified when you share or alert.'
       : `${contacts.length} contact${contacts.length === 1 ? '' : 's'} on this device · tracking and alerts when connected`;
 
   return (
