@@ -45,6 +45,8 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 - `GET /health` — liveness (process up).
 - `GET /ready` — readiness: bearer token configured and `AUDIT_LOG_PATH` directory writable (**503** `not_ready` otherwise). Use for orchestration / load balancer health when audit persistence must succeed.
 
+All JSON responses include baseline headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` (see [`API_CONTRACT.md`](../web/docs/API_CONTRACT.md)).
+
 Optional header: `X-Aura-Device-Fingerprint` (opaque client id; stored hashed in audit).
 
 When burst SOS threshold is exceeded within 10 minutes, responses may include `X-Aura-Anomaly: burst_sos` for downstream alerting. Location shares use a separate burst detector (`burst_location_share`). Dedicated rate-limit responses append `audit.rate_limited` lines to the audit log.

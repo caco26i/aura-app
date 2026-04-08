@@ -36,6 +36,13 @@ describe('Aura API', () => {
     assert.equal(res.body.service, 'aura-api');
   });
 
+  test('responses include baseline security headers', async () => {
+    const res = await request(app).get('/health').expect(200);
+    assert.equal(res.headers['x-content-type-options'], 'nosniff');
+    assert.equal(res.headers['x-frame-options'], 'DENY');
+    assert.equal(res.headers['referrer-policy'], 'no-referrer');
+  });
+
   test('GET /ready returns ready when bearer and audit path are ok', async () => {
     const res = await request(app).get('/ready').expect(200);
     assert.equal(res.body.ok, true);
