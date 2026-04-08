@@ -61,6 +61,16 @@ For the Node API container, you can set **`AURA_API_DEPLOY_VERSION`** (e.g. rele
 - OAuth: sign-in flow completes against staging Google client.
 - **Telemetry (staging):** With `VITE_AURA_TELEMETRY_ENDPOINT` set, confirm the browser issues successful `POST` requests to the configured URL (Network tab) or temporarily enable `VITE_AURA_TELEMETRY_DEBUG` and run `window.__auraTelemetryMetrics()` — expect `telemetry.ship_ok` to increment after you trigger a journey or auth event. Details: [OBSERVABILITY.md](./OBSERVABILITY.md).
 
+### Staging smoke: BFF JWT path (no static web token)
+
+Use this checklist on **staging** (or a local stack that mirrors staging) to prove **BFF-issued JWT** auth works end-to-end **without** `VITE_AURA_API_TOKEN` in the web bundle. Contract and dev notes: [BETA_BACKEND.md](./BETA_BACKEND.md); BFF env and routes: [`server/bff/README.md`](../../server/bff/README.md).
+
+1. Run the **Aura API** (`server/`) and the **BFF** (`server/bff`) with the **same** `AURA_API_BFF_JWT_SECRET` on both services (and `AURA_BFF_SESSION_SECRET` on the BFF). For a full local/stack parity smoke, you can use root **`docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build`** as described in [Hosting target](#hosting-target) above.
+2. Set **`AURA_BFF_GOOGLE_CLIENT_ID`** on the BFF to the **same** Google OAuth client you use for the web build (staging client is fine).
+3. Configure the web app **without** a static API token: in **`web/.env.local`** (Vite dev) or **staging build args / env**, set **`VITE_AURA_BFF_URL`** to the browser-visible BFF base (e.g. `/aura-bff` behind your reverse proxy, or an absolute BFF URL) and **`VITE_GOOGLE_CLIENT_ID`** to that same client id. **Do not** set **`VITE_AURA_API_TOKEN`**.
+4. Open the app → **Settings** → **Beta API session** → use the Google control (**Continue with Google**) to complete sign-in so the BFF binds an httpOnly session (see flow in [BETA_BACKEND.md](./BETA_BACKEND.md)).
+5. In DevTools **Network**, confirm credentialed **`GET /session`** (or the app’s equivalent session fetch under your BFF prefix) returns **`200`** with an access token, then confirm at least one authenticated **`/v1/*`** request (e.g. **`POST /v1/journeys`** when starting a journey) returns **`200`** / expected success — not **`401`** from missing or invalid auth.
+
 ## Rollback
 
 Re-point CDN / host to previous `dist` artifact or revert release tag and rebuild.

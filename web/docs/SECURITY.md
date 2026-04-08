@@ -7,6 +7,7 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 - **Google OAuth:** Client ID is public by design; restrict authorized JavaScript origins and redirect URIs in Google Cloud Console. Tokens must be validated **server-side** before trusting identity.
 - **Stub mode:** Without `VITE_GOOGLE_CLIENT_ID`, the app runs without `GoogleOAuthProvider`. Do not ship production builds that rely on stub auth for protected data.
 - **Session:** When a backend exists, use short-lived credentials, refresh rotation, and revoke on logout.
+- **BFF + JWT (no static web token):** To smoke-test staging (or staging-like local) without `VITE_AURA_API_TOKEN`, follow the numbered checklist in [DEPLOY.md — Staging smoke: BFF JWT path](./DEPLOY.md#staging-smoke-bff-jwt-path-no-static-web-token).
 
 ## Location and map data
 
