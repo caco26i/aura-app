@@ -6,6 +6,10 @@ The Aura API (`server/`) sets **`X-Request-Id`** on every HTTP response. Clients
 
 The SPA sends a fresh **`X-Request-Id`** (UUID) on each `fetch` from `src/api/auraBackend.ts` to the Aura API; backend telemetry events include the same `requestId` when the call hits the network.
 
+### API audit file (staging / production)
+
+The authoritative API (`server/`) appends **one JSON object per line** (NDJSON) to **`AUDIT_LOG_PATH`** (default `data/audit.log`). **Ship** these lines with your log agent, sidecar, or periodic upload to object storage / SIEM; correlate with edge access logs using **`requestId`** (same as **`X-Request-Id`** on responses). **Rotation:** on Linux, prefer **logrotate** with `postrotate` **`kill -USR2`** to the API process so it **reopens** the file after the path is recreated at the same pathname (no full restart). **Windows** hosts do not get this signal path — use process restart or a new `AUDIT_LOG_PATH` per deploy. Full ops detail: [`../server/docs/RUNBOOK_AUDIT.md`](../server/docs/RUNBOOK_AUDIT.md).
+
 ## Structured logs
 
 The app emits **one JSON object per line** prefixed with `[aura.telemetry]` from `src/observability/auraTelemetry.ts`.

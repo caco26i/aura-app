@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README)
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
  */
 
 import cors from 'cors';
@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
+import { createAuditWriter, installAuditLogReopenOnUsr2 } from './auditWriter.js';
 import { createJourneyRegistry } from './journeyRegistry.js';
 
 const PORT = Number(process.env.PORT || 8787);
@@ -21,7 +22,8 @@ const BFF_JWT_SECRET = process.env.AURA_API_BFF_JWT_SECRET || '';
 const BFF_JWT_ISSUER = process.env.AURA_API_BFF_JWT_ISSUER || '';
 const BFF_JWT_AUDIENCE = process.env.AURA_API_BFF_JWT_AUDIENCE || '';
 const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '32kb';
-const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
+const auditWriter = createAuditWriter();
+installAuditLogReopenOnUsr2(() => auditWriter.reopenAuditLog());
 const JOURNEY_SQLITE_PATH =
   process.env.AURA_API_JOURNEY_STORE_SQLITE_PATH ||
   process.env.AURA_API_JOURNEY_SQLITE_PATH ||
@@ -283,11 +285,6 @@ function auditRateLimited(route, req) {
   });
 }
 
-function ensureAuditDir() {
-  const dir = path.dirname(AUDIT_LOG_PATH);
-  fs.mkdirSync(dir, { recursive: true });
-}
-
 function probeDirWritable(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const probe = path.join(dir, `.aura-ready-probe-${process.pid}`);
@@ -301,8 +298,7 @@ function readinessResult() {
     return { ok: false, detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET' };
   }
   try {
-    ensureAuditDir();
-    probeDirWritable(path.dirname(AUDIT_LOG_PATH));
+    probeDirWritable(path.dirname(auditWriter.getLogPath()));
     probeDirWritable(path.dirname(JOURNEY_SQLITE_PATH));
     probeDirWritable(path.dirname(JOURNEY_JSONL_PATH));
     return { ok: true };
@@ -313,9 +309,7 @@ function readinessResult() {
 }
 
 function appendAudit(entry) {
-  ensureAuditDir();
-  const line = JSON.stringify(entry) + '\n';
-  fs.appendFileSync(AUDIT_LOG_PATH, line, { encoding: 'utf8' });
+  auditWriter.appendJson(entry);
 }
 
 /** @param {import('express').Request} req @param {Record<string, unknown>} entry */
@@ -737,7 +731,7 @@ app.use((_req, res) => {
 if (!process.env.AURA_API_SKIP_LISTEN) {
   app.listen(PORT, () => {
     process.stdout.write(
-      `aura-api listening on :${PORT} audit=${AUDIT_LOG_PATH} journeys=${journeyRegistry.backend}\n`,
+      `aura-api listening on :${PORT} audit=${auditWriter.getLogPath()} journeys=${journeyRegistry.backend}\n`,
     );
   });
 }
