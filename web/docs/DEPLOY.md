@@ -11,7 +11,7 @@
 | Environment | Purpose | Typical vars |
 | ----------- | ------- | ------------ |
 | Local       | Developer machines | `VITE_GOOGLE_CLIENT_ID` optional in `.env.local` |
-| Staging     | Internal QA, telemetry on | `VITE_GOOGLE_CLIENT_ID`, `VITE_AURA_TELEMETRY_ENDPOINT`, optional `VITE_AURA_TELEMETRY_DEBUG` |
+| Staging     | Internal QA, telemetry on | `VITE_GOOGLE_CLIENT_ID`, `VITE_AURA_TELEMETRY_ENDPOINT` (full collector URL **or** same-origin path such as `/ingest/aura` behind your proxy — see [OBSERVABILITY.md](./OBSERVABILITY.md)), optional `VITE_AURA_TELEMETRY_DEBUG` (`true` or `1`) |
 | Production  | Users | Restricted origins for OAuth; telemetry endpoint or log shipping per policy |
 
 Vite exposes only `VITE_*` variables to the client — **never** put secrets in `VITE_` keys.
@@ -26,7 +26,7 @@ Vite exposes only `VITE_*` variables to the client — **never** put secrets in 
 
 Production `npm run build` injects a CSP **meta tag** into `dist/index.html` via `vite-plugin-production-csp.ts` (dev server is unchanged).
 
-- **API / telemetry:** Origins from `VITE_AURA_API_URL` and `VITE_AURA_TELEMETRY_ENDPOINT` are added to `connect-src` when those vars are set at **build** time. If you add another cross-origin client endpoint later, rebuild with the var set or adjust the plugin.
+- **API / telemetry:** Origins parsed from `VITE_AURA_API_URL` and `VITE_AURA_TELEMETRY_ENDPOINT` are added to `connect-src` when those vars are absolute URLs at **build** time. A **relative** `VITE_AURA_TELEMETRY_ENDPOINT` (same-origin ingest) is allowed via existing `'self'` in `connect-src` — no extra origin entry. If you add another cross-origin client endpoint later, rebuild with the var set or adjust the plugin.
 - **Google OAuth:** Extra `script-src` / `connect-src` / `frame-src` entries for Google are included only when `VITE_GOOGLE_CLIENT_ID` is non-empty at build time.
 - **Edge headers:** `frame-ancestors` is not set in meta CSP (browsers ignore it there). Prefer an HTTP header such as `Content-Security-Policy: frame-ancestors 'none'` or `X-Frame-Options: DENY` from your CDN / reverse proxy if you need clickjacking controls at the edge.
 
@@ -52,6 +52,7 @@ Upload `dist/` to the CDN origin. Invalidate CDN cache after deploy.
 - `/emergency` reachable from SOS FAB.
 - Map tiles load; if blocked, confirm telemetry `map.tile_error` appears in logs.
 - OAuth: sign-in flow completes against staging Google client.
+- **Telemetry (staging):** With `VITE_AURA_TELEMETRY_ENDPOINT` set, confirm the browser issues successful `POST` requests to the configured URL (Network tab) or temporarily enable `VITE_AURA_TELEMETRY_DEBUG` and run `window.__auraTelemetryMetrics()` — expect `telemetry.ship_ok` to increment after you trigger a journey or auth event. Details: [OBSERVABILITY.md](./OBSERVABILITY.md).
 
 ## Rollback
 

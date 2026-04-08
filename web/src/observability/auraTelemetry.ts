@@ -15,6 +15,10 @@ export type TelemetryEvent = {
 const SERVICE = 'aura-web';
 const metricCounts = new Map<string, number>();
 
+function envFlagTrue(v: string | undefined): boolean {
+  return v === 'true' || v === '1';
+}
+
 function bumpMetric(key: string, delta = 1) {
   metricCounts.set(key, (metricCounts.get(key) ?? 0) + delta);
 }
@@ -72,6 +76,6 @@ declare global {
   }
 }
 
-if (typeof window !== 'undefined' && import.meta.env.VITE_AURA_TELEMETRY_DEBUG === 'true') {
+if (typeof window !== 'undefined' && envFlagTrue(import.meta.env.VITE_AURA_TELEMETRY_DEBUG)) {
   window.__auraTelemetryMetrics = () => getTelemetryMetricsSnapshot();
 }
