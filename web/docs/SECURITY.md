@@ -1,6 +1,6 @@
 # Security notes (launch readiness)
 
-Scope: current **Vite + React** client with optional Google OAuth stub, `localStorage` persistence, and mocked backend calls in `src/api/auraBackend.ts`. No production API exists yet; treat below as requirements for the first real backend.
+Scope: **Vite + React** client (`web/`) with optional Google OAuth, Firebase email/password (when env is configured), `localStorage` persistence, and **`src/api/auraBackend.ts`**. When **`VITE_AURA_API_TOKEN`** (static bearer, dev-style) and/or **`VITE_AURA_BFF_URL`** (BFF session → short-lived JWT) is set, the SPA talks to the **beta Aura API** in **`server/`**; otherwise journey/SOS calls use **local mocks** that never leave the browser. The **`server/`** Node service is the **authoritative HTTP boundary** for beta (validated routes, auth, rate limits, audit log) — not “no API yet.” Read **[`API_CONTRACT.md`](./API_CONTRACT.md)** for the public JSON contract and **[`../../server/README.md`](../../server/README.md)** for operators (env matrix, BFF JWT vs static bearer, SQLite/JSONL journey store, headers, body limits). The sections below are **launch-facing security expectations** for that stack; keep them aligned when `server/` behavior changes.
 
 ## Authentication
 
@@ -36,5 +36,8 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 ## Related docs
 
 - [AUTH.md](./AUTH.md)
+- [API_CONTRACT.md](./API_CONTRACT.md)
 - [BETA_BACKEND.md](./BETA_BACKEND.md)
+- [DEPLOY.md](./DEPLOY.md) (incl. **Compose stack smoke** / CI pointer)
 - [OBSERVABILITY.md](./OBSERVABILITY.md)
+- [`../../server/README.md`](../../server/README.md)
