@@ -22,13 +22,31 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 
 ### Environment variables (web)
 
-Copy [`web/.env.example`](../web/.env.example) to `web/.env.local`. Common keys:
+Copy [`web/.env.example`](../web/.env.example) to `web/.env.local`.
+
+#### BFF-first (recommended for staging and production)
+
+**Hosted** beta and production builds should prefer **Google sign-in → BFF session → short-lived API JWT** instead of baking a static bearer into the SPA. That path is spelled out in [`web/docs/BETA_BACKEND.md`](../web/docs/BETA_BACKEND.md); BFF operators should read [`server/bff/README.md`](../server/bff/README.md). Full variable matrix: [BFF-first env matrix](../web/docs/DEPLOY.md#bff-first-env-matrix-staging--production) in [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md). **Staging smoke** (prove JWT auth end-to-end without `VITE_AURA_API_TOKEN`): [Staging smoke: BFF JWT path](../web/docs/DEPLOY.md#staging-smoke-bff-jwt-path-no-static-web-token).
+
+**Production build guard:** `npm run build` **fails** if both `VITE_AURA_BFF_URL` and `VITE_AURA_API_TOKEN` are non-empty — same rule as CI — so you cannot accidentally ship a static token alongside the BFF URL (see `web/vite.config.ts` and [`web/.env.example`](../web/.env.example)).
+
+| Variable | Required for BFF-first? | Purpose |
+| -------- | ------------------------ | ------- |
+| `VITE_AURA_BFF_URL` | Yes (for that stack) | Browser-visible BFF base (e.g. same-origin `/aura-bff` behind your reverse proxy, or an absolute BFF URL). Leave `VITE_AURA_API_TOKEN` **empty** for production builds on this path. |
+| `VITE_GOOGLE_CLIENT_ID` | Yes (real Google auth) | OAuth client id; must match BFF `AURA_BFF_GOOGLE_CLIENT_ID` for the Google → BFF flow. |
+
+#### Static bearer + local dev (optional)
+
+For **local** exploration you can use a **static** `VITE_AURA_API_TOKEN` and an empty `VITE_AURA_API_URL` so Vite proxies to the dev API (see §2). **Staging / production** should still prefer **BFF-first** when possible ([`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md)).
+
+Common keys (including overlap with BFF-first above):
 
 | Variable | Required for beta? | Purpose |
 | -------- | ------------------ | ------- |
-| `VITE_GOOGLE_CLIENT_ID` | No | Google sign-in; omit for **stub** auth (fine for local exploration). |
-| `VITE_AURA_API_TOKEN` | No | Enables **real** HTTP to the Aura API instead of mocks. |
-| `VITE_AURA_API_URL` | No | **Unset locally** so Vite proxies `/v1` and `/health` to the dev API. Set in staging/prod to your public API origin (see [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md)). |
+| `VITE_AURA_BFF_URL` | No | BFF-first path (see subsection above). Optional in dev with `VITE_AURA_DEV_BFF_PROXY` (shell-only; see [`web/.env.example`](../web/.env.example)). |
+| `VITE_GOOGLE_CLIENT_ID` | No | Google sign-in; **required** for real Google + BFF JWT flow; omit for **stub** auth (local exploration only). |
+| `VITE_AURA_API_TOKEN` | No | Static bearer: enables **real** HTTP to the Aura API instead of mocks. **Omit** when shipping BFF-first production builds (see guard above). |
+| `VITE_AURA_API_URL` | No | **Unset locally** so Vite proxies `/v1` and `/health` to the dev API. Set in staging/prod when the API is on another origin (see [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md)). |
 | `VITE_AURA_DEV_API_PROXY` | No | Overrides proxy target (default `http://127.0.0.1:8787`). Not exposed to the client bundle. |
 | `VITE_AURA_TELEMETRY_ENDPOINT` | No | POST target for structured client telemetry (staging/production). |
 | `VITE_AURA_TELEMETRY_DEBUG` | No | Set to `1` or `true` for console metrics helper (see observability below). |
