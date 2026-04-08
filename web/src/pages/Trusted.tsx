@@ -87,12 +87,12 @@ export function Trusted() {
             </div>
             {c.phone ? <div style={{ fontSize: 13 }}>{c.phone}</div> : null}
             <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-              <label style={{ fontSize: 13 }}>
+              <label htmlFor={`trusted-saved-group-${c.id}`} style={{ fontSize: 13 }}>
                 Group{' '}
                 <select
+                  id={`trusted-saved-group-${c.id}`}
                   value={c.group}
                   onChange={(e) => updateContact(c.id, { group: e.target.value })}
-                  aria-label={`Group for ${c.name}`}
                 >
                   {['Family', 'Friends', 'Work', 'Other'].map((g) => (
                     <option key={g} value={g}>
@@ -101,19 +101,24 @@ export function Trusted() {
                   ))}
                 </select>
               </label>
-              <label style={{ fontSize: 13 }}>
+              <label htmlFor={`trusted-saved-perm-${c.id}`} style={{ fontSize: 13 }}>
                 Permission{' '}
                 <select
+                  id={`trusted-saved-perm-${c.id}`}
                   value={c.permission}
                   onChange={(e) => updateContact(c.id, { permission: e.target.value as PermissionLevel })}
-                  aria-label={`Permission for ${c.name}`}
                 >
                   <option value="full">Full</option>
                   <option value="location">Location only</option>
                   <option value="alerts">Alerts only</option>
                 </select>
               </label>
-              <button type="button" onClick={() => removeContact(c.id)} style={{ marginLeft: 'auto' }}>
+              <button
+                type="button"
+                onClick={() => removeContact(c.id)}
+                style={{ marginLeft: 'auto' }}
+                aria-label={`Remove ${c.name} from trusted contacts`}
+              >
                 Remove
               </button>
             </div>
@@ -138,30 +143,30 @@ function ContactForm(props: {
   const { name, setName, phone, setPhone, group, setGroup, permission, setPermission, onAdd } = props;
   return (
     <div style={{ display: 'grid', gap: 10 }}>
-      <label style={{ fontWeight: 700 }}>
+      <label htmlFor="trusted-new-name" style={{ fontWeight: 700 }}>
         Name
         <input
+          id="trusted-new-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          aria-label="Trusted contact name"
           autoComplete="name"
           style={field}
         />
       </label>
-      <label style={{ fontWeight: 700 }}>
+      <label htmlFor="trusted-new-phone" style={{ fontWeight: 700 }}>
         Phone (optional)
         <input
+          id="trusted-new-phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          aria-label="Trusted contact phone number"
           autoComplete="tel"
           inputMode="tel"
           style={field}
         />
       </label>
-      <label style={{ fontWeight: 700 }}>
+      <label htmlFor="trusted-new-group" style={{ fontWeight: 700 }}>
         Group
-        <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Trusted contact group" style={field}>
+        <select id="trusted-new-group" value={group} onChange={(e) => setGroup(e.target.value)} style={field}>
           {['Family', 'Friends', 'Work', 'Other'].map((g) => (
             <option key={g} value={g}>
               {g}
@@ -169,18 +174,24 @@ function ContactForm(props: {
           ))}
         </select>
       </label>
-      <fieldset style={{ border: '1px solid var(--aura-border)', borderRadius: 12, padding: 12 }}>
+      <fieldset
+        aria-describedby="trusted-new-permission-hint"
+        style={{ border: '1px solid var(--aura-border)', borderRadius: 12, padding: 12 }}
+      >
         <legend style={{ fontWeight: 700 }}>Permission preset</legend>
         {(['full', 'location', 'alerts'] as const).map((p) => (
           <label key={p} style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <input type="radio" name="perm" checked={permission === p} onChange={() => setPermission(p)} />
+            <input type="radio" name="trusted-new-perm" checked={permission === p} onChange={() => setPermission(p)} />
             <span>
               {p === 'full' ? 'Full' : p === 'location' ? 'Location only' : 'Alerts only'}
               <span style={{ color: 'var(--aura-muted)', fontSize: 13 }}> — {permissionHelp[p]}</span>
             </span>
           </label>
         ))}
-        <p style={{ fontSize: 13, color: 'var(--aura-muted)', margin: '12px 0 0', lineHeight: 1.45 }}>
+        <p
+          id="trusted-new-permission-hint"
+          style={{ fontSize: 13, color: 'var(--aura-muted)', margin: '12px 0 0', lineHeight: 1.45 }}
+        >
           Alerts can include SOS and journey notifications when connected.
         </p>
       </fieldset>
