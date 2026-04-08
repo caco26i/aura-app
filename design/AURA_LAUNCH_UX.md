@@ -45,23 +45,25 @@ Server: `server/src/index.js` (404 `journey_not_found`, 403 `journey_forbidden` 
 
 ## User-visible strings (map `error` / HTTP to copy)
 
-Implement in one helper (e.g. `mapBackendError(res, json)` used by `remotePost`) so all routes stay consistent.
+**Canonical strings** live in `web/src/api/auraApiMessages.ts` (`userMessageForHttpFailure`, `userMessageForNetworkFailure`, `userMessageForUnknownError`, `noticeForAnomalyHeader`, etc.) and are consumed via `remotePost` in `auraBackend.ts`. Keep this table aligned when that file changes — it is the post-launch **spec mirror**, not a second source of copy.
 
-| Condition | Suggested user string | Notes |
-|-----------|----------------------|--------|
-| **Offline / network** (`fetch` throws, `TypeError`, “Failed to fetch”, navigator offline) | **Journey / map actions:** “We couldn't reach Aura. Check your connection and try again.” **SOS:** “We couldn't confirm your alert reached Aura. If you're in immediate danger, contact local emergency services. You can also check your connection and try again.” | **Shipped** in `userMessageForNetworkFailure` (`auraApiMessages.ts`) — SOS uses stronger safety framing than journey; aligns with principle 1 (calm) + SOS sensitivity. |
-| **401** — missing/invalid bearer | **Your session expired. Sign in again, then retry.** | If the app has no sign-in yet, use: **This app needs a valid connection token. Update your settings and try again.** |
-| **403** — wrong token | **We couldn’t authorize this device. Check your access token in settings.** | |
-| **429** — rate limited (global/journey/SOS) | **You’re doing that a little too often. Wait a moment and try again.** | For **SOS-only** limiter, soften further: **We couldn’t send another alert just yet. If you’re in danger, call local emergency services. You can try again in a minute.** |
-| **503** + `server_misconfigured` | **Aura isn’t fully set up yet. Try again later or contact support.** | |
-| **5xx** / unknown HTTP | **Something went wrong on our side. Try again in a few minutes.** | |
-| **404** + `not_found` | **That action isn’t available. Go back and try again.** | Rare for current POST routes. |
-| **404** without a usable JSON `error` | **We couldn’t find that resource. Refresh the page or start again.** | Matches `userMessageForHttpFailure` when body omits `not_found`. |
-| Other non-mapped HTTP | Calm surface-specific copy from `userMessageForUnknownError` | **No numeric status** in the string (principle 3). |
-| **400** + `invalid_journey_id` | **This journey isn’t valid anymore. Start or resume a journey and try again.** | |
-| **400** + `validation_failed` | **We couldn’t send that request. Go back and try again.** | Optional: one short second line *only in dev builds*: show sanitized detail. |
-| JSON parse / shape issues (`Invalid response`) | **We got an unexpected response. Try again.** | |
-| Missing `VITE_AURA_API_*` (`Backend not configured`) | **Live features need Aura to be connected in settings.** | Dev-friendly; tighten for production when OAuth/BFF exists. |
+| Condition | Shipped user string | Notes |
+|-----------|---------------------|--------|
+| **Offline / network** (`fetch` throws, `TypeError`, “Failed to fetch”, navigator offline) | **Journey / map:** “We couldn't reach Aura. Check your connection and try again.” **SOS:** “We couldn't confirm your alert reached Aura. If you're in immediate danger, contact local emergency services. You can also check your connection and try again.” | `userMessageForNetworkFailure` — SOS uses stronger safety framing than journey. |
+| **401** — missing/invalid bearer | “Your session may have expired. When sign-in is available, sign in again and retry.” | From `messageForJsonError('unauthorized')` / 401 branch. |
+| **403** — wrong token / scope | JSON `forbidden`: “This action isn't available with your current access. If it keeps happening, contact your organizer.” Fallback (no mapped code): “This action isn't available right now. If it keeps happening, contact your organizer.” | |
+| **429** — rate limited | **Journey / map:** “Aura is handling a lot of requests right now. Please wait a moment and try again.” **SOS:** “We couldn't send your alert just yet because Aura is limiting requests. If you're in immediate danger, contact local emergency services. Wait a moment, then try again.” | Also used when JSON `error` is `rate_limited` (surface-aware). |
+| **`server_misconfigured`** (any HTTP where mapped) | “Aura's live service isn't fully configured yet. Try again later or use demo mode without API keys.” | |
+| **5xx** / unknown HTTP | “Something went wrong on our side. Please try again in a few minutes.” | After status branches; then `userMessageForUnknownError` if still unmapped. |
+| **404** + `not_found` | “We couldn't find that resource. Refresh the page or start again.” | Rare for current POST routes. |
+| **404** without a usable JSON `error` | Same as above (fallback path). | |
+| Other non-mapped HTTP | **Journey:** “We couldn't complete that request. Please try again.” **SOS:** “We couldn't complete that request. If you're in immediate danger, contact local emergency services, then try again.” | `userMessageForUnknownError` — **no** numeric status in the string (principle 3). |
+| **400** + `invalid_journey_id` (journey surface) | “We couldn't use this journey on your current session. Start a new journey from home, then try again.” | Non-journey surfaces get generic validation copy. |
+| **400** + `validation_failed` | “Something in the request did not look right. Check your details and try again.” | |
+| **413** + `payload_too_large` | “The request was too large for the server to accept. Try again with less data or refresh and start over.” | |
+| Missing client API config (`userMessageForMisconfiguration`) | “Live backend is not connected (missing API URL or token in this build). If you're a participant, contact your organizer.” | Distinct from `server_misconfigured` (server-declared). |
+| BFF: no session (`userMessageForBffSignIn`) | “Sign in with Google under Settings to connect this device to the live Aura API, then try again.” | |
+| BFF: session fetch failed (`userMessageForBffSessionFetchFailure`) | “Could not reach the sign-in service. Check that the BFF is running and CORS allows this origin.” | |
 
 ### SOS success with `X-Aura-Anomaly`
 
