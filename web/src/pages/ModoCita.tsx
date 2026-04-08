@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -48,19 +49,18 @@ const WALL_CLOCK_TICK_MS = 30_000;
 
 function useWallClockMs(): number {
   const ref = useRef(0);
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      const bump = () => {
-        ref.current = Date.now();
-        onStoreChange();
-      };
-      bump();
-      const id = window.setInterval(bump, WALL_CLOCK_TICK_MS);
-      return () => window.clearInterval(id);
-    },
-    () => ref.current,
-    () => 0,
-  );
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    const bump = () => {
+      ref.current = Date.now();
+      onStoreChange();
+    };
+    bump();
+    const id = window.setInterval(bump, WALL_CLOCK_TICK_MS);
+    return () => window.clearInterval(id);
+  }, []);
+  const getSnapshot = useCallback(() => ref.current, []);
+  const getServerSnapshot = useCallback(() => 0, []);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export function ModoCita() {
