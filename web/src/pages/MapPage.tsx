@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { AuraMap } from '../components/AuraMap';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 import { MAP_INTEL_SEED } from '../data/mapIntelSeed';
 
 export function MapPage() {

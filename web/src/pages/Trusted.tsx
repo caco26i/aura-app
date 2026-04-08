@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import type { PermissionLevel } from '../types';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 
 const permissionHelp: Record<PermissionLevel, string> = {
   full: 'Full — location + alerts + check-ins',

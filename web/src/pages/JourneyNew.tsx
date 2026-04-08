@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postCreateJourney } from '../api/auraBackend';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
 export function JourneyNew() {

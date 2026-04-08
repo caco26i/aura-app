@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
 export function AuraSOSButton() {

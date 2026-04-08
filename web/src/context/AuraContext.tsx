@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
   ActiveJourney,
   AuraSettings,
@@ -15,6 +7,7 @@ import type {
   MapLayers,
   TrustedContact,
 } from '../types';
+import { AuraContext } from './auraContext';
 
 const STORAGE_KEY = 'aura:v1';
 
@@ -69,32 +62,6 @@ function loadPersisted(): Persisted {
     };
   }
 }
-
-type AuraContextValue = {
-  contacts: TrustedContact[];
-  addContact: (c: Omit<TrustedContact, 'id'>) => void;
-  updateContact: (id: string, patch: Partial<TrustedContact>) => void;
-  removeContact: (id: string) => void;
-  activeJourney: ActiveJourney | null;
-  startJourney: (input: {
-    /** When live API is used, must be the id returned by `POST /v1/journeys`. */
-    id?: string;
-    label: string;
-    destinationLabel: string;
-    etaMinutes: number;
-    trackState?: JourneyTrackState;
-  }) => void;
-  endJourney: () => void;
-  setTrackState: (state: JourneyTrackState) => void;
-  mapLayers: MapLayers;
-  setMapLayer: (key: keyof MapLayers, value: boolean) => void;
-  settings: AuraSettings;
-  updateSettings: (patch: Partial<AuraSettings>) => void;
-  globalStatus: GlobalStatus;
-  setGlobalStatus: (s: GlobalStatus) => void;
-};
-
-const AuraContext = createContext<AuraContextValue | null>(null);
 
 export function AuraProvider({ children }: { children: ReactNode }) {
   const [contacts, setContacts] = useState<TrustedContact[]>(() => loadPersisted().contacts);
@@ -204,10 +171,4 @@ export function AuraProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuraContext.Provider value={value}>{children}</AuraContext.Provider>;
-}
-
-export function useAura() {
-  const ctx = useContext(AuraContext);
-  if (!ctx) throw new Error('useAura must be used within AuraProvider');
-  return ctx;
 }

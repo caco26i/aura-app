@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { postEmergencyAlert } from '../api/auraBackend';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
 type LocState = { mode?: 'silent' | 'visible' } | null;

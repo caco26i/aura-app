@@ -4,7 +4,7 @@ import { postImSafe, postShareLocation } from '../api/auraBackend';
 import { emitTelemetry } from '../observability/auraTelemetry';
 import { AuraMap } from '../components/AuraMap';
 import { StatusPill } from '../components/StatusPill';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 import { MAP_INTEL_SEED } from '../data/mapIntelSeed';
 
 export function JourneyActive() {

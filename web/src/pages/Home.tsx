@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 
 const card: CSSProperties = {
   display: 'block',

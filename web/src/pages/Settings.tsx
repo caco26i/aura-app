@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { useAura } from '../context/AuraContext';
+import { useAura } from '../context/useAura';
 
 export function Settings() {
   const { settings, updateSettings } = useAura();
