@@ -14,11 +14,11 @@
 | **JourneyNew** | N/A | Button `Starting…` | `role="alert"` via `startError` |
 | **JourneyActive** | No journey: title + status + link | `Sending…` / `Sharing…` on actions | `role="alert"` shared for API failures |
 | **Emergency** | N/A | Both buttons `Sending…` | `role="alert"` + optional `role="status"` notice |
-| **MapPage** | All layers off → `role="status"` hint | **None** (tiles load silently) | **None** (tile errors → telemetry only) |
+| **MapPage** | All layers off → `role="status"` hint | Via `AuraMap`: `aria-busy`, overlay, `role="status"` *Loading map…* until tiles `load` (timeout fallback) | **None** (tile errors → telemetry only) |
 | **Trusted** | Zero contacts → dashed card + form | N/A | N/A |
 | **Settings** | N/A | N/A | N/A |
-| **App / routing** | `*` → redirect home | N/A | **No error boundary** |
-| **AuraMap** | N/A | **No skeleton / spinner** | Tiles fail silently to user |
+| **App / routing** | `*` → redirect home | N/A | **`AuraErrorBoundary`** wraps routes in `App.tsx` (fallback UI + reload) |
+| **AuraMap** | N/A | **Shipped:** overlay + `aria-busy` + status line while tiles load | Tiles fail silently to user |
 
 ---
 
@@ -26,15 +26,11 @@
 
 ### 2.1 Loading & perceived performance
 
-1. **Map (Leaflet)** — First paint often blank until tiles load.  
-   - **Spec:** Add a lightweight overlay or skeleton inside the map frame (`aria-busy="true"` on the map container until `load` event on `TileLayer`, or timeout fallback).  
-   - **Copy (optional):** Short `role="status"` line under map: *“Loading map…”* (remove when ready).  
-   - **Do not** block interaction on map-only views unless you add explicit “retry tiles” later.
+1. **Map (Leaflet)** — **Shipped** in `AuraMap.tsx`: overlay, `aria-busy`, timeout fallback, *Loading map…* `role="status"`. Optional later: explicit “retry tiles” if tile errors should be user-visible.
 
-2. **JourneyNew `postCreateJourney`** — Only the button label changes.  
-   - **Spec:** Consider `aria-busy` on the primary button and/or disable inputs while `starting` to avoid double-submit (visual + a11y).
+2. **JourneyNew `postCreateJourney`** — **Shipped:** form wrapper + primary button `aria-busy`, inputs disabled while `starting`.
 
-3. **JourneyActive primary actions** — Same pattern; **spec:** `aria-busy` on the button that is active when `busy === 'safe' | 'share'`.
+3. **JourneyActive primary actions** — **Shipped:** `aria-busy` on I’m safe / Share when the matching `busy` state is active.
 
 ### 2.2 Empty & edge states
 

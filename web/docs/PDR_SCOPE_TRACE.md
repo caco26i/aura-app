@@ -2,7 +2,7 @@
 
 **Purpose:** Keep [`design/AURA_PDR.md`](../../design/AURA_PDR.md) **§3 (scope)** and **§4 (functional requirements)** traceable to `web/` UX docs and the shipped shell. Complements the design index in PDR §7.
 
-**Related work:** [AURA-41](/AURA/issues/AURA-41), [AURA-44](/AURA/issues/AURA-44), [AURA-47](/AURA/issues/AURA-47), [AURA-49](/AURA/issues/AURA-49), [AURA-50](/AURA/issues/AURA-50).
+**Related work:** [AURA-41](/AURA/issues/AURA-41), [AURA-44](/AURA/issues/AURA-44), [AURA-47](/AURA/issues/AURA-47), [AURA-49](/AURA/issues/AURA-49), [AURA-50](/AURA/issues/AURA-50), [AURA-59](/AURA/issues/AURA-59) (frontend delivery bucket).
 
 ---
 
@@ -51,9 +51,12 @@
 
 ### Nice-to-have (polish)
 
-1. **Global error boundary** — [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) notes none today; `*` route redirects home only.
-2. **Map loading affordance** — Optional skeleton / `aria-busy` per empty/loading spec.
-3. **Wildcard / deep links** — Document any future routes in [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) when added.
+1. **Wildcard / deep links** — `*` still redirects home only; document any future routes in [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) when added.
+
+### Resolved vs earlier gap register
+
+1. **Global error boundary** — `AuraErrorBoundary` in [`web/src/App.tsx`](../src/App.tsx); inventory updated in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md).
+2. **Map loading affordance** — Shipped in [`web/src/components/AuraMap.tsx`](../src/components/AuraMap.tsx) (`aria-busy`, overlay, status copy).
 
 ---
 
@@ -64,3 +67,5 @@
 | 2026-04-08 | Initial trace + gap register for [AURA-47](/AURA/issues/AURA-47). |
 | 2026-04-08 | §4.2 verification row expanded + `invalid_journey_id` journey copy; trace link for [AURA-49](/AURA/issues/AURA-49). |
 | 2026-04-08 | §5 trace rows; SOS FAB gap closed vs screen specs; [AURA-50](/AURA/issues/AURA-50) telemetry for `X-Aura-Anomaly` on successful API calls. |
+| 2026-04-08 | PDR §7 validation table + gap register sync (error boundary, map loading) for [AURA-61](/AURA/issues/AURA-61). |
+| 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): UX trace inventory synced to shipped map loading + app error boundary. |
