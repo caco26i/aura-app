@@ -1,11 +1,12 @@
 /**
- * Express app factory for Aura BFF (Google sign-in → session → API JWT).
+ * Express app factory for Aura BFF (Google / Firebase sign-in → session → API JWT).
  */
 
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import session from 'express-session';
+import admin from 'firebase-admin';
 import { OAuth2Client } from 'google-auth-library';
 import { mintAccessJwt } from './mintAccessJwt.js';
 
@@ -51,7 +52,6 @@ function createBffIpLimiter({ windowMs, max, detail }) {
 export function readBffConfigErrors() {
   const SESSION_SECRET = process.env.AURA_BFF_SESSION_SECRET || '';
   const JWT_SECRET = process.env.AURA_API_BFF_JWT_SECRET || '';
-  const GOOGLE_CLIENT_ID = process.env.AURA_BFF_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || '';
   const errors = [];
   if (!SESSION_SECRET || SESSION_SECRET.length < 16) {
     errors.push('Set AURA_BFF_SESSION_SECRET (min 16 chars)');
@@ -59,15 +59,24 @@ export function readBffConfigErrors() {
   if (!JWT_SECRET || JWT_SECRET.length < 16) {
     errors.push('Set AURA_API_BFF_JWT_SECRET (same value as Aura API; min 16 chars)');
   }
-  if (!GOOGLE_CLIENT_ID) {
-    errors.push('Set AURA_BFF_GOOGLE_CLIENT_ID (must match web VITE_GOOGLE_CLIENT_ID)');
-  }
   return errors;
+}
+
+/**
+ * @returns {string[]}
+ */
+export function readGoogleOAuthConfigErrors() {
+  const GOOGLE_CLIENT_ID = process.env.AURA_BFF_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || '';
+  if (!GOOGLE_CLIENT_ID) {
+    return ['Set AURA_BFF_GOOGLE_CLIENT_ID (must match web VITE_GOOGLE_CLIENT_ID)'];
+  }
+  return [];
 }
 
 /**
  * @typedef {object} CreateAppOverrides
  * @property {(opts: { idToken: string; audience: string }) => Promise<{ getPayload: () => { sub?: string } | null | undefined }>} [verifyIdToken]
+ * @property {(idToken: string) => Promise<{ uid: string }>} [verifyFirebaseIdToken]
  */
 
 /**
@@ -124,6 +133,44 @@ export function createApp(overrides = {}) {
       return oauthClient.verifyIdToken(opts);
     });
 
+  /**
+   * @returns {boolean}
+   */
+  function firebaseAdminConfigured() {
+    const sa = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    return Boolean((typeof sa === 'string' && sa.trim()) || (typeof gac === 'string' && gac.trim()));
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  async function ensureFirebaseAdminApp() {
+    if (admin.apps.length) return;
+    const sa = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    if (typeof sa === 'string' && sa.trim()) {
+      admin.initializeApp({ credential: admin.credential.cert(JSON.parse(sa)) });
+      return;
+    }
+    if (typeof gac === 'string' && gac.trim()) {
+      admin.initializeApp();
+      return;
+    }
+    throw new Error('firebase_not_configured');
+  }
+
+  const verifyFirebaseIdToken =
+    overrides.verifyFirebaseIdToken ??
+    (async (idToken) => {
+      await ensureFirebaseAdminApp();
+      const decoded = await admin.auth().verifyIdToken(idToken);
+      if (!decoded.uid) {
+        throw new Error('invalid_firebase_token');
+      }
+      return { uid: decoded.uid };
+    });
+
   function parseCorsOrigins() {
     const raw = CORS_RAW.trim();
     if (!raw || raw === '*') return null;
@@ -168,7 +215,7 @@ export function createApp(overrides = {}) {
   });
 
   app.post('/auth/google', authGoogleLimiter, async (req, res) => {
-    const errors = readBffConfigErrors();
+    const errors = [...readBffConfigErrors(), ...readGoogleOAuthConfigErrors()];
     if (errors.length) {
       return res.status(503).json({ ok: false, error: 'bff_misconfigured', detail: errors[0] });
     }
@@ -187,6 +234,33 @@ export function createApp(overrides = {}) {
         return res.status(401).json({ ok: false, error: 'invalid_token' });
       }
       req.session.googleSub = sub;
+      delete req.session.firebaseUid;
+      return res.json({ ok: true });
+    } catch {
+      return res.status(401).json({ ok: false, error: 'invalid_token' });
+    }
+  });
+
+  app.post('/auth/firebase', authGoogleLimiter, async (req, res) => {
+    const errors = readBffConfigErrors();
+    if (errors.length) {
+      return res.status(503).json({ ok: false, error: 'bff_misconfigured', detail: errors[0] });
+    }
+    if (!overrides.verifyFirebaseIdToken && !firebaseAdminConfigured()) {
+      return res.status(503).json({
+        ok: false,
+        error: 'firebase_not_configured',
+        detail: 'Set FIREBASE_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS for the BFF.',
+      });
+    }
+    const idToken = req.body?.idToken;
+    if (typeof idToken !== 'string' || !idToken.trim()) {
+      return res.status(400).json({ ok: false, error: 'invalid_request', detail: 'idToken required' });
+    }
+    try {
+      const { uid } = await verifyFirebaseIdToken(idToken.trim());
+      req.session.firebaseUid = uid;
+      delete req.session.googleSub;
       return res.json({ ok: true });
     } catch {
       return res.status(401).json({ ok: false, error: 'invalid_token' });
@@ -194,7 +268,7 @@ export function createApp(overrides = {}) {
   });
 
   app.get('/auth/google/start', (req, res) => {
-    const errors = readBffConfigErrors();
+    const errors = [...readBffConfigErrors(), ...readGoogleOAuthConfigErrors()];
     if (errors.length) {
       return res.status(503).send(errors[0]);
     }
@@ -214,7 +288,7 @@ export function createApp(overrides = {}) {
   });
 
   app.get('/auth/google/callback', async (req, res) => {
-    const errors = readBffConfigErrors();
+    const errors = [...readBffConfigErrors(), ...readGoogleOAuthConfigErrors()];
     if (errors.length || !GOOGLE_CLIENT_SECRET || !BFF_PUBLIC_URL) {
       return res.status(503).send('OAuth redirect not configured');
     }
@@ -237,6 +311,7 @@ export function createApp(overrides = {}) {
       const sub = ticket.getPayload()?.sub;
       if (!sub) return res.status(401).send('Invalid token');
       req.session.googleSub = sub;
+      delete req.session.firebaseUid;
       const back = typeof req.session.oauthReturnTo === 'string' ? req.session.oauthReturnTo : '/';
       delete req.session.oauthReturnTo;
       res.redirect(back.startsWith('/') ? back : '/');
@@ -250,8 +325,15 @@ export function createApp(overrides = {}) {
     if (errors.length) {
       return res.status(503).json({ ok: false, error: 'bff_misconfigured', detail: errors[0] });
     }
-    const sub = req.session.googleSub;
-    if (typeof sub !== 'string' || !sub) {
+    const googleSub = req.session.googleSub;
+    const firebaseUid = req.session.firebaseUid;
+    const sub =
+      typeof googleSub === 'string' && googleSub
+        ? googleSub
+        : typeof firebaseUid === 'string' && firebaseUid
+          ? firebaseUid
+          : null;
+    if (!sub) {
       return res.status(401).json({ ok: false, error: 'not_authenticated' });
     }
     const { token, exp } = mintAccessJwt({

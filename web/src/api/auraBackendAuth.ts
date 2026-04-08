@@ -73,6 +73,20 @@ export async function establishAuraBffSessionWithGoogleIdToken(idToken: string):
   return res.ok;
 }
 
+/** After Firebase email/password sign-in, exchange the Firebase ID token for the same BFF session cookie. */
+export async function establishAuraBffSessionWithFirebaseIdToken(idToken: string): Promise<boolean> {
+  const origin = resolveBffOrigin();
+  if (!origin) return false;
+  const res = await fetch(`${origin}/auth/firebase`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken }),
+  });
+  clearAuraBffTokenCache();
+  return res.ok;
+}
+
 async function fetchBffSession(): Promise<AuraApiAuthResolution> {
   const origin = resolveBffOrigin();
   if (!origin) return { kind: 'off' };

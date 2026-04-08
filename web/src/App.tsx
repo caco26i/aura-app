@@ -11,6 +11,7 @@ import { Emergency } from './pages/Emergency';
 import { MapPage } from './pages/MapPage';
 import { Trusted } from './pages/Trusted';
 import { Settings } from './pages/Settings';
+import { Auth } from './pages/Auth';
 import { Welcome } from './pages/Welcome';
 import { ModoCita } from './pages/ModoCita';
 import { ModoTransporte } from './pages/ModoTransporte';
@@ -26,6 +27,7 @@ export default function App() {
         <AuraErrorBoundary>
           <Routes>
             <Route path="/welcome" element={<Welcome />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/emergency" element={<Emergency />} />
             <Route element={<RequireOnboarding />}>
               <Route element={<AppShell />}>

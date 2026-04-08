@@ -7,6 +7,8 @@ const mockVerifyOk = async () => ({
   getPayload: () => ({ sub: 'google-sub-integration-test' }),
 });
 
+const mockFirebaseVerifyOk = async () => ({ uid: 'firebase-uid-integration-test' });
+
 describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
   test('GET /session returns 401 when no session cookie', async () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
@@ -43,6 +45,38 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
     const res = await request(app).post('/auth/google').send({}).expect(400);
     assert.equal(res.body.error, 'invalid_request');
+  });
+
+  test('POST /auth/firebase returns 400 when idToken is missing', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk, verifyFirebaseIdToken: mockFirebaseVerifyOk });
+    const res = await request(app).post('/auth/firebase').send({}).expect(400);
+    assert.equal(res.body.error, 'invalid_request');
+  });
+
+  test('POST /auth/firebase happy path: mocked verify sets cookie; GET /session uses firebase uid', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk, verifyFirebaseIdToken: mockFirebaseVerifyOk });
+    const agent = request.agent(app);
+    await agent.post('/auth/firebase').send({ idToken: 'synthetic.firebase.jwt' }).expect(200);
+    const sess = await agent.get('/session').expect(200);
+    assert.equal(sess.body.ok, true);
+    assert.ok(typeof sess.body.accessToken === 'string');
+  });
+
+  test('POST /auth/firebase returns 503 firebase_not_configured without override or env', async () => {
+    const prevSa = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const prevGac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      const res = await request(app).post('/auth/firebase').send({ idToken: 'x' }).expect(503);
+      assert.equal(res.body.error, 'firebase_not_configured');
+    } finally {
+      if (prevSa === undefined) delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      else process.env.FIREBASE_SERVICE_ACCOUNT_JSON = prevSa;
+      if (prevGac === undefined) delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      else process.env.GOOGLE_APPLICATION_CREDENTIALS = prevGac;
+    }
   });
 
   test('POST /auth/google returns 400 when idToken is not a non-empty string', async () => {

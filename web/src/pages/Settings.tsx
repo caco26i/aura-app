@@ -3,6 +3,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { establishAuraBffSessionWithGoogleIdToken } from '../api/auraBackendAuth';
+import { firebaseAuthConfigured } from '../lib/firebaseClient';
 import { useAura } from '../context/useAura';
 
 const bffUrlConfigured = Boolean(import.meta.env.VITE_AURA_BFF_URL?.trim());
@@ -158,6 +159,15 @@ export function Settings() {
           {bffHint ? (
             <p role="status" style={{ marginTop: 12, fontSize: 15 }}>
               {bffHint}
+            </p>
+          ) : null}
+          {firebaseAuthConfigured() ? (
+            <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, marginTop: 12 }}>
+              Prefer email and password?{' '}
+              <Link to="/auth" style={{ fontWeight: 800, color: 'var(--aura-text)' }}>
+                Open sign in / sign up
+              </Link>
+              .
             </p>
           ) : null}
           {googleClientConfigured ? (
