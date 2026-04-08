@@ -14,6 +14,14 @@ npm install
 npm run dev
 ```
 
+## Tests
+
+```bash
+npm test
+```
+
+Integration tests exercise auth, Zod validation, journey ownership, rate-limit-adjacent routes, and append-only audit writes (see `test/api.integration.test.js`). They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
+
 ## Env
 
 | Variable | Required | Description |
