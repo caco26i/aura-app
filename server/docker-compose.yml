@@ -1,5 +1,9 @@
 # Example stack for beta operators: bind-mount or named volume for durable SQLite + audit.
 # Copy `.env` or export `AURA_API_BEARER_TOKEN` before `docker compose up`.
+#
+# AUDIT_LOG_PATH is /app/data/audit.log with volume aura-api-data → /app/data. After host-side
+# logrotate (or equivalent), send SIGUSR2 to the API process so it reopens the audit file —
+# e.g. `docker kill -s USR2 <container>`. See docs/RUNBOOK_AUDIT.md and docs/examples/audit-logrotate.example.conf
 services:
   aura-api:
     build: .

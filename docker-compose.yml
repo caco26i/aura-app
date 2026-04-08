@@ -3,6 +3,12 @@
 # image as `VITE_AURA_API_TOKEN` at build time). For **JWT + BFF** without a static token in
 # the web bundle, use `docker-compose.bff.yml` as a second compose file (see web/docs/DEPLOY.md).
 #
+# Audit + SQLite persistence: `aura-api` sets AUDIT_LOG_PATH=/app/data/audit.log and mounts
+# the named volume `aura-api-data` at /app/data (journey SQLite/JSONL live there too). For
+# log rotation on the host, run logrotate against the file inside the volume or bind-mount
+# a host directory, then signal the API to reopen the log — e.g. `docker kill -s USR2 <container>`.
+# Details: server/docs/RUNBOOK_AUDIT.md and server/docs/examples/audit-logrotate.example.conf
+#
 #   docker compose up --build
 #
 # Web UI: http://localhost:${WEB_PORT:-8080} — browser calls /v1 on the same origin; nginx

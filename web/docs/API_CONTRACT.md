@@ -17,6 +17,7 @@ Canonical server behavior: [`../../server/README.md`](../../server/README.md). T
 | Correlation | Optional `X-Request-Id` or `X-Correlation-Id` — printable ASCII, max **128** chars; server echoes **`X-Request-Id`** on every response (generated UUID when omitted or invalid) |
 | Content-Type | `application/json` on POST bodies when a body is sent |
 | JSON body size | Default **32kb** per route (`express.json`); override with **`AURA_API_JSON_BODY_LIMIT`** (authoritative API) — aligned with the in-repo BFF |
+| Minute-window rate limits (mutating routes) | Tunable **`AURA_API_RATE_LIMIT_GLOBAL_WINDOW_MS`** / **`AURA_API_RATE_LIMIT_GLOBAL_MAX`** (`globalLimiter`) and **`AURA_API_RATE_LIMIT_JOURNEY_WINDOW_MS`** / **`AURA_API_RATE_LIMIT_JOURNEY_MAX`** (`journeyLimiter`); defaults and hourly caps in [`../../server/README.md`](../../server/README.md) |
 
 ## Success envelope
 
