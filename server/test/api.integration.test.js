@@ -62,6 +62,17 @@ describe('Aura API', () => {
     assert.match(String(res.headers['access-control-allow-headers'] || ''), /authorization/i);
   });
 
+  test('malformed JSON body returns invalid_json', async () => {
+    const res = await request(app)
+      .post('/v1/journeys')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send('{ not-json')
+      .expect(400);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'invalid_json');
+  });
+
   test('mutating routes require bearer token', async () => {
     await request(app).post('/v1/journeys').send({}).expect(401);
   });

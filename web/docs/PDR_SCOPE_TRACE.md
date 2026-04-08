@@ -101,5 +101,6 @@ _None at present._
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): `Trusted.tsx` — explicit labels/ids on add form and saved contacts; permission fieldset described by hint; named radio group `trusted-new-perm`. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): `MapPage` layer switches use visible label + description via `aria-labelledby` / `aria-describedby`; modo/check-in toolbars `header aria-labelledby`; `JourneyNew` form tied to intro copy. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): `Home` screen-reader-only `h1`; `MapPage` `section` landmarks (`aria-labelledby` / `aria-describedby`) around layers + map + POI list. |
+| 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): malformed JSON on mutating routes → **400** `invalid_json` (express `entity.parse.failed` handler); integration test + [API_CONTRACT.md](./API_CONTRACT.md). |
 | 2026-04-08 | [AURA-75](/AURA/issues/AURA-75): **G-IA-01** closed — IA vs PDR §3.1 confirmed per [AURA-74](/AURA/issues/AURA-74); open-questions section cleared. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): related-work index linked [AURA-74](/AURA/issues/AURA-74) / [AURA-75](/AURA/issues/AURA-75) after CEO clarification ([comment 510069eb](/AURA/issues/AURA-61#comment-510069eb-fced-48c6-866c-9ad6993a4ee6)). |

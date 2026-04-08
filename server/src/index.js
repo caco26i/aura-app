@@ -196,6 +196,13 @@ app.use(
   }),
 );
 app.use(express.json({ limit: '24kb' }));
+app.use((err, req, res, next) => {
+  if (err.status === 400 && err.type === 'entity.parse.failed') {
+    res.status(400).json({ ok: false, error: 'invalid_json', detail: 'Malformed JSON request body' });
+    return;
+  }
+  next(err);
+});
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'aura-api' });
