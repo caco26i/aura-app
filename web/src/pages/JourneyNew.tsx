@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postCreateJourney } from '../api/auraBackend';
 import { useAura } from '../context/useAura';
+import { getAcquisitionTelemetry } from '../observability/firstTouchAcquisition';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
 export function JourneyNew() {
@@ -23,11 +24,13 @@ export function JourneyNew() {
         setStartError(created.userMessage);
         return;
       }
+      const acquisition = getAcquisitionTelemetry();
       emitTelemetry({
         category: 'journey',
         event: 'started',
         etaMinutes,
         locationPrecision: settings.locationPrecision,
+        ...(acquisition ? { acquisition } : {}),
       });
       startJourney({
         id: created.data.journeyId,

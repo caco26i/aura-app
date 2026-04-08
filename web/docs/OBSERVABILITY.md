@@ -14,13 +14,27 @@ The authoritative API (`server/`) appends **one JSON object per line** (NDJSON) 
 
 The app emits **one JSON object per line** prefixed with `[aura.telemetry]` from `src/observability/auraTelemetry.ts`.
 
+### First-touch acquisition (`auth.bootstrap`, optional `journey.started`)
+
+On the **first** page load in a browser profile, the SPA reads the landing URL query string once and persists allowed keys to **`localStorage`** key `aura:first_touch_acquisition:v1`. Later navigations do **not** update this snapshot. Parsed keys (non-PII, length-capped): `ref`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`.
+
+When present, events include an **`acquisition`** object:
+
+| Field | Type | Meaning |
+| ----- | ---- | ------- |
+| `firstTouchAt` | string (ISO-8601) | When the first-touch record was written |
+| `ref` | string (optional) | `ref` query value |
+| `utm` | object (optional) | Subset of UTM fields that were present: `source`, `medium`, `campaign`, `term`, `content` (from `utm_*` query params) |
+
+Implementation: `src/observability/firstTouchAcquisition.ts`. If `localStorage` is unavailable, acquisition fields may be omitted.
+
 Categories:
 
 | Category   | Events (examples) |
 | ---------- | ----------------- |
-| `auth`     | `bootstrap` (google_enabled / stub) |
+| `auth`     | `bootstrap` (Google OAuth enabled vs stub, optional **`acquisition`** — first-touch ref/UTM, see below) |
 | `backend`  | `request`, `success`, `error` for journey and SOS API calls; remote calls include `requestId` matching `X-Request-Id`; successful responses may include `anomalyHeader` when the API returns `X-Aura-Anomaly` (ops signal, not an error) |
-| `journey`  | `started`, `track_state`, `ended`, `im_safe`, `share_location` |
+| `journey`  | `started` (may repeat **`acquisition`** when present), `track_state`, `ended`, `im_safe`, `share_location` |
 | `sos`      | `fab_open`, `alert_sent` (optional `anomalyHeader`), `alert_failed` |
 | `map`      | `tile_error` |
 
