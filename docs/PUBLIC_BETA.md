@@ -84,6 +84,8 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 
 **Partners / press — beta metrics story:** what we measure, how we report it, and explicit **privacy boundaries** (what we will not claim), plus a short FAQ for “how do you know it works?”, is in [`docs/beta-analytics-outcomes-narrative.md`](./beta-analytics-outcomes-narrative.md) ([AURA-72](/AURA/issues/AURA-72)).
 
+**Post-launch week 1 — retention / return visits:** repeat-visitor strip, two email subject+preheader pairs, and SMS (≤160 chars) for activation after launch are in [`docs/post-launch-retention-narrative-week1.md`](./post-launch-retention-narrative-week1.md) ([AURA-77](/AURA/issues/AURA-77)).
+
 ---
 
 ## 6. More reading
@@ -95,4 +97,5 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 | [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md) | Hosting the SPA and API |
 | [`web/docs/SECURITY.md`](../web/docs/SECURITY.md) | Threat model and client/API notes |
 | [`docs/beta-analytics-outcomes-narrative.md`](./beta-analytics-outcomes-narrative.md) | Beta metrics narrative, reporting, privacy boundaries ([AURA-72](/AURA/issues/AURA-72)) |
+| [`docs/post-launch-retention-narrative-week1.md`](./post-launch-retention-narrative-week1.md) | Return-visit strip, email/SMS hooks ([AURA-77](/AURA/issues/AURA-77)) |
 | [`web/README.md`](../web/README.md) | Web package overview |
