@@ -44,7 +44,12 @@ export function sanitizeAcquisitionValue(raw: string | null): string | undefined
   if (raw == null) return undefined;
   const t = raw.trim();
   if (!t) return undefined;
-  const cleaned = t.replace(/[\u0000-\u001F\u007F]/g, '');
+  const cleaned = [...t]
+    .filter((ch) => {
+      const cp = ch.codePointAt(0)!;
+      return cp >= 0x20 && cp !== 0x7f;
+    })
+    .join('');
   if (!cleaned) return undefined;
   return cleaned.length > MAX_VALUE_LEN ? cleaned.slice(0, MAX_VALUE_LEN) : cleaned;
 }

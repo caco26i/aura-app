@@ -147,7 +147,7 @@ export function JourneyActive() {
         <p style={{ margin: '0 0 6px', fontWeight: 600 }}>
           Double-tap the map to open emergency options (silent path).
         </p>
-        <p style={{ margin: 0, color: 'var(--aura-muted)' }}>The exact gesture can vary by device and browser.</p>
+        <p style={{ margin: 0, color: 'var(--aura-muted)' }}>Demo: gesture may vary by device.</p>
       </div>
       <AuraMap
         features={visibleIntel}

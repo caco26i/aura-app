@@ -13,6 +13,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | §7 topic | Path | Status |
 |----------|------|--------|
 | Routes | [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) | Present |
+| Data visibility / local storage (shell ↔ UX) | [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) §7 + [`UX_ONBOARDING_TRUST_SETTINGS.md`](./UX_ONBOARDING_TRUST_SETTINGS.md) §3–§4 | Present |
 | Copy / errors / SOS | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md) | Present |
 | Onboarding & settings UX | [`UX_ONBOARDING_TRUST_SETTINGS.md`](./UX_ONBOARDING_TRUST_SETTINGS.md) | Present |
 | PDR §3–4 trace & gap register | This file | Present |
@@ -138,3 +139,4 @@ _None at present._
 | 2026-04-08 | [AURA-92](/AURA/issues/AURA-92): **Deep links / wildcard** — screen specs subsection for unknown paths, onboarding vs deep link, and route change process; **OSM map attribution** — `AuraMap` TileLayer + `BETA_BACKEND.md`; nice-to-have gap cleared. |
 | 2026-04-08 | [AURA-95](/AURA/issues/AURA-95): mutating-route **minute-window** limiters — `429` + `audit.rate_limited` parity with hourly caps; **`AURA_API_RATE_LIMIT_*`** env tunables in `server/README.md`; integration test for journey minute cap; [API_CONTRACT.md](./API_CONTRACT.md) regression line. |
 | 2026-04-08 | [AURA-96](/AURA/issues/AURA-96): durable **journey registry** — SQLite **WAL** + JSONL fallback + `memory` for default integration tests; subprocess **HTTP restart** test; env `AURA_API_JOURNEY_STORE*` in `server/README.md`; [SECURITY.md](./SECURITY.md) beta API row. |
+| 2026-04-08 | [AURA-175](/AURA/issues/AURA-175): **§7 data visibility** — added [`AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) §7 matrix (Home / Journey / Trusted / Settings); PDR §7 index row; ESLint **`no-control-regex`** fix in `firstTouchAcquisition.ts`; Journey map hint aligned to UX §3.4 demo line. |
