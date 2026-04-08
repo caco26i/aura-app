@@ -209,15 +209,21 @@ export function JourneyActive() {
             Sends a check-in to Aura when connected.
           </p>
         </div>
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={onShareClick}
-          style={actionBtn}
-          aria-busy={busy === 'share'}
-        >
-          {busy === 'share' ? 'Sharing…' : 'Share live location'}
-        </button>
+        <div>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={onShareClick}
+            style={{ ...actionBtn, width: '100%' }}
+            aria-busy={busy === 'share'}
+            aria-describedby="journey-share-hint"
+          >
+            {busy === 'share' ? 'Sharing…' : 'Share live location'}
+          </button>
+          <p id="journey-share-hint" style={{ fontSize: 13, color: 'var(--aura-muted)', margin: '8px 0 0' }}>
+            Notifies trusted contacts when Aura is connected. You can stop by ending the journey.
+          </p>
+        </div>
         <button
           type="button"
           disabled={busy !== null || overlayOpen}

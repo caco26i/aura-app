@@ -156,16 +156,29 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'validation_failed');
   });
 
-  test('emergency-alerts validates mode', async () => {
+  test('append-only audit log receives journey.created', async () => {
+    const beforeLen = fs.existsSync(auditPath) ? fs.readFileSync(auditPath, 'utf8').length : 0;
+    await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
+    const log = fs.readFileSync(auditPath, 'utf8');
+    assert.ok(log.length > beforeLen);
+    const last = log.trim().split('\n').pop();
+    const row = JSON.parse(last);
+    assert.equal(row.type, 'journey.created');
+  });
+
+  test('emergency-alerts rejects invalid mode', async () => {
     await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'invalid' }).expect(400);
+  });
+
+  test('emergency-alerts accepts silent mode', async () => {
     const ok = await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'silent' }).expect(201);
     assert.equal(ok.body.ok, true);
     assert.ok(ok.body.data.alertId);
   });
 
   test('emergency-alerts returns rate_limited after SOS hourly cap', async () => {
-    // SOS limiter max=8 counts every POST to this route (including the prior test’s invalid-body attempt).
-    // Prior test: 1×400 + 1×201 → 2 requests. Six more successes → 8 total allowed; 9th is 429.
+    // SOS limiter max=8 counts every POST. The two tests above send 1×400 + 1×201 first; six visible successes → 8 total; 9th is 429.
+    // Keep this trio last in the file so no earlier test hits /v1/emergency-alerts.
     for (let i = 0; i < 6; i += 1) {
       await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'visible' }).expect(201);
     }
@@ -175,15 +188,5 @@ describe('Aura API', () => {
     const log = fs.readFileSync(auditPath, 'utf8');
     assert.match(log, /"type":"audit\.rate_limited"/);
     assert.match(log, /"route":"emergency-alerts"/);
-  });
-
-  test('append-only audit log receives journey.created', async () => {
-    const beforeLen = fs.existsSync(auditPath) ? fs.readFileSync(auditPath, 'utf8').length : 0;
-    await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
-    const log = fs.readFileSync(auditPath, 'utf8');
-    assert.ok(log.length > beforeLen);
-    const last = log.trim().split('\n').pop();
-    const row = JSON.parse(last);
-    assert.equal(row.type, 'journey.created');
   });
 });
