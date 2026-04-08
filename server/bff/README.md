@@ -40,6 +40,18 @@ npm install
 npm run dev
 ```
 
+## Tests
+
+HTTP-level integration tests use **supertest** against `createApp()` from [`src/createApp.js`](src/createApp.js). Google ID token verification is **injected** in tests so CI never calls Google.
+
+```bash
+cd server/bff
+npm install
+npm test
+```
+
+Tests load minimal env via `test/load-test-env.mjs` (see `npm test` script). The main entry [`src/index.js`](src/index.js) only binds a listening port when executed directly (`npm start` / `node src/index.js`), so imports do not accidentally listen during tests.
+
 ## Routes
 
 - `GET /health` — liveness
