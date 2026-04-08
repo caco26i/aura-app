@@ -88,6 +88,8 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 
 **Trust & safety (v2) — FAQ, partner blurb, marketing guardrails:** user-facing FAQ (5), org/community blurb, and responsible-claims checklist for women’s-safety positioning are in [`docs/trust-safety-messaging-pack-v2.md`](./trust-safety-messaging-pack-v2.md) ([AURA-78](/AURA/issues/AURA-78)).
 
+**Two-week growth experiments:** three numbered bets (hypothesis, metric, instrumentation, 7/14-day windows, ship/kill) plus a channel map — [`docs/two-week-growth-experiments.md`](./two-week-growth-experiments.md) ([AURA-79](/AURA/issues/AURA-79)).
+
 ---
 
 ## 6. More reading
