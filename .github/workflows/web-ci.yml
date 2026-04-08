@@ -6,11 +6,17 @@ on:
     paths:
       - 'web/**'
       - 'docker-compose.yml'
+      - 'docker-compose.bff.yml'
+      - '.env.example'
+      - 'scripts/check-compose-env-example.mjs'
       - '.github/workflows/web-ci.yml'
   pull_request:
     paths:
       - 'web/**'
       - 'docker-compose.yml'
+      - 'docker-compose.bff.yml'
+      - '.env.example'
+      - 'scripts/check-compose-env-example.mjs'
       - '.github/workflows/web-ci.yml'
 
 jobs:
@@ -21,6 +27,9 @@ jobs:
         working-directory: web
     steps:
       - uses: actions/checkout@v4
+      - name: Compose env vs .env.example (no drift)
+        working-directory: ${{ github.workspace }}
+        run: node scripts/check-compose-env-example.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
