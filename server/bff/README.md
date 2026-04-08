@@ -2,6 +2,15 @@
 
 Small **backend-for-frontend** that turns **Google or Firebase Authentication** into **short-lived HS256 JWTs** the Aura API accepts (`AURA_API_BFF_JWT_SECRET` — same verification as [`../README.md`](../README.md)).
 
+## Request correlation and response headers
+
+Every response includes the same baseline headers as the authoritative Aura API ([`../src/index.js`](../src/index.js), [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)):
+
+- **`X-Request-Id`** — echoed from a valid **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max **128** chars) or a generated UUID when missing/invalid.
+- **`X-Content-Type-Options: nosniff`**, **`X-Frame-Options: DENY`**, **`Referrer-Policy: no-referrer`**.
+
+CORS is configured with **`X-Request-Id` / `X-Correlation-Id`** in **allowed** and **exposed** headers so cross-origin browser clients can send and read the correlation id where applicable. Oversized or malformed JSON bodies on POST routes return **`413` `payload_too_large`** or **`400` `invalid_json`** (same envelope shape as the API) with these headers still present.
+
 ## Rate limiting
 
 `express-rate-limit` applies **separate per-IP** caps to `POST /auth/google`, `POST /auth/firebase`, `GET /session`, and `POST /logout` (see env table). On exceed: **429** with `{ ok: false, error: "rate_limited", detail }` (same `error` code as the authoritative API in [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)). Standard rate-limit response headers are enabled. At the edge, a WAF or CDN should still enforce broader abuse controls; these knobs protect the BFF process when traffic reaches origin.

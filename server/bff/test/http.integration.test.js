@@ -9,7 +9,48 @@ const mockVerifyOk = async () => ({
 
 const mockFirebaseVerifyOk = async () => ({ uid: 'firebase-uid-integration-test' });
 
+function assertResponseSecurityHeaders(res, opts = {}) {
+  assert.equal(res.headers['x-content-type-options'], 'nosniff');
+  assert.equal(res.headers['x-frame-options'], 'DENY');
+  assert.equal(res.headers['referrer-policy'], 'no-referrer');
+  const rid = res.headers['x-request-id'];
+  assert.ok(typeof rid === 'string' && rid.length > 0);
+  if (opts.requestId !== undefined) {
+    assert.equal(rid, opts.requestId);
+  }
+}
+
 describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
+  test('GET /health includes X-Request-Id, security headers, and stable echo of valid X-Request-Id', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const gen = await request(app).get('/health').expect(200);
+    assertResponseSecurityHeaders(gen);
+    assert.match(String(gen.headers['x-request-id']), /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+
+    const echoed = await request(app)
+      .get('/health')
+      .set('X-Request-Id', 'bff-req-1')
+      .expect(200);
+    assertResponseSecurityHeaders(echoed, { requestId: 'bff-req-1' });
+  });
+
+  test('GET /health accepts X-Correlation-Id when X-Request-Id omitted', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const res = await request(app)
+      .get('/health')
+      .set('X-Correlation-Id', 'corr-bff-9')
+      .expect(200);
+    assertResponseSecurityHeaders(res, { requestId: 'corr-bff-9' });
+  });
+
+  test('GET /health ignores over-long X-Request-Id and issues a UUID', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const tooLong = 'a'.repeat(129);
+    const res = await request(app).get('/health').set('X-Request-Id', tooLong).expect(200);
+    assertResponseSecurityHeaders(res);
+    assert.match(String(res.headers['x-request-id']), /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
   test('GET /session returns 401 when no session cookie', async () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
     const res = await request(app).get('/session').expect(401);
@@ -32,19 +73,39 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
       const app = createApp({ verifyIdToken: mockVerifyOk });
       const res = await request(app)
         .post('/auth/google')
+        .set('X-Request-Id', 'oversize-body-test')
         .send({ pad: 'x'.repeat(5000) });
       assert.equal(res.status, 413);
-      assert.match(String(res.text), /too large/i);
+      assert.equal(res.body.ok, false);
+      assert.equal(res.body.error, 'payload_too_large');
+      assertResponseSecurityHeaders(res, { requestId: 'oversize-body-test' });
     } finally {
       if (prev === undefined) delete process.env.AURA_BFF_JSON_BODY_LIMIT;
       else process.env.AURA_BFF_JSON_BODY_LIMIT = prev;
     }
   });
 
+  test('POST /auth/google returns 400 invalid_json for malformed JSON body', async () => {
+    const app = createApp({ verifyIdToken: mockVerifyOk });
+    const res = await request(app)
+      .post('/auth/google')
+      .set('Content-Type', 'application/json')
+      .set('X-Request-Id', 'bad-json-test')
+      .send('{ not json');
+    assert.equal(res.status, 400);
+    assert.equal(res.body.error, 'invalid_json');
+    assertResponseSecurityHeaders(res, { requestId: 'bad-json-test' });
+  });
+
   test('POST /auth/google returns 400 when idToken is missing', async () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
-    const res = await request(app).post('/auth/google').send({}).expect(400);
+    const res = await request(app)
+      .post('/auth/google')
+      .set('X-Request-Id', 'missing-id-token')
+      .send({})
+      .expect(400);
     assert.equal(res.body.error, 'invalid_request');
+    assertResponseSecurityHeaders(res, { requestId: 'missing-id-token' });
   });
 
   test('POST /auth/firebase returns 400 when idToken is missing', async () => {
@@ -135,10 +196,15 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
       const app = createApp({ verifyIdToken: mockVerifyOk });
       await request(app).post('/auth/google').send({ idToken: 'a' }).expect(200);
       await request(app).post('/auth/google').send({ idToken: 'b' }).expect(200);
-      const res = await request(app).post('/auth/google').send({ idToken: 'c' }).expect(429);
+      const res = await request(app)
+        .post('/auth/google')
+        .set('X-Request-Id', 'rate-limit-auth')
+        .send({ idToken: 'c' })
+        .expect(429);
       assert.equal(res.body.ok, false);
       assert.equal(res.body.error, 'rate_limited');
       assert.ok(typeof res.body.detail === 'string');
+      assertResponseSecurityHeaders(res, { requestId: 'rate-limit-auth' });
     } finally {
       for (const k of keys) {
         if (prev[k] === undefined) delete process.env[k];

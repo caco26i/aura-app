@@ -2,6 +2,7 @@
  * Express app factory for Aura BFF (Google / Firebase sign-in → session → API JWT).
  */
 
+import { randomUUID } from 'node:crypto';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -9,6 +10,36 @@ import session from 'express-session';
 import admin from 'firebase-admin';
 import { OAuth2Client } from 'google-auth-library';
 import { mintAccessJwt } from './mintAccessJwt.js';
+
+/** Max length for client-supplied `X-Request-Id` / `X-Correlation-Id` (printable ASCII only). Mirrors `server/src/index.js`. */
+const REQUEST_ID_MAX_LEN = 128;
+
+/**
+ * @param {unknown} raw
+ * @returns {string | null}
+ */
+function tryUseIncomingRequestId(raw) {
+  if (typeof raw !== 'string') return null;
+  const s = raw.trim();
+  if (s.length === 0 || s.length > REQUEST_ID_MAX_LEN) return null;
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s.charCodeAt(i);
+    if (c < 0x20 || c > 0x7e) return null;
+  }
+  return s;
+}
+
+/**
+ * @param {import('express').Request} req
+ * @returns {string}
+ */
+function resolveAuraRequestId(req) {
+  const fromReqId = tryUseIncomingRequestId(req.headers['x-request-id']);
+  if (fromReqId) return fromReqId;
+  const fromCorr = tryUseIncomingRequestId(req.headers['x-correlation-id']);
+  if (fromCorr) return fromCorr;
+  return randomUUID();
+}
 
 /**
  * @param {string} name
@@ -179,7 +210,18 @@ export function createApp(overrides = {}) {
 
   const app = express();
   app.set('trust proxy', 1);
-  app.use(express.json({ limit: JSON_BODY_LIMIT }));
+  app.use((req, res, next) => {
+    const requestId = resolveAuraRequestId(req);
+    req.auraRequestId = requestId;
+    res.setHeader('X-Request-Id', requestId);
+    next();
+  });
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  });
 
   const allowlist = parseCorsOrigins();
   app.use(
@@ -192,8 +234,34 @@ export function createApp(overrides = {}) {
           }
         : true,
       credentials: true,
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: [
+        'Authorization',
+        'Content-Type',
+        'X-Aura-Device-Fingerprint',
+        'X-Request-Id',
+        'X-Correlation-Id',
+      ],
+      exposedHeaders: ['X-Request-Id'],
     }),
   );
+
+  app.use(express.json({ limit: JSON_BODY_LIMIT }));
+  app.use((err, _req, res, next) => {
+    if (err.status === 400 && err.type === 'entity.parse.failed') {
+      res.status(400).json({ ok: false, error: 'invalid_json', detail: 'Malformed JSON request body' });
+      return;
+    }
+    if (err.status === 413 && err.type === 'entity.too.large') {
+      res.status(413).json({
+        ok: false,
+        error: 'payload_too_large',
+        detail: 'JSON request body exceeds configured limit',
+      });
+      return;
+    }
+    next(err);
+  });
 
   app.use(
     session({
