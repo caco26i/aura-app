@@ -116,6 +116,13 @@ export function userMessageForMisconfiguration(): string {
   );
 }
 
+/** BFF is configured but the browser has no BFF session / Google handoff yet. */
+export function userMessageForBffSignIn(): string {
+  return (
+    'Sign in with Google under Settings to connect this device to the live Aura API, then try again.'
+  );
+}
+
 export function noticeForAnomalyHeader(header: string | null): string | undefined {
   if (!header || !header.trim()) return undefined;
   const flags = header.split(',').map((s) => s.trim()).filter(Boolean);

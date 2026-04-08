@@ -1,11 +1,17 @@
 import type { CSSProperties } from 'react';
-import { useRef } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { establishAuraBffSessionWithGoogleIdToken } from '../api/auraBackendAuth';
 import { useAura } from '../context/useAura';
+
+const bffUrlConfigured = Boolean(import.meta.env.VITE_AURA_BFF_URL?.trim());
+const googleClientConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
 
 export function Settings() {
   const { settings, updateSettings, clearLocalAuraData } = useAura();
   const clearDialogRef = useRef<HTMLDialogElement>(null);
+  const [bffHint, setBffHint] = useState<string | null>(null);
 
   const openClearDialog = () => {
     clearDialogRef.current?.showModal();
@@ -139,6 +145,51 @@ export function Settings() {
           </div>
         </fieldset>
       </section>
+
+      {bffUrlConfigured ? (
+        <section style={section} aria-labelledby="bff-api-heading">
+          <h2 id="bff-api-heading" style={h2}>
+            Beta API session
+          </h2>
+          <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, marginTop: 0 }}>
+            This build talks to the live Aura API through a short-lived token from our sign-in service (BFF). Sign in
+            once here so journey and safety actions can reach the server.
+          </p>
+          {bffHint ? (
+            <p role="status" style={{ marginTop: 12, fontSize: 15 }}>
+              {bffHint}
+            </p>
+          ) : null}
+          {googleClientConfigured ? (
+            <div style={{ marginTop: 14 }}>
+              <GoogleLogin
+                text="continue_with"
+                shape="rectangular"
+                size="large"
+                width={280}
+                onSuccess={async (cred) => {
+                  if (!cred.credential) {
+                    setBffHint('Google did not return a credential. Try again.');
+                    return;
+                  }
+                  const ok = await establishAuraBffSessionWithGoogleIdToken(cred.credential);
+                  setBffHint(
+                    ok
+                      ? 'Session linked. Journey and SOS actions will use the live API.'
+                      : 'Could not link session. Check that the BFF is running and CORS allows this origin.',
+                  );
+                }}
+                onError={() => setBffHint('Google sign-in was interrupted. Try again.')}
+              />
+            </div>
+          ) : (
+            <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, marginTop: 12 }}>
+              Set <code style={{ fontSize: 14 }}>VITE_GOOGLE_CLIENT_ID</code> for the button flow, or complete Google
+              OAuth via your BFF redirect URL (see <code style={{ fontSize: 14 }}>server/bff/README.md</code>).
+            </p>
+          )}
+        </section>
+      ) : null}
 
       <section style={section} aria-labelledby="reset-heading">
         <h2 id="reset-heading" style={h2}>

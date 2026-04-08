@@ -1,13 +1,16 @@
 /**
  * Boundary for a future real backend (Supabase, Firebase, REST).
- * When `VITE_AURA_API_TOKEN` is set, calls the authoritative Aura API in `../../server`.
+ * When `VITE_AURA_API_TOKEN` is set, calls the authoritative Aura API in `../../server` (local dev).
+ * When `VITE_AURA_BFF_URL` is set without a static token, obtains a short-lived JWT via the BFF (`GET /session` with session cookie).
  * `VITE_AURA_API_URL` is optional: omit or leave empty to use same-origin URLs (Vite dev proxy → local `server/`).
  */
 
 import { emitTelemetry } from '../observability/auraTelemetry';
+import { auraRemoteApiMode, resolveAuraApiBearer } from './auraBackendAuth';
 import {
   isOfflineError,
   noticeForAnomalyHeader,
+  userMessageForBffSignIn,
   userMessageForHttpFailure,
   userMessageForMisconfiguration,
   userMessageForNetworkFailure,
@@ -32,29 +35,39 @@ function deviceFingerprint(): string | undefined {
   return fp;
 }
 
-function remoteConfig(): { base: string; token: string } | null {
-  const token = import.meta.env.VITE_AURA_API_TOKEN?.trim();
-  if (!token) return null;
+function apiBase(): string {
   const raw = import.meta.env.VITE_AURA_API_URL;
   const base =
     raw === undefined || raw === null || String(raw).trim() === ''
       ? ''
       : String(raw).replace(/\/$/, '');
-  return { base, token };
+  return base;
 }
 
 async function remotePost<T>(path: string, body: unknown | undefined, surface: ApiSurface): Promise<BackendResult<T>> {
-  const cfg = remoteConfig();
-  if (!cfg) {
+  const auth = await resolveAuraApiBearer();
+  if (auth.kind === 'off') {
     return { ok: false, error: 'Backend not configured', userMessage: userMessageForMisconfiguration() };
   }
+  if (auth.kind === 'sign_in_required') {
+    return { ok: false, error: 'not_authenticated', userMessage: userMessageForBffSignIn() };
+  }
+  if (auth.kind === 'error') {
+    return {
+      ok: false,
+      error: auth.error,
+      userMessage: userMessageForUnknownError(surface),
+    };
+  }
+
+  const base = apiBase();
   const fp = deviceFingerprint();
   try {
-    const res = await fetch(`${cfg.base}${path}`, {
+    const res = await fetch(`${base}${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${cfg.token}`,
+        Authorization: `Bearer ${auth.token}`,
         ...(fp ? { 'X-Aura-Device-Fingerprint': fp } : {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -101,8 +114,8 @@ async function remotePost<T>(path: string, body: unknown | undefined, surface: A
 
 /** When API is configured, registers a server-side journey for the current bearer; required before share / im-safe. */
 export async function postCreateJourney(): Promise<BackendResult<{ journeyId: string }>> {
-  const cfg = remoteConfig();
-  if (!cfg) {
+  const mode = auraRemoteApiMode();
+  if (mode === 'off') {
     return { ok: true, data: { journeyId: crypto.randomUUID() } };
   }
   return remotePost<{ journeyId: string }>('/v1/journeys', {}, 'journey');
@@ -110,83 +123,83 @@ export async function postCreateJourney(): Promise<BackendResult<{ journeyId: st
 
 export async function postImSafe(journeyId: string): Promise<BackendResult<{ receivedAt: string }>> {
   emitTelemetry({ category: 'backend', event: 'request', operation: 'im_safe', journeyId });
-  const cfg = remoteConfig();
-  if (cfg) {
-    const res = await remotePost<{ receivedAt: string }>(
-      `/v1/journeys/${encodeURIComponent(journeyId)}/im-safe`,
-      undefined,
-      'journey',
-    );
-    if (res.ok) {
-      emitTelemetry({
-        category: 'backend',
-        event: 'success',
-        operation: 'im_safe',
-        journeyId,
-        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
-      });
-    } else {
-      emitTelemetry({ category: 'backend', event: 'error', operation: 'im_safe', journeyId, error: res.error });
-    }
-    return res;
+  const mode = auraRemoteApiMode();
+  if (mode === 'off') {
+    await delay(450);
+    emitTelemetry({ category: 'backend', event: 'success', operation: 'im_safe', journeyId });
+    return { ok: true, data: { receivedAt: new Date().toISOString() } };
   }
-  await delay(450);
-  emitTelemetry({ category: 'backend', event: 'success', operation: 'im_safe', journeyId });
-  return { ok: true, data: { receivedAt: new Date().toISOString() } };
+  const res = await remotePost<{ receivedAt: string }>(
+    `/v1/journeys/${encodeURIComponent(journeyId)}/im-safe`,
+    undefined,
+    'journey',
+  );
+  if (res.ok) {
+    emitTelemetry({
+      category: 'backend',
+      event: 'success',
+      operation: 'im_safe',
+      journeyId,
+      ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+    });
+  } else {
+    emitTelemetry({ category: 'backend', event: 'error', operation: 'im_safe', journeyId, error: res.error });
+  }
+  return res;
 }
 
 export async function postShareLocation(journeyId: string): Promise<BackendResult<{ shareId: string }>> {
   emitTelemetry({ category: 'backend', event: 'request', operation: 'share_location', journeyId });
-  const cfg = remoteConfig();
-  if (cfg) {
-    const res = await remotePost<{ shareId: string }>(
-      `/v1/journeys/${encodeURIComponent(journeyId)}/location-shares`,
-      {},
-      'journey',
-    );
-    if (res.ok) {
-      emitTelemetry({
-        category: 'backend',
-        event: 'success',
-        operation: 'share_location',
-        journeyId,
-        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
-      });
-    } else {
-      emitTelemetry({
-        category: 'backend',
-        event: 'error',
-        operation: 'share_location',
-        journeyId,
-        error: res.error,
-      });
-    }
-    return res;
+  const mode = auraRemoteApiMode();
+  if (mode === 'off') {
+    await delay(550);
+    emitTelemetry({ category: 'backend', event: 'success', operation: 'share_location', journeyId });
+    return { ok: true, data: { shareId: crypto.randomUUID() } };
   }
-  await delay(550);
-  emitTelemetry({ category: 'backend', event: 'success', operation: 'share_location', journeyId });
-  return { ok: true, data: { shareId: crypto.randomUUID() } };
+  const res = await remotePost<{ shareId: string }>(
+    `/v1/journeys/${encodeURIComponent(journeyId)}/location-shares`,
+    {},
+    'journey',
+  );
+  if (res.ok) {
+    emitTelemetry({
+      category: 'backend',
+      event: 'success',
+      operation: 'share_location',
+      journeyId,
+      ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+    });
+  } else {
+    emitTelemetry({
+      category: 'backend',
+      event: 'error',
+      operation: 'share_location',
+      journeyId,
+      error: res.error,
+    });
+  }
+  return res;
 }
 
 export async function postEmergencyAlert(mode: 'silent' | 'visible'): Promise<BackendResult<{ alertId: string }>> {
   emitTelemetry({ category: 'backend', event: 'request', operation: 'emergency_alert', mode });
-  const cfg = remoteConfig();
-  if (cfg) {
-    const res = await remotePost<{ alertId: string }>('/v1/emergency-alerts', { mode }, 'sos');
-    if (res.ok) {
-      emitTelemetry({
-        category: 'backend',
-        event: 'success',
-        operation: 'emergency_alert',
-        mode,
-        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
-      });
-    } else {
-      emitTelemetry({ category: 'backend', event: 'error', operation: 'emergency_alert', mode, error: res.error });
-    }
-    return res;
+  const apiMode = auraRemoteApiMode();
+  if (apiMode === 'off') {
+    await delay(600);
+    emitTelemetry({ category: 'backend', event: 'success', operation: 'emergency_alert', mode });
+    return { ok: true, data: { alertId: crypto.randomUUID() } };
   }
-  await delay(600);
-  emitTelemetry({ category: 'backend', event: 'success', operation: 'emergency_alert', mode });
-  return { ok: true, data: { alertId: crypto.randomUUID() } };
+  const res = await remotePost<{ alertId: string }>('/v1/emergency-alerts', { mode }, 'sos');
+  if (res.ok) {
+    emitTelemetry({
+      category: 'backend',
+      event: 'success',
+      operation: 'emergency_alert',
+      mode,
+      ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+    });
+  } else {
+    emitTelemetry({ category: 'backend', event: 'error', operation: 'emergency_alert', mode, error: res.error });
+  }
+  return res;
 }

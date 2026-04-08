@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import { productionCspMeta } from './vite-plugin-production-csp'
 
 const apiTarget = process.env.VITE_AURA_DEV_API_PROXY ?? 'http://127.0.0.1:8787'
+const bffTarget = process.env.VITE_AURA_DEV_BFF_PROXY ?? 'http://127.0.0.1:8790'
 const telemetryProxyTarget = process.env.VITE_AURA_DEV_TELEMETRY_PROXY?.trim()
 
 /**
@@ -44,6 +45,11 @@ export default defineConfig({
       '/v1': { target: apiTarget, changeOrigin: true },
       '/health': { target: apiTarget, changeOrigin: true },
       '/ready': { target: apiTarget, changeOrigin: true },
+      '/aura-bff': {
+        target: bffTarget,
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/aura-bff/, '') || '/',
+      },
       ...(telemetryProxyTarget
         ? {
             '/ingest/aura': { target: telemetryProxyTarget, changeOrigin: true },

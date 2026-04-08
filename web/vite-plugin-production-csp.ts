@@ -27,6 +27,8 @@ export function productionCspMeta(): Plugin {
       const connectOrigins = new Set<string>();
       const apiOrigin = tryOrigin(process.env.VITE_AURA_API_URL);
       if (apiOrigin) connectOrigins.add(apiOrigin);
+      const bffOrigin = tryOrigin(process.env.VITE_AURA_BFF_URL);
+      if (bffOrigin) connectOrigins.add(bffOrigin);
       const telemetryOrigin = tryOrigin(process.env.VITE_AURA_TELEMETRY_ENDPOINT);
       if (telemetryOrigin) connectOrigins.add(telemetryOrigin);
 

@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_ID?: string;
+  /** Same-origin path (e.g. `/aura-bff`) or full BFF base URL — no trailing slash. */
+  readonly VITE_AURA_BFF_URL?: string;
   readonly VITE_AURA_TELEMETRY_ENDPOINT?: string;
   readonly VITE_AURA_TELEMETRY_DEBUG?: string;
   /** API origin (e.g. https://api.example.com). Omit or leave empty for same-origin (dev proxy). */
