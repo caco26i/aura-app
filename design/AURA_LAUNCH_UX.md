@@ -49,7 +49,7 @@ Implement in one helper (e.g. `mapBackendError(res, json)` used by `remotePost`)
 
 | Condition | Suggested user string | Notes |
 |-----------|----------------------|--------|
-| **Offline / network** (`fetch` throws, `TypeError`, “Failed to fetch”, navigator offline) | **We can’t reach Aura right now. Check your connection and try again.** | Same copy for journey + SOS. |
+| **Offline / network** (`fetch` throws, `TypeError`, “Failed to fetch”, navigator offline) | **Journey / map actions:** “We couldn't reach Aura. Check your connection and try again.” **SOS:** “We couldn't confirm your alert reached Aura. If you're in immediate danger, contact local emergency services. You can also check your connection and try again.” | **Shipped** in `userMessageForNetworkFailure` (`auraApiMessages.ts`) — SOS uses stronger safety framing than journey; aligns with principle 1 (calm) + SOS sensitivity. |
 | **401** — missing/invalid bearer | **Your session expired. Sign in again, then retry.** | If the app has no sign-in yet, use: **This app needs a valid connection token. Update your settings and try again.** |
 | **403** — wrong token | **We couldn’t authorize this device. Check your access token in settings.** | |
 | **429** — rate limited (global/journey/SOS) | **You’re doing that a little too often. Wait a moment and try again.** | For **SOS-only** limiter, soften further: **We couldn’t send another alert just yet. If you’re in danger, call local emergency services. You can try again in a minute.** |

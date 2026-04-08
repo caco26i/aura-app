@@ -77,10 +77,13 @@ Route and env reference: [`server/README.md`](../server/README.md).
 Aligned with [`design/AURA_SCREEN_SPECS.md`](../design/AURA_SCREEN_SPECS.md) and the root [`README.md`](../README.md):
 
 1. **Welcome** — short onboarding; stub or Google auth.
-2. **Home** — safety hub, quick actions, global SOS entry.
-3. **Journey** — create a journey (**with the beta API**, the client must `POST /v1/journeys` before share / I’m safe for that id — see BETA_BACKEND doc), live map, share location, **I’m safe**.
-4. **Emergency (SOS)** — calm confirmation; visible vs silent-style paths as implemented.
-5. **Trusted network & settings** — contacts and safety defaults.
+2. **Sign-in (`/auth`)** — when using real Google + BFF, dedicated auth surface outside the main shell (see [`web/docs/AUTH.md`](../web/docs/AUTH.md)); optional for local stub exploration.
+3. **Home** — safety hub, quick actions, global SOS entry (also **SOS** in the bottom nav).
+4. **Bottom nav (inside shell)** — **Cita** (`/cita`), **Transp.** (`/transport`), **Check-in** (`/checkin`), plus **SOS** (`/emergency`, full-screen).
+5. **Journey** — create a journey (**with the beta API**, the client must `POST /v1/journeys` before share / I’m safe for that id — see BETA_BACKEND doc), live map, share location, **I’m safe** (reached from Home, not the primary bottom bar).
+6. **Map intel (`/map`)** — layers and map; secondary entry from Home.
+7. **Emergency (SOS)** — calm confirmation; visible vs silent-style paths as implemented (`/emergency`).
+8. **Trusted network & settings** — contacts and safety defaults (secondary from Home).
 
 If API calls fail, user-facing copy is framed as **session/sync** issues where possible; technical codes are for logs and telemetry.
 
