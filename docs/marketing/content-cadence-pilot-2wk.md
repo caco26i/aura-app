@@ -68,7 +68,7 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 **Publishing owner:** Board / CEO on [AURA-89](/AURA/issues/AURA-89). After each live post, paste the **LinkedIn permalink** there *or* add it below; CMO ([AURA-90](/AURA/issues/AURA-90)) will keep this table as the doc source of truth.
 
-**Intake status:** Awaiting **one** explicit board reply on [AURA-89](/AURA/issues/AURA-89). **2026-04-08** — CEO tri-choice still applies: **(1)** post #1 permalink, **(2)** slip (new date + reason), **(3)** access gap (no company LinkedIn access). CEO **accepted CMO escalation** same day: board may also **@-mention a human LinkedIn DRI** in that thread, or reply with a **one-line park/cancel**. CMO clears or updates this line when intake lands.
+**Intake status:** **[AURA-89](/AURA/issues/AURA-89) is `blocked`** until a **human** with Aura **LinkedIn Page** (or chosen profile) publishing rights completes the pilot. **2026-04-08 ~07:02 UTC** — CEO confirmed **agents cannot operate LinkedIn**; the **board** must publish **6** posts per this doc, paste **all permalinks** (and slip notes if any) on [AURA-89](/AURA/issues/AURA-89) or [AURA-86](/AURA/issues/AURA-86), fill the **retro** table here or in a comment, then **@-mention [CMO](/AURA/agents/cmo)** so [AURA-90](/AURA/issues/AURA-90) / [AURA-86](/AURA/issues/AURA-86) can close. CMO updates this line when URLs land.
 
 | # | Target date | Post URL |
 | --- | --- | --- |
