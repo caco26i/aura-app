@@ -30,6 +30,7 @@ Cross-check for map intel and global HTML shell called out in [AURA-61](/AURA/is
 | Topic | Verified in |
 |-------|-------------|
 | Map intel layers + demo route affordance | [`MapPage.tsx`](../src/pages/MapPage.tsx) (`/map`) |
+| OSM map tile attribution | [`AuraMap.tsx`](../src/components/AuraMap.tsx) (`TileLayer` + Leaflet attribution control); policy in [`BETA_BACKEND.md`](./BETA_BACKEND.md) |
 | Page title for map route | `RouteDocumentTitle` — **`Map intel · Aura`** for `/map` |
 | Mobile browser chrome color | [`index.html`](../index.html) `<meta name="theme-color" content="#fafaff" />` |
 
@@ -50,7 +51,7 @@ Cross-check for map intel and global HTML shell called out in [AURA-61](/AURA/is
 
 | Clause | Verified in |
 |--------|-------------|
-| §4.1 Routes & shell | [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) + `web/src/App.tsx`, `AppShell.tsx` |
+| §4.1 Routes & shell | [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) (incl. deep links / `*` policy) + `web/src/App.tsx`, `AppShell.tsx` |
 | §4.2 Journey API before share / I’m safe | [`BETA_BACKEND.md`](./BETA_BACKEND.md), `auraBackend.ts` (`postCreateJourney`), `JourneyNew.tsx`, `JourneyActive.tsx`, `auraApiMessages.ts` |
 | §4.3 SOS confirm; anomaly notice styling | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md), `Emergency.tsx` |
 | §4.4 Voice; no raw HTTP in UI | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md), `auraApiMessages.ts` |
@@ -82,9 +83,13 @@ _None at present._
 
 3. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
 
+4. **Wildcard / deep links** — **Resolved.** [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now has an explicit **Deep links & unknown paths** subsection: unknown `*` → home (`replace`), onboarding gate for shell routes, and change process (update `App.tsx` + route table + §4.1 trace). Shipped behavior unchanged by design.
+
+5. **Map tile attribution (production readiness)** — **Resolved.** OSM **© OpenStreetMap contributors** attribution on `TileLayer` in [`AuraMap.tsx`](../src/components/AuraMap.tsx); [`BETA_BACKEND.md`](./BETA_BACKEND.md) documents the review outcome and Leaflet credit.
+
 ### Nice-to-have (polish)
 
-1. **Wildcard / deep links** — `*` still redirects home only; document any future routes in [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) when added.
+_None at present._
 
 ### Resolved vs earlier gap register
 
@@ -130,3 +135,4 @@ _None at present._
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 **MapIntel.tsx** naming clarified — canonical surface is `MapPage.tsx` (`/map`); CTO wake [52b19e31](/AURA/issues/AURA-61#comment-52b19e31-76cf-457a-8570-5cbab2bc1eed). |
 | 2026-04-08 | [AURA-91](/AURA/issues/AURA-91): BFF **HS256 JWT** auth (`sub` ownership) + **im-safe** hourly rate limit + `AURA_API_JSON_BODY_LIMIT`; audit **RUNBOOK_AUDIT.md**; Resolved/aligned row for API production auth path. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): Eng verified `Emergency.tsx` — `npm run lint` + targeted ESLint **clean** on `20be0fb` ([comment ca9f8b1d](/AURA/issues/AURA-61#comment-ca9f8b1d-6a36-4a32-a32a-0340ad77b8b6)); prior `react-hooks/set-state-in-effect` note closed as stale / config drift. |
+| 2026-04-08 | [AURA-92](/AURA/issues/AURA-92): **Deep links / wildcard** — screen specs subsection for unknown paths, onboarding vs deep link, and route change process; **OSM map attribution** — `AuraMap` TileLayer + `BETA_BACKEND.md`; nice-to-have gap cleared. |

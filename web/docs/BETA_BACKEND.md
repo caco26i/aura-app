@@ -24,7 +24,7 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 - **SOS / share validation:** Implemented in repo root `server/` when deployed; wire env vars per `server/README.md`. Production: exchange OAuth in a **BFF** and call the API with **HS256 JWTs** signed using `AURA_API_BFF_JWT_SECRET` (claim **`sub`** = stable user id); do not ship long-lived static secrets in `VITE_AURA_API_TOKEN`.
 - **Journey ownership:** When the beta API is enabled, the web app calls `POST /v1/journeys` before starting a journey so `journeyId` is bound to the current actor (static bearer hash or **JWT `sub`**); `location-shares` and `im-safe` reject ids the caller did not create (`journey_not_found` / `journey_forbidden`). Refreshed access tokens with the same `sub` keep ownership. **User-facing copy** for those codes lives in `design/AURA_LAUNCH_UX.md` (JSON table) and `web/src/api/auraApiMessages.ts`.
-- Map tiles are public OSM; add attribution review for production branding.
+- **Map tiles (OSM):** Standard **OpenStreetMap** raster tiles via Leaflet `TileLayer`, with **© OpenStreetMap contributors** linked to [OSM copyright](https://www.openstreetmap.org/copyright) (ODbL). Implemented in [`AuraMap.tsx`](../src/components/AuraMap.tsx); Leaflet’s default attribution control remains enabled so the **Leaflet** credit stays visible. Revisit if you swap tile providers or add overlays with different license terms.
 
 ## Observability
 
