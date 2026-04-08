@@ -21,6 +21,18 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 ---
 
+## §2.1 Map & page chrome (shipped shell)
+
+Cross-check for map intel and global HTML shell called out in [AURA-61](/AURA/issues/AURA-61) IC batches.
+
+| Topic | Verified in |
+|-------|-------------|
+| Map intel layers + demo route affordance | [`MapPage.tsx`](../src/pages/MapPage.tsx) (`/map`) |
+| Page title for map route | `RouteDocumentTitle` — **`Map intel · Aura`** for `/map` |
+| Mobile browser chrome color | [`index.html`](../index.html) `<meta name="theme-color" content="#fafaff" />` |
+
+---
+
 ## §3.1 In scope — doc map
 
 | PDR area | Spec / doc |
@@ -47,10 +59,10 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 | Clause | Verified in |
 |--------|-------------|
-| §5 Accessibility (SOS, journey paths) | `RouteDocumentTitle` (`App.tsx`) — route-aware `document.title`; `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `MapPage.tsx` (layer `role="switch"` `aria-labelledby` / `aria-describedby`; `section` `aria-labelledby` / `aria-describedby` for map block), `Home.tsx` (visually hidden page `h1`; hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx` (`htmlFor`/`id` on safety inputs; location `fieldset` `aria-describedby` privacy note), `Trusted.tsx` (add form + saved rows `htmlFor`/`id`; permission `fieldset` `aria-describedby`; remove `aria-label`), `JourneyNew.tsx` (heading id + form `aria-describedby` lede), modo shells (`ModoCita` / `ModoTransporte` / `CheckinInteligente` — `header` `aria-labelledby` + `h1` id) |
+| §5 Accessibility (SOS, journey paths) | `RouteDocumentTitle` (`App.tsx`) — route-aware `document.title`; `SkipToContent` + `#main-content` (`AppShell.tsx`, `Welcome.tsx`, `Emergency.tsx`); `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `MapPage.tsx` (layer `role="switch"` `aria-checked` / `aria-pressed` + dynamic `aria-label` (on/off) + `aria-describedby` on toggles; **Find safest route (demo)** primary control with demo `aria-label` + `role="status"` feedback; `section` `aria-labelledby` / `aria-describedby` for map block), `Home.tsx` (visually hidden page `h1`; hub safe/alert `role="status"` + `aria-live="polite"`), `Settings.tsx` (`htmlFor`/`id` on safety inputs; location `fieldset` `aria-describedby` privacy note), `Trusted.tsx` (add form + saved rows `htmlFor`/`id`; permission `fieldset` `aria-describedby`; remove `aria-label`), `JourneyNew.tsx` (heading id + form `aria-describedby` lede), modo shells (`ModoCita` / `ModoTransporte` / `CheckinInteligente` — `header` `aria-labelledby` + `h1` id) |
 | §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
 | §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
-| §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
+| §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css`, `index.html` `theme-color` (mobile browser chrome) |
 
 ---
 
@@ -109,3 +121,5 @@ _None at present._
 | 2026-04-08 | [AURA-75](/AURA/issues/AURA-75): **G-IA-01** closed — IA vs PDR §3.1 confirmed per [AURA-74](/AURA/issues/AURA-74); open-questions section cleared. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): related-work index linked [AURA-74](/AURA/issues/AURA-74) / [AURA-75](/AURA/issues/AURA-75) after CEO clarification ([comment 510069eb](/AURA/issues/AURA-61#comment-510069eb-fced-48c6-866c-9ad6993a4ee6)). |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): **PDR §5 a11y gate** — UX Designer static/code review **PASS** on `8014df0` ([comment cbe4678c](/AURA/issues/AURA-59#comment-cbe4678c-4a66-43f3-8481-6f1ca0504d30)); optional human SR smoke on device still recommended. |
+| 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 map + page chrome table; §5 rows for `MapPage` toggle `aria-label` / `aria-pressed`, demo route control + status, and `index.html` `theme-color`. |
+| 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): `RouteDocumentTitle` `/map` → **Map intel · Aura** (aligns with on-page `h1`). |

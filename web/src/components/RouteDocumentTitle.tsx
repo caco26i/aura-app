@@ -17,7 +17,7 @@ function titleForPath(pathname: string): string {
     case '/journey/active':
       return `Live journey · ${APP_NAME}`;
     case '/map':
-      return `Map · ${APP_NAME}`;
+      return `Map intel · ${APP_NAME}`;
     case '/trusted':
       return `Trusted contacts · ${APP_NAME}`;
     case '/settings':

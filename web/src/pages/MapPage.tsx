@@ -1,10 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import { AuraMap } from '../components/AuraMap';
 import { useAura } from '../context/useAura';
 import { MAP_INTEL_SEED } from '../data/mapIntelSeed';
 
 export function MapPage() {
   const { mapLayers, setMapLayer } = useAura();
+  const [demoRouteMsg, setDemoRouteMsg] = useState<string | null>(null);
+  const demoMsgTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (demoMsgTimer.current) clearTimeout(demoMsgTimer.current);
+    };
+  }, []);
 
   const visible = useMemo(
     () =>
@@ -42,7 +50,8 @@ export function MapPage() {
         type="button"
         role="switch"
         aria-checked={mapLayers[key]}
-        aria-labelledby={`${idPrefix}-label`}
+        aria-pressed={mapLayers[key]}
+        aria-label={`${label}: ${mapLayers[key] ? 'on' : 'off'}`}
         aria-describedby={`${idPrefix}-desc`}
         onClick={() => setMapLayer(key, !mapLayers[key])}
         style={{
@@ -79,6 +88,41 @@ export function MapPage() {
       <p id="map-intel-lede" style={{ color: 'var(--aura-muted)' }}>
         Layers and POIs persist across reloads (local device).
       </p>
+
+      <div style={{ marginBottom: 16 }}>
+        <button
+          type="button"
+          onClick={() => {
+            setDemoRouteMsg('Demo only — live routing is not connected in this build.');
+            if (demoMsgTimer.current) clearTimeout(demoMsgTimer.current);
+            demoMsgTimer.current = setTimeout(() => setDemoRouteMsg(null), 5000);
+          }}
+          aria-label="Find safest route — demo only; shows a placeholder message and does not compute a real route"
+          style={{
+            padding: '12px 18px',
+            borderRadius: 14,
+            border: 'none',
+            background: 'var(--aura-status-ok)',
+            color: '#fff',
+            fontWeight: 600,
+            cursor: 'pointer',
+            width: '100%',
+            maxWidth: 320,
+          }}
+        >
+          Find safest route (demo)
+        </button>
+        {demoRouteMsg ? (
+          <p
+            id="map-demo-route-status"
+            role="status"
+            aria-live="polite"
+            style={{ marginTop: 10, fontSize: 14, color: 'var(--aura-muted)' }}
+          >
+            {demoRouteMsg}
+          </p>
+        ) : null}
+      </div>
 
       <section aria-labelledby="map-intel-heading" aria-describedby="map-intel-lede">
         {toggleRow('map-layer-risk', 'Risk signals', 'risk', 'Areas to stay aware near')}
