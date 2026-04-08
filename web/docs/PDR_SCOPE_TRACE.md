@@ -25,6 +25,8 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 Cross-check for map intel and global HTML shell called out in [AURA-61](/AURA/issues/AURA-61) IC batches.
 
+**Implementation note:** Map intel UI is **`MapPage.tsx`** at **`/map`** only — there is **no** separate `MapIntel.tsx` page file; seed data/types live in `mapIntelSeed.ts` and render through `AuraMap`. Reconciles with [CTO spot-check](/AURA/issues/AURA-61#comment-4cc626c1-5e05-411d-a456-ce3fd5b16d51) / [link fix](/AURA/issues/AURA-61#comment-52b19e31-76cf-457a-8570-5cbab2bc1eed).
+
 | Topic | Verified in |
 |-------|-------------|
 | Map intel layers + demo route affordance | [`MapPage.tsx`](../src/pages/MapPage.tsx) (`/map`) |
@@ -123,3 +125,4 @@ _None at present._
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): **PDR §5 a11y gate** — UX Designer static/code review **PASS** on `8014df0` ([comment cbe4678c](/AURA/issues/AURA-59#comment-cbe4678c-4a66-43f3-8481-6f1ca0504d30)); optional human SR smoke on device still recommended. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 map + page chrome table; §5 rows for `MapPage` toggle `aria-label` / `aria-pressed`, demo route control + status, and `index.html` `theme-color`. |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): `RouteDocumentTitle` `/map` → **Map intel · Aura** (aligns with on-page `h1`). |
+| 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 **MapIntel.tsx** naming clarified — canonical surface is `MapPage.tsx` (`/map`); CTO wake [52b19e31](/AURA/issues/AURA-61#comment-52b19e31-76cf-457a-8570-5cbab2bc1eed). |
