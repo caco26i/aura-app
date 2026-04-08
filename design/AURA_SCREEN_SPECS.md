@@ -59,6 +59,46 @@ Visual intent: [`AURA_DESIGN_SYSTEM.md`](./AURA_DESIGN_SYSTEM.md). Loading / emp
 
 ---
 
+## Map surfaces: tile loading, busy states, and composition (AURA-28 / AURA-257)
+
+**Normative UX inventory:** [`web/docs/UX_EMPTY_LOADING_SAFETY.md`](../web/docs/UX_EMPTY_LOADING_SAFETY.md) §1 (**MapPage**, **AuraMap** rows) and §2.1 — map tile loading is **shipped**; this section is the **screen-spec** contract for product and eng so routing/shell docs stay aligned with that inventory.
+
+### Shared implementation: `AuraMap`
+
+Leaflet embeds use **`web/src/components/AuraMap.tsx`** only. Today it is mounted from:
+
+| Surface | Route / context | Typical height | Notes |
+|--------|------------------|----------------|-------|
+| **Map & Intel** | `/map` (`MapPage.tsx`) | 340px | Full intel UI: layer toggles, demo route control, POI list; map block is one section inside the page. |
+| **Journey (live tracking)** | `/journey/active` (`JourneyActive.tsx`) | 320px | In-flow map with double-tap → silent emergency sheet; uses `visibleIntel` features from context. |
+
+### Expected presentation while tiles are not ready
+
+1. **Container** — Outer map shell uses `role="application"` and `aria-label="Map"`. **`aria-busy={true}`** while tiles are loading; cleared on successful tile `load` or after a **15s** fallback timeout so assistive tech and scripts do not stay stuck in a busy state.
+2. **Visual overlay** — While busy, a **semi-opaque layer** (`aria-hidden`) covers the map viewport so users are not interacting with a half-painted map. It is decorative only; the status line carries the accessible name of the loading state.
+3. **Status copy** — A **sibling** line below the map frame uses **`role="status"`** and the string *Loading map…* while `aria-busy` is true. Treat this as the **primary polite announcement** for tile readiness (implicit `aria-live="polite"` where supported). **Do not** duplicate the same message in a separate live region.
+
+### `aria-busy` and live regions (guidance)
+
+- **Map** — Busy flag lives on the **map application** wrapper (not on the whole page). Page-level `role="status"` / `aria-live` for other concerns (e.g. Home safe/alert headline, MapPage layer hints) **must remain separate** identifiers so screen readers can distinguish *map tiles loading* from *hub alert state* or *all map layers off*.
+- **Errors** — Tile failures are **telemetry-only** in the current build (`tileerror` → observability). They **do not** surface as `role="alert"` on the map path; reserve alerts for actionable API / journey failures (see UX spec). A future **user-visible tile retry** would be a product change and likely a **CTO-owned** follow-up, not a tweak inside this spec alone.
+
+### Composition with empty and offline-related patterns
+
+| Scenario | How it composes with map loading |
+|----------|----------------------------------|
+| **MapPage — all layers off** | The “layers off” hint is a **`role="status"`** pattern about **POI visibility**, independent of whether tiles are still loading. If both apply, loading overlay + *Loading map…* take precedence visually until tiles are ready; the empty-layer hint remains valid for **zero visible features** once the map is interactive. |
+| **JourneyActive — no active journey** | The **empty journey** state is a **full-screen** message (no `AuraMap` mounted). There is no map loading state until a journey exists. |
+| **JourneyActive — API / share errors** | Errors below the map use **`role="alert"`**. Map loading must **not** use alert for parity with UX §3 / §2.3. |
+| **Offline / network** | There is **no** dedicated offline string on the map surface in MVP; offline journey/SOS copy lives in **`auraApiMessages.ts`** and journey CTAs. Map tiles may fail silently from the user’s perspective; do not imply a separate “offline map” empty state unless product adds one. |
+| **Home hub** | **Shipped:** **Home does not embed `AuraMap`.** The hub’s **`role="status"`** + **`aria-live="polite"`** headline (*Safe.* / *Alert active.*) is **global status only**, not map loading. Users hit map loading behavior by navigating to **Map intel** or **Live tracking**. If product adds a **Home map preview** later, it **must** reuse **`AuraMap`** (or the same **aria-busy + overlay + status line** contract) so behavior matches [`UX_EMPTY_LOADING_SAFETY.md`](../web/docs/UX_EMPTY_LOADING_SAFETY.md). |
+
+### Engineering handoff pointer
+
+Short implementation checklist and CTO spawn note: [`AURA_MAP_TILE_LOADING_HANDOFF.md`](./AURA_MAP_TILE_LOADING_HANDOFF.md).
+
+---
+
 ## 7. Data visibility & local storage (cross-surface)
 
 Authoritative UX copy and structure: [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §3–§4 (trust surfaces, settings clarity). PDR §7 lists that doc in the [detail index](./AURA_PDR.md#7-traceability--child-work); this section ties **shipped shell** behavior to those requirements.

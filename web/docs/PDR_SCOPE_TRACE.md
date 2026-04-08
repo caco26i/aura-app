@@ -96,7 +96,7 @@ _None at present._
 ### Resolved vs earlier gap register
 
 1. **Global error boundary** — `AuraErrorBoundary` in [`web/src/App.tsx`](../src/App.tsx); inventory updated in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md).
-2. **Map loading affordance** — Shipped in [`web/src/components/AuraMap.tsx`](../src/components/AuraMap.tsx) (`aria-busy`, overlay, status copy).
+2. **Map loading affordance** — Shipped in [`web/src/components/AuraMap.tsx`](../src/components/AuraMap.tsx) (`aria-busy`, overlay, status copy). IC screen-spec closure: [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) **Map surfaces** § + [`design/AURA_MAP_TILE_LOADING_HANDOFF.md`](../../design/AURA_MAP_TILE_LOADING_HANDOFF.md) ([AURA-257](/AURA/issues/AURA-257)); product gap register remains closed vs [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md).
 
 ---
 
@@ -104,6 +104,7 @@ _None at present._
 
 | Date | Change |
 |------|--------|
+| 2026-04-08 | [AURA-257](/AURA/issues/AURA-257): map tile loading / busy-state spec + eng handoff note linked from gap register row above. |
 | 2026-04-08 | Initial trace + gap register for [AURA-47](/AURA/issues/AURA-47). |
 | 2026-04-08 | §4.2 verification row expanded + `invalid_journey_id` journey copy; trace link for [AURA-49](/AURA/issues/AURA-49). |
 | 2026-04-08 | §5 trace rows; SOS FAB gap closed vs screen specs; [AURA-50](/AURA/issues/AURA-50) telemetry for `X-Aura-Anomaly` on successful API calls. |
