@@ -27,7 +27,7 @@ Routing reference: [`design/AURA_SCREEN_SPECS.md`](./design/AURA_SCREEN_SPECS.md
 
 ## Screenshots
 
-Use real product captures so newcomers see Aura at a glance. Add images **after** `main` is on GitHub (or in the same PR as go-public) so paths resolve on the default branch.
+Use real product captures so newcomers see Aura at a glance. With `main` on GitHub, add images whenever you have stable UI shots; use the same PR as visual changes when possible so paths always resolve on the default branch.
 
 1. **Home / safety dashboard** — replace `<!-- TODO: docs/assets/screenshot-home.png -->` with `![Aura home — safety dashboard](docs/assets/screenshot-home.png)` (adjust alt text to match the UI).
 2. **Live journey** — `docs/assets/screenshot-journey.png`
@@ -107,11 +107,11 @@ The **server** package documents API env vars and routes in [`server/README.md`]
 
 ## Publishing to GitHub (maintainers)
 
-Use this checklist when the canonical remote is empty or you are wiring **write** access for the first time. It mirrors the board-facing thread for **AURA-20** (*publish Aura to the project GitHub*).
+Use this checklist when the remote is **new or empty**, you are wiring **write** access for the first time, or you are onboarding a fork. The canonical public remote for Aura today is **`https://github.com/caco26i/aura-app`**; always double-check with `git remote -v` on your machine.
 
 ### Before you push
 
-1. **Repo access** — confirm you can push to `https://github.com/Chrisdugamo/aura-app` (org/repo permissions or fork + PR if that is the agreed model).
+1. **Repo access** — confirm you can push to the URL shown by `git remote -v` (for the upstream above: HTTPS `https://github.com/caco26i/aura-app.git` or SSH `git@github.com:caco26i/aura-app.git`; forks use their own owner/repo).
 2. **Local tree** — on `main`, clean working tree, `npm ci` + `npm run build` under `web/` (and any release checks you use) passing.
 3. **Tip alignment** — if your checkout predates recent README/docs-only commits, merge or cherry-pick so this file includes this section before advertising the repo.
 
@@ -142,7 +142,7 @@ Managed automation without interactive login must use **non-interactive** auth (
 1. Open **github.com** → this repo → default branch `main` → rendered root `README.md`. Confirm code blocks, tables, and **relative links** (including `blob/main`-style paths from the GitHub UI) read correctly.
 2. Confirm the tip matches the intended release (README + `web/` + `server/` as intended).
 3. **Public README hygiene** — skim root and [`web/README.md`](./web/README.md) in the browser for anything that should stay **internal-only** (VPN URLs, private board links, staging hosts); fix in a follow-up commit if needed.
-4. Close or hand off **AURA-20** on the internal board per CTO agreement (remote tip vs local release criteria).
+4. **Process** — if your team tracks releases internally, close out the publish item once the default branch matches what you ship (docs, `web/`, `server/`).
 
 ---
 
