@@ -1,5 +1,9 @@
 # Observability (Aura web)
 
+## API request correlation (authoritative server)
+
+The Aura API (`server/`) sets **`X-Request-Id`** on every HTTP response. Clients may send **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max 128 characters); invalid or oversized values are ignored and a new UUID is used. JSONL audit events written by the API include the same value as **`requestId`** so operators can join access logs, audit files, and client-reported ids. Details: [`API_CONTRACT.md`](./API_CONTRACT.md) (transport + response headers).
+
 ## Structured logs
 
 The app emits **one JSON object per line** prefixed with `[aura.telemetry]` from `src/observability/auraTelemetry.ts`.

@@ -32,6 +32,36 @@ const JOURNEY_JSONL_PATH =
   path.join(process.cwd(), 'data', 'journeys.jsonl');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
+/** Max length for client-supplied `X-Request-Id` / `X-Correlation-Id` (printable ASCII only). */
+const REQUEST_ID_MAX_LEN = 128;
+
+/**
+ * @param {unknown} raw
+ * @returns {string | null}
+ */
+function tryUseIncomingRequestId(raw) {
+  if (typeof raw !== 'string') return null;
+  const s = raw.trim();
+  if (s.length === 0 || s.length > REQUEST_ID_MAX_LEN) return null;
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s.charCodeAt(i);
+    if (c < 0x20 || c > 0x7e) return null;
+  }
+  return s;
+}
+
+/**
+ * @param {import('express').Request} req
+ * @returns {string}
+ */
+function resolveAuraRequestId(req) {
+  const fromReqId = tryUseIncomingRequestId(req.headers['x-request-id']);
+  if (fromReqId) return fromReqId;
+  const fromCorr = tryUseIncomingRequestId(req.headers['x-correlation-id']);
+  if (fromCorr) return fromCorr;
+  return randomUUID();
+}
+
 const journeyRegistry = createJourneyRegistry({
   sqlitePath: JOURNEY_SQLITE_PATH,
   jsonlPath: JOURNEY_JSONL_PATH,
@@ -190,7 +220,7 @@ function journeyOwnerOrRespond(journeyIdUuid, req, res, route) {
   const owner = actorKey(req);
   const registered = journeyRegistry.getOwner(journeyIdUuid);
   if (!registered) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.journey_not_found',
       route,
@@ -202,7 +232,7 @@ function journeyOwnerOrRespond(journeyIdUuid, req, res, route) {
     return false;
   }
   if (registered !== owner) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.journey_forbidden',
       route,
@@ -217,7 +247,7 @@ function journeyOwnerOrRespond(journeyIdUuid, req, res, route) {
 }
 
 function auditRateLimited(route, req) {
-  appendAudit({
+  appendAuditFromReq(req, {
     ts: new Date().toISOString(),
     type: 'audit.rate_limited',
     route,
@@ -259,6 +289,14 @@ function appendAudit(entry) {
   ensureAuditDir();
   const line = JSON.stringify(entry) + '\n';
   fs.appendFileSync(AUDIT_LOG_PATH, line, { encoding: 'utf8' });
+}
+
+/** @param {import('express').Request} req @param {Record<string, unknown>} entry */
+function appendAuditFromReq(req, entry) {
+  appendAudit({
+    ...entry,
+    requestId: req.auraRequestId,
+  });
 }
 
 function bearerAccepted(rawToken) {
@@ -394,6 +432,12 @@ const imSafeLimiter = rateLimit({
 
 const app = express();
 app.set('trust proxy', 1);
+app.use((req, res, next) => {
+  const requestId = resolveAuraRequestId(req);
+  req.auraRequestId = requestId;
+  res.setHeader('X-Request-Id', requestId);
+  next();
+});
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -404,8 +448,14 @@ app.use(
   cors({
     origin: CORS_ORIGIN === '*' ? true : CORS_ORIGIN.split(',').map((s) => s.trim()),
     methods: ['POST', 'GET', 'OPTIONS'],
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Aura-Device-Fingerprint'],
-    exposedHeaders: ['X-Aura-Anomaly'],
+    allowedHeaders: [
+      'Authorization',
+      'Content-Type',
+      'X-Aura-Device-Fingerprint',
+      'X-Request-Id',
+      'X-Correlation-Id',
+    ],
+    exposedHeaders: ['X-Aura-Anomaly', 'X-Request-Id'],
   }),
 );
 app.use(express.json({ limit: JSON_BODY_LIMIT }));
@@ -456,7 +506,7 @@ app.post(
   (req, res) => {
   const parsed = emptyBodySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.validation_failed',
       route: 'journeys-create',
@@ -470,7 +520,7 @@ app.post(
   const journeyId = randomUUID();
   const owner = actorKey(req);
   journeyRegistry.register(journeyId, owner);
-  appendAudit({
+  appendAuditFromReq(req, {
     ts: new Date().toISOString(),
     type: 'journey.created',
     journeyId,
@@ -490,7 +540,7 @@ app.post(
   (req, res) => {
   const parsed = emergencyBodySchema.safeParse(req.body);
   if (!parsed.success) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.validation_failed',
       route: 'emergency-alerts',
@@ -520,7 +570,7 @@ app.post(
     anomalyFlags,
     consentModel: 'trusted_contacts_local_only',
   };
-  appendAudit(entry);
+  appendAuditFromReq(req, entry);
   if (anomalyFlags.length) {
     res.setHeader('X-Aura-Anomaly', anomalyFlags.join(','));
   }
@@ -538,7 +588,7 @@ app.post(
   (req, res) => {
     const jid = uuidSchema.safeParse(req.params.journeyId);
     if (!jid.success) {
-      appendAudit({
+      appendAuditFromReq(req, {
         ts: new Date().toISOString(),
         type: 'audit.validation_failed',
         route: 'location-shares',
@@ -554,7 +604,7 @@ app.post(
     }
     const bodyParsed = locationShareBodySchema.safeParse(req.body ?? {});
     if (!bodyParsed.success) {
-      appendAudit({
+      appendAuditFromReq(req, {
         ts: new Date().toISOString(),
         type: 'audit.validation_failed',
         route: 'location-shares',
@@ -570,7 +620,7 @@ app.post(
     const anomalyFlags = shareAnomalyFlags(actorKey(req));
     const payload = bodyParsed.data;
     const hasCoords = payload.latitude !== undefined && payload.longitude !== undefined;
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'journey.location_share',
       shareId,
@@ -611,7 +661,7 @@ app.post(
   (req, res) => {
   const jid = uuidSchema.safeParse(req.params.journeyId);
   if (!jid.success) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.validation_failed',
       route: 'im-safe',
@@ -627,7 +677,7 @@ app.post(
   }
   const bodyParsed = emptyBodySchema.safeParse(req.body ?? {});
   if (!bodyParsed.success) {
-    appendAudit({
+    appendAuditFromReq(req, {
       ts: new Date().toISOString(),
       type: 'audit.validation_failed',
       route: 'im-safe',
@@ -640,7 +690,7 @@ app.post(
     return;
   }
   const receivedAt = new Date().toISOString();
-  appendAudit({
+  appendAuditFromReq(req, {
     ts: receivedAt,
     type: 'journey.im_safe',
     journeyId: jid.data,

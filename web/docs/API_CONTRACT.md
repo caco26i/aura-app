@@ -13,6 +13,7 @@ Canonical server behavior: [`../../server/README.md`](../../server/README.md). T
 | Base URL | Same-origin in dev (Vite proxy → `server/`), or `VITE_AURA_API_URL` when set |
 | Auth | `Authorization: Bearer <token>` — **static secret** matching `AURA_API_BEARER_TOKEN` (and optional `AURA_API_BEARER_TOKEN_ALT`), **or** a **three-segment HS256 JWT** signed with `AURA_API_BFF_JWT_SECRET` with claim **`sub`** (stable user id) and valid **`exp`**. Optional `iss` / `aud` enforced when `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE` are set. Other schemes or missing `Bearer ` → **401** `unauthorized`. Invalid JWT or wrong static secret → **403** `forbidden`. |
 | Fingerprint | Optional `X-Aura-Device-Fingerprint` (opaque); server stores a hash in audit only |
+| Correlation | Optional `X-Request-Id` or `X-Correlation-Id` — printable ASCII, max **128** chars; server echoes **`X-Request-Id`** on every response (generated UUID when omitted or invalid) |
 | Content-Type | `application/json` on POST bodies when a body is sent |
 | JSON body size | Default **32kb** per route (`express.json`); override with **`AURA_API_JSON_BODY_LIMIT`** (authoritative API) — aligned with the in-repo BFF |
 
@@ -67,6 +68,7 @@ The client reads **`error`** (string) for mapping; `detail` is diagnostic.
 | `X-Content-Type-Options: nosniff` | All responses | Reduces MIME sniffing risk for JSON API |
 | `X-Frame-Options: DENY` | All responses | Clickjacking hardening (API not intended in frames) |
 | `Referrer-Policy: no-referrer` | All responses | Limits referrer leakage on cross-origin navigations from error pages |
+| `X-Request-Id` | All responses | Same value as the request’s accepted id (from `X-Request-Id` / `X-Correlation-Id` when valid) or a server-generated UUID; correlate with JSONL audit `requestId` |
 | `X-Aura-Anomaly` | Optional on **successful** SOS or location-share | `noticeForAnomalyHeader()` → soft notice (still `ok: true`) |
 | Rate-limit headers | Standard `express-rate-limit` | Browser surfaces 429 via `userMessageForHttpFailure` |
 

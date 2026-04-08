@@ -64,6 +64,23 @@ describe('Aura API', () => {
     assert.equal(res.headers['referrer-policy'], 'no-referrer');
   });
 
+  test('responses include X-Request-Id on health and on 401 JSON errors', async () => {
+    const ok = await request(app).get('/health').expect(200);
+    const idOk = ok.headers['x-request-id'];
+    assert.ok(idOk && String(idOk).length > 0);
+    assert.match(String(idOk), /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    const ua = await request(app).post('/v1/journeys').send({}).expect(401);
+    const id401 = ua.headers['x-request-id'];
+    assert.ok(id401 && String(id401).length > 0);
+    assert.match(String(id401), /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
+  test('valid X-Correlation-Id is echoed as X-Request-Id', async () => {
+    const cid = 'client-trace-abc-99';
+    const res = await request(app).get('/health').set('X-Correlation-Id', cid).expect(200);
+    assert.equal(res.headers['x-request-id'], cid);
+  });
+
   test('error JSON responses include baseline security headers', async () => {
     const nf = await request(app).get('/v1/definitely-not-a-route').expect(404);
     assert.equal(nf.headers['x-content-type-options'], 'nosniff');
@@ -267,12 +284,13 @@ describe('Aura API', () => {
 
   test('append-only audit log receives journey.created', async () => {
     const beforeLen = fs.existsSync(auditPath) ? fs.readFileSync(auditPath, 'utf8').length : 0;
-    await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
+    const res = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
     const log = fs.readFileSync(auditPath, 'utf8');
     assert.ok(log.length > beforeLen);
     const last = log.trim().split('\n').pop();
     const row = JSON.parse(last);
     assert.equal(row.type, 'journey.created');
+    assert.equal(row.requestId, res.headers['x-request-id']);
   });
 
   test('BFF JWT: same sub across two tokens can im-safe on owned journey', async () => {
