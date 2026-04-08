@@ -6,7 +6,7 @@
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
-**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only.
+**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`); Settings **clear-local** modal copy is not in a dedicated e2e yet (optional follow-up if copy regresses).
 
 ---
 
@@ -160,6 +160,10 @@ Do not duplicate full tables here; implement alongside onboarding/trust work whe
 - [x] Settings: data explainer + clear-local flow  
 - [x] Update [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) with new route(s)  
 - [x] Telemetry: `onboarding_completed`, `share_location_primer_shown`, `local_data_cleared` (names illustrative)
+
+### Automated regression ([AURA-209](/AURA/issues/AURA-209))
+
+Playwright (Chromium, `web/` dev server): **19 passed** — `/welcome` flow, `/emergency` before onboarding, share primer + SOS + settings privacy deep link in `smoke`. **Gap:** no isolated spec for Settings *Reset Aura on this device* / clear-local modal; ship one if this surface churns.
 
 ---
 
