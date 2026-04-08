@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { useAura } from '../context/useAura';
 import { isEncuentroCheckInNudgeDue, parseMeetingLocalMs } from './modoCitaCheckIn';
@@ -37,20 +44,34 @@ function checkInShellCopy(
   )}. Próximo recordatorio local sugerido en ${formatDurationEs(nextTick)}. Puedes usar el aviso en pantalla o las notificaciones del navegador (opcional).`;
 }
 
+const WALL_CLOCK_TICK_MS = 30_000;
+
+function useWallClockMs(): number {
+  const ref = useRef(0);
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const bump = () => {
+        ref.current = Date.now();
+        onStoreChange();
+      };
+      bump();
+      const id = window.setInterval(bump, WALL_CLOCK_TICK_MS);
+      return () => window.clearInterval(id);
+    },
+    () => ref.current,
+    () => 0,
+  );
+}
+
 export function ModoCita() {
   const { encuentroDraft, updateEncuentroDraft } = useAura();
-  const [tick, setTick] = useState(0);
+  const wallTimeMs = useWallClockMs();
   const [tabVisible, setTabVisible] = useState(
     () => typeof document !== 'undefined' && document.visibilityState === 'visible',
   );
   const prevMeetingMsRef = useRef<number | null | undefined>(undefined);
   const notifiedHiddenRef = useRef(false);
   const titleBaseRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const id = window.setInterval(() => setTick((n) => n + 1), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
 
   useEffect(() => {
     const onVis = () => {
@@ -84,10 +105,8 @@ export function ModoCita() {
     updateEncuentroDraft({ encuentroLastLocalCheckInAckMs: Date.now() });
   }, [meetingMs, encuentroDraft.encuentroLastLocalCheckInAckMs, updateEncuentroDraft]);
 
-  const now = Date.now();
-  void tick;
   const nudgeDue = isEncuentroCheckInNudgeDue(
-    now,
+    wallTimeMs,
     meetingMs,
     encuentroDraft.encuentroLastLocalCheckInAckMs,
     encuentroDraft.checkInIntervalMinutes,
@@ -145,8 +164,8 @@ export function ModoCita() {
   }, [nudgeDue, tabVisible]);
 
   const liveStatus = useMemo(() => {
-    return checkInShellCopy(Date.now(), meetingMs, encuentroDraft.checkInIntervalMinutes);
-  }, [meetingMs, encuentroDraft.checkInIntervalMinutes, tick]);
+    return checkInShellCopy(wallTimeMs, meetingMs, encuentroDraft.checkInIntervalMinutes);
+  }, [wallTimeMs, meetingMs, encuentroDraft.checkInIntervalMinutes]);
 
   const notificationSupported = typeof Notification !== 'undefined';
   const permissionLabel = !notificationSupported
