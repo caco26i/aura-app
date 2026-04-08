@@ -35,7 +35,7 @@ const TILE_LOAD_TIMEOUT_MS = 15_000;
 
 export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProps) {
   const [tilesBusy, setTilesBusy] = useState(true);
-  const fallbackClearTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const fallbackClearTimerRef = useRef<number | null>(null);
 
   const clearFallbackTimer = () => {
     if (fallbackClearTimerRef.current !== null) {

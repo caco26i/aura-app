@@ -21,6 +21,11 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
 | `/transport` | Modo transporte (inside shell; same note) |
 | `/checkin` | Check-in IA (inside shell; same note) |
 
+### Modo Transporte & Check-in IA (wireframe)
+
+- **`/transport` (`ModoTransporte.tsx`)** — Local-only wireframe: estado vacío vs. viaje de demostración; tarjeta de verificación (placa de ejemplo, placeholders de foto); casillas de confirmación; acciones **Posible desvío de ruta** y **No soy yo / no es mi viaje** que solo actualizan copy en pantalla (sin POST). Región **`#transport-live-status`** con `role="status"`, `aria-live="polite"`, `aria-atomic="true"` para mensajes dinámicos. Tono alineado a [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md) / [`web/docs/UX_EMPTY_LOADING_SAFETY.md`](../web/docs/UX_EMPTY_LOADING_SAFETY.md) (calma + siguiente paso).
+- **`/checkin` (`CheckinInteligente.tsx`)** — Seis disparadores tipo plantilla, respuestas rápidas tappeables e **historial de demostración** en memoria (máx. 12 entradas). **`#checkin-ia-status`** con `role="status"`, `aria-live="polite"`, `aria-atomic="true"` para el estado del disparador y última acción. Sin SMS/push hasta contrato de API.
+
 ### Deep links & unknown paths
 
 - **Canonical route list** — Only the paths in the table above are first-class Aura routes; the source of truth for the SPA is `web/src/App.tsx` (plus `RouteDocumentTitle` for tab titles). When adding a route, update this table and the trace row for §4.1 in [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md).
