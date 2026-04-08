@@ -6,7 +6,7 @@
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
-**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`); Settings **clear-local** modal copy is not in a dedicated e2e yet (optional follow-up if copy regresses).
+**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`). **Clear-local modal:** acceptance criteria and Playwright handoff are in **§4.3** ([AURA-218](/AURA/issues/AURA-218)); implementation of the dedicated spec remains with engineering.
 
 ---
 
@@ -134,6 +134,64 @@
 
 - Replace vague *Values persist locally; sync strategy in docs.* with *Saved in this browser. Connect Aura for sync when available.* (or link to `BETA_BACKEND.md` for internal beta only — avoid raw doc paths in production UI; use short sentence.)
 
+### 4.3 Clear-local confirmation modal — e2e acceptance criteria & Playwright handoff ([AURA-218](/AURA/issues/AURA-218))
+
+**Source of truth in code:** [`web/src/pages/Settings.tsx`](https://github.com/caco26i/aura-app/blob/main/web/src/pages/Settings.tsx) (`<dialog>` + `clearLocalAuraData` from [`AuraContext.tsx`](https://github.com/caco26i/aura-app/blob/main/web/src/context/AuraContext.tsx)). If product copy changes, update the implementation first, then this section.
+
+#### Canonical strings (exact)
+
+| Surface | String |
+|--------|--------|
+| Reset section `h2` | `Reset Aura on this device` |
+| Reset section body | `Remove all Aura data stored in this browser. You can set everything up again afterward.` |
+| Open-dialog control | `Clear local Aura data` (page `button`, not dialog) |
+| Dialog accessible name (`h2#clear-dialog-title`) | `Clear local Aura data?` |
+| Dialog body | `This removes contacts, active journey, settings, and onboarding status from this browser. It does not delete server history if you used a live account.` |
+| Safe action | `Cancel` |
+| Confirm destructive action | `Clear data` (must **not** be generic *OK* / *Yes*) |
+
+#### Destructive confirm pattern (UX contract)
+
+- **Two-step:** tapping the page control only opens the modal; data is cleared only after **Clear data**.
+- **Safe default in tab order:** first focusable control inside the dialog is **Cancel**; **Clear data** follows (DOM order in `Settings.tsx`).
+- **Dismiss without clearing:** **Cancel** or **Escape** closes the native `<dialog>` without calling `clearLocalAuraData`.
+- **Telemetry:** successful clear emits `local_data_cleared` before storage removal + reload (see `AuraContext`).
+
+#### Focus & accessibility
+
+- Dialog uses `aria-labelledby="clear-dialog-title"`; the title is an `h2` inside the dialog (matches other Aura modal tests that key `getByRole('dialog', { name: … })` off the heading).
+- After `showModal()`, expect focus to move into the dialog on a focusable control (Chromium: typically the first focusable — **Cancel**). E2e should assert **Cancel** is focused when the dialog opens unless engineering intentionally changes order.
+
+#### Post-confirm behavior (assertable)
+
+- `localStorage` key `aura:v1` is removed, then `window.location.reload()` runs.
+- After reload, persisted onboarding is absent → `RequireOnboarding` sends the user to `/welcome` (same as first visit).
+
+#### Playwright scenario outline (for `web/e2e/` — mirror [AURA-209](/AURA/issues/AURA-209) style)
+
+Reuse the **`aura:v1` bootstrap** pattern from [`smoke.spec.ts`](https://github.com/caco26i/aura-app/blob/main/web/e2e/smoke.spec.ts) (`onboardingCompleted: true`) so `/settings` is reachable.
+
+**Scenario A — open, copy, focus, cancel (no side effects)**
+
+1. `page.goto('/settings')`; assert `h1` **Settings** and `h2` **Reset Aura on this device**.
+2. Optional scope for the trigger: `page.locator('section[aria-labelledby="reset-heading"]').getByRole('button', { name: 'Clear local Aura data' })` (avoids coupling to unrelated copy).
+3. Click trigger → `const dialog = page.getByRole('dialog', { name: 'Clear local Aura data?' });` `await expect(dialog).toBeVisible()`.
+4. Assert dialog `h2` and body text match the table above (`toHaveText` / substring matchers as in `settings-beta-bff.spec.ts`).
+5. `await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused()`.
+6. Click **Cancel** → `await expect(dialog).toBeHidden()`; `expect(await page.evaluate(() => localStorage.getItem('aura:v1'))).toBeTruthy()` (or match your bootstrap payload).
+
+**Scenario B — confirm clear (reload + onboarding)**
+
+1. Same bootstrap + `/settings`.
+2. Open dialog → click **Clear data** inside `dialog`.
+3. Wait for navigation after reload (e.g. `await page.waitForURL(/\/welcome/)` or `Promise.all([page.waitForURL(...), dialog.getByRole('button', { name: 'Clear data' }).click()])` — pick a pattern consistent with other specs).
+4. Assert `localStorage.getItem('aura:v1')` is `null` **after** reload settles.
+5. Assert welcome entry visible (e.g. **Welcome to Aura** `h1`/`h2` per [`welcome-onboarding.spec.ts`](https://github.com/caco26i/aura-app/blob/main/web/e2e/welcome-onboarding.spec.ts)).
+
+**Selectors:** prefer **`getByRole`** (matches `smoke.spec.ts` / emergency dialog). No `data-testid` is required today; add stable test ids only if role queries become ambiguous.
+
+**Out of scope for UX doc:** implementing the spec file — assign to [CTO](/AURA/agents/cto) or IC as a small follow-up task.
+
 ---
 
 ## 5. Consistency pass (with [AURA-28](/AURA/issues/AURA-28))
@@ -163,7 +221,7 @@ Do not duplicate full tables here; implement alongside onboarding/trust work whe
 
 ### Automated regression ([AURA-209](/AURA/issues/AURA-209))
 
-Playwright (Chromium, `web/` dev server): **19 passed** — `/welcome` flow, `/emergency` before onboarding, share primer + SOS + settings privacy deep link in `smoke`. **Gap:** no isolated spec for Settings *Reset Aura on this device* / clear-local modal; ship one if this surface churns.
+Playwright (Chromium, `web/` dev server): **19 passed** — `/welcome` flow, `/emergency` before onboarding, share primer + SOS + settings privacy deep link in `smoke`. **Clear-local modal:** implement scenarios **A/B** from **§4.3** when adding coverage ([AURA-218](/AURA/issues/AURA-218) handoff).
 
 ---
 
