@@ -66,7 +66,8 @@ export function JourneyActive() {
       <div>
         <h1 style={{ marginTop: 0 }}>No active journey</h1>
         <p style={{ color: 'var(--aura-muted)' }} role="status">
-          Start a journey to enable live tracking and backend actions.
+          You don&apos;t have an active journey on this device. Start one to enable live tracking and backend actions when
+          Aura is connected.
         </p>
         {contacts.length === 0 ? (
           <p>
@@ -145,7 +146,7 @@ export function JourneyActive() {
         <p style={{ margin: '0 0 6px', fontWeight: 600 }}>
           Double-tap the map to open emergency options (silent path).
         </p>
-        <p style={{ margin: 0, color: 'var(--aura-muted)' }}>Demo: gesture may vary by device.</p>
+        <p style={{ margin: 0, color: 'var(--aura-muted)' }}>The exact gesture can vary by device and browser.</p>
       </div>
       <AuraMap
         features={visibleIntel}
