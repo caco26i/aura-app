@@ -18,6 +18,8 @@ services:
     environment:
       PORT: "8787"
       AURA_API_BEARER_TOKEN: ${AURA_API_BEARER_TOKEN:-}
+      AURA_API_DEPLOY_VERSION: ${AURA_API_DEPLOY_VERSION:-}
+      AURA_API_GIT_SHA: ${AURA_API_GIT_SHA:-}
       AUDIT_LOG_PATH: /app/data/audit.log
       AURA_API_JOURNEY_STORE_SQLITE_PATH: /app/data/journeys.sqlite
       AURA_API_JOURNEY_STORE_JSONL_PATH: /app/data/journeys.jsonl

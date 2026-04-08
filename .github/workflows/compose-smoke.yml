@@ -15,6 +15,9 @@ jobs:
       - name: Ephemeral API token for compose (.env)
         run: |
           echo "AURA_API_BEARER_TOKEN=$(openssl rand -hex 24)" > .env
+          short_sha="${GITHUB_SHA:0:7}"
+          echo "AURA_API_GIT_SHA=${short_sha}" >> .env
+          echo "AURA_API_DEPLOY_VERSION=compose-smoke" >> .env
 
       - name: Build and start stack
         run: docker compose up -d --build
@@ -36,8 +39,10 @@ jobs:
             fi
             sleep 2
           done
-          curl -fsS "http://127.0.0.1:8080/health"
-          echo
+          health_json="$(curl -fsS "http://127.0.0.1:8080/health")"
+          echo "${health_json}"
+          echo "${health_json}" | jq -e --arg sha "${GITHUB_SHA:0:7}" '.gitSha == $sha' >/dev/null
+          echo "${health_json}" | jq -e '.deployVersion == "compose-smoke"' >/dev/null
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
 
@@ -59,6 +64,9 @@ jobs:
           VITE_GOOGLE_CLIENT_ID=ci-smoke-placeholder.apps.googleusercontent.com
           AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080
           EOF
+          short_sha="${GITHUB_SHA:0:7}"
+          echo "AURA_API_GIT_SHA=${short_sha}" >> .env
+          echo "AURA_API_DEPLOY_VERSION=compose-smoke" >> .env
 
       - name: Build and start stack (merged compose)
         run: docker compose -f docker-compose.yml -f docker-compose.bff.yml up -d --build
@@ -80,8 +88,10 @@ jobs:
             fi
             sleep 2
           done
-          curl -fsS "http://127.0.0.1:8080/health"
-          echo
+          health_json="$(curl -fsS "http://127.0.0.1:8080/health")"
+          echo "${health_json}"
+          echo "${health_json}" | jq -e --arg sha "${GITHUB_SHA:0:7}" '.gitSha == $sha' >/dev/null
+          echo "${health_json}" | jq -e '.deployVersion == "compose-smoke"' >/dev/null
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"

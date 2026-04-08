@@ -40,6 +40,8 @@ services:
     environment:
       AURA_API_BEARER_TOKEN: ""
       AURA_API_BFF_JWT_SECRET: ${AURA_API_BFF_JWT_SECRET:?Set AURA_API_BFF_JWT_SECRET in .env}
+      AURA_API_DEPLOY_VERSION: ${AURA_API_DEPLOY_VERSION:-}
+      AURA_API_GIT_SHA: ${AURA_API_GIT_SHA:-}
 
   aura-web:
     build:
