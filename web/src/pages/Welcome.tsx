@@ -51,7 +51,7 @@ export function Welcome() {
           </h1>
           <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, fontSize: 16 }}>
             When you start a journey or use the map, your browser may ask for location. You can choose approximate or
-            precise sharing in Settings.
+            precise sharing under Location precision in Settings.
           </p>
           <button
             type="button"
@@ -122,7 +122,7 @@ export function Welcome() {
             </h1>
             <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, fontSize: 16 }}>
               When you start a journey or use the map, your browser may ask for location. You can choose approximate or
-              precise sharing in Settings.
+              precise sharing under Location precision in Settings.
             </p>
           </>
         ) : null}
