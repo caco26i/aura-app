@@ -112,6 +112,21 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
           echo
 
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-bff-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-bff-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.bff.yml down -v --remove-orphans
@@ -133,7 +148,7 @@ jobs:
       - name: Build and start stack (telemetry stub override)
         run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up -d --build
 
-      - name: Wait for /health then POST /ingest/aura via nginx proxy
+      - name: Wait for /health via aura-web (proxied)
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
@@ -150,6 +165,25 @@ jobs:
             fi
             sleep 2
           done
+
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-telemetry-proxy-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-telemetry-proxy-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-telemetry-proxy-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
+      - name: POST /ingest/aura via nginx proxy
+        run: |
+          set -euo pipefail
           code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
             -H "Content-Type: application/json" -d '{"smoke":true}')"
           echo "POST /ingest/aura HTTP ${code}"
@@ -244,6 +278,17 @@ jobs:
           echo
           curl -fsS "http://127.0.0.1:8080/aura-bff/health"
           echo
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-telemetry-proxy-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-bff-telemetry-proxy-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-bff-telemetry-proxy-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
           code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
             -H "Content-Type: application/json" -d '{"smoke":true}')"
           echo "POST /ingest/aura HTTP ${code}"
