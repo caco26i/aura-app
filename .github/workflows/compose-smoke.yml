@@ -98,7 +98,54 @@ jobs:
             docker compose logs --tail=120
             exit 1
           fi
-          echo "compose-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=$(jq -r '.data.journeyId' /tmp/aura_compose_journey.json)"
+          journey_id="$(jq -r '.data.journeyId' /tmp/aura_compose_journey.json)"
+          echo "compose-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=${journey_id}"
+
+          code="$(curl -sS -o /tmp/aura_compose_location_share.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/location-shares" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST .../location-shares: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_location_share.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.shareId | type == "string") and (.data.shareId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_compose_location_share.json >/dev/null; then
+            echo "::error::compose-smoke: POST .../location-shares JSON missing ok=true and data.shareId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_location_share.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          echo "compose-smoke POST .../location-shares ok: HTTP ${code}, shareId=$(jq -r '.data.shareId' /tmp/aura_compose_location_share.json)"
+
+          code="$(curl -sS -o /tmp/aura_compose_im_safe.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys/${journey_id}/im-safe" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}")"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST .../im-safe: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_im_safe.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.receivedAt | type == "string") and (.data.receivedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"))' /tmp/aura_compose_im_safe.json >/dev/null; then
+            echo "::error::compose-smoke: POST .../im-safe JSON missing ok=true and data.receivedAt (ISO-8601)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_im_safe.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          echo "compose-smoke POST .../im-safe ok: HTTP ${code}, receivedAt=$(jq -r '.data.receivedAt' /tmp/aura_compose_im_safe.json)"
 
       - name: Tear down
         if: always()
