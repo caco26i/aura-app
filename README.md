@@ -49,6 +49,7 @@ Alt text stays concrete and non-alarmist; voice rules: [`design/AURA_LAUNCH_UX.m
 
 | Path | Role |
 |------|------|
+| **(root)** | No workspace-level `package.json` — install and run npm scripts **inside** [`web/`](./web/) and [`server/`](./server/) separately (Node **20+** for both). |
 | [`web/`](./web/) | Vite + React + TypeScript SPA (maps, OAuth hook, app shell) |
 | [`server/`](./server/) | Aura API — validated POST routes, audit log, rate limits |
 | [`web/docs/`](./web/docs/) | Auth, deploy, security, observability, beta backend notes |

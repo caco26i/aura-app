@@ -41,7 +41,10 @@ On GitHub, the **Web lint & build** workflow runs `npm ci`, `npm run lint`, and 
 Production image: [`Dockerfile`](./Dockerfile) (Vite `dist/` + nginx, SPA fallback). For **web + API** together, use the repo root [`docker-compose.yml`](../docker-compose.yml) and [`docs/DEPLOY.md`](./docs/DEPLOY.md) (build-time `VITE_*`, token rotation, telemetry caveats).
 
 ```bash
-# from repo root, with AURA_API_BEARER_TOKEN in .env
-docker compose build aura-web
-docker compose up
+# from repo root
+cp .env.example .env
+# Edit .env — set AURA_API_BEARER_TOKEN for the default static-bearer stack (see .env.example)
+docker compose up --build
 ```
+
+Starts **`aura-api`** and **`aura-web`** (same as root [`README.md`](../README.md) *Full stack with Docker*).

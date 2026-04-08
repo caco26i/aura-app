@@ -46,7 +46,7 @@ Web deploy cross-links: [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md).
 
 ## Tests
 
-There is no separate `lint` script in this package’s `package.json`; quality gates are **`npm test`** (Node’s test runner + integration suites) and the [Server API tests](../../.github/workflows/server-tests.yml) workflow.
+There is no separate `lint` script in this package’s `package.json`; quality gates are **`npm test`** (Node’s test runner + integration suites) and the [Server API tests](../.github/workflows/server-tests.yml) workflow.
 
 ```bash
 npm test
