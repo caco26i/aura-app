@@ -61,6 +61,45 @@ jobs:
           fi
           echo "compose-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
 
+      - name: Assert POST /v1/journeys via nginx (static bearer)
+        run: |
+          set -euo pipefail
+          if [ ! -f .env ]; then
+            echo "::error::compose-smoke: .env missing (expected AURA_API_BEARER_TOKEN from prior step)"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          if [ -z "${AURA_API_BEARER_TOKEN:-}" ]; then
+            echo "::error::compose-smoke: AURA_API_BEARER_TOKEN is empty"
+            exit 1
+          fi
+          code="$(curl -sS -o /tmp/aura_compose_journey.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/journeys" \
+            -H "Authorization: Bearer ${AURA_API_BEARER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke POST /v1/journeys: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_journey.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.journeyId | type == "string") and (.data.journeyId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_compose_journey.json >/dev/null; then
+            echo "::error::compose-smoke: POST /v1/journeys JSON missing ok=true and data.journeyId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_compose_journey.json || true
+            echo "::endgroup::"
+            docker compose logs --tail=120
+            exit 1
+          fi
+          echo "compose-smoke POST /v1/journeys ok: HTTP ${code}, journeyId=$(jq -r '.data.journeyId' /tmp/aura_compose_journey.json)"
+
       - name: Tear down
         if: always()
         run: docker compose down -v --remove-orphans
