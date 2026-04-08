@@ -4,7 +4,7 @@
 
 - **Static SPA:** Build output is `web/dist` after `npm run build` in the `web` directory. Host on any static object store + CDN (S3 + CloudFront, Cloudflare Pages, Netlify, Vercel, etc.).
 - **Router:** Configure the host to **fallback all non-file routes to `index.html`** for React Router (`BrowserRouter`).
-- **Aura API:** Run the Node service in `../server` behind your edge (Fly.io, Cloud Run, ECS, etc.). Set `AURA_API_BEARER_TOKEN`, `AUDIT_LOG_PATH` (durable volume or shipped logs), and `CORS_ORIGIN` to your SPA origin. Point `VITE_AURA_API_URL` at the public API base URL for staging/prod builds (see `server/README.md`).
+- **Aura API:** Run the Node service in `../server` behind your edge (Fly.io, Cloud Run, ECS, etc.). Set `AURA_API_BEARER_TOKEN`, `AUDIT_LOG_PATH` (durable volume or shipped logs), and `CORS_ORIGIN` to your SPA origin. Point `VITE_AURA_API_URL` at the public API base URL for staging/prod builds (see `server/README.md`). **Container:** build from [`server/Dockerfile`](../../server/Dockerfile); example Compose with SQLite + audit volumes is [`server/docker-compose.yml`](../../server/docker-compose.yml).
 
 ## Environment separation
 

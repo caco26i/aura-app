@@ -17,6 +17,31 @@ npm install
 npm run dev
 ```
 
+## Docker
+
+The API image compiles **`better-sqlite3`** during `npm ci`, so the build stage uses **Debian bookworm-slim** with `python3`, `make`, and `g++`. The runtime image stays slim and reuses the compiled `node_modules` from the build stage.
+
+```bash
+cd server
+docker build -t aura-api:local .
+export AURA_API_BEARER_TOKEN="$(openssl rand -hex 24)"
+docker run --rm -e AURA_API_BEARER_TOKEN -p 8787:8787 \
+  -v aura-data:/app/data \
+  aura-api:local
+```
+
+**Compose (example):** [`docker-compose.yml`](./docker-compose.yml) mounts a named volume at `/app/data` and sets `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` under that path. Set `AURA_API_BEARER_TOKEN` in the environment or a `.env` file next to the compose file, then:
+
+```bash
+cd server
+docker compose up --build
+```
+
+- **Liveness:** `GET /health` (Docker `HEALTHCHECK` and compose `healthcheck` use this).
+- **Readiness:** `GET /ready` — use from your orchestrator or load balancer once at least one of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` is set and `/app/data` is writable (see route list above).
+
+Web deploy cross-links: [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md).
+
 ## Tests
 
 ```bash
