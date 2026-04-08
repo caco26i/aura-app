@@ -74,6 +74,15 @@ describe('Aura API', () => {
       .expect(403);
   });
 
+  test('mutating routes reject non-Bearer authorization scheme', async () => {
+    const res = await request(app)
+      .post('/v1/journeys')
+      .set('Authorization', 'Basic dGVzdA==')
+      .send({})
+      .expect(401);
+    assert.equal(res.body.error, 'unauthorized');
+  });
+
   test('POST /v1/journeys creates journey and accepts empty object body', async () => {
     const res = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
     assert.equal(res.body.ok, true);
