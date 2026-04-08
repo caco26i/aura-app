@@ -74,6 +74,27 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
+  test('journey: /journey/new → Start live tracking → /journey/active (API off, local UUID)', async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/journey/new');
+    await expect(page.getByRole('heading', { name: 'New journey', level: 1 })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Start live tracking' }).click();
+    await expect(page).toHaveURL(/\/journey\/active$/);
+    await expect(page.getByRole('heading', { name: 'Live tracking', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
   test('Map intel: layer toggle exposes switch role and aria-checked, no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
