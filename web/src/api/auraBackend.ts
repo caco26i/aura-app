@@ -18,7 +18,7 @@ import {
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export type BackendResult<T> =
-  | { ok: true; data: T; notice?: string }
+  | { ok: true; data: T; notice?: string; anomalyHeader?: string }
   | { ok: false; error: string; userMessage: string };
 
 function deviceFingerprint(): string | undefined {
@@ -77,10 +77,12 @@ async function remotePost<T>(path: string, body: unknown | undefined, surface: A
     }
     if (json && typeof json === 'object' && 'ok' in json && json.ok === true && 'data' in json) {
       const notice = noticeForAnomalyHeader(anomaly);
+      const trimmedAnomaly = anomaly?.trim() ?? '';
       return {
         ok: true,
         data: (json as { data: T }).data,
         ...(notice ? { notice } : {}),
+        ...(trimmedAnomaly ? { anomalyHeader: trimmedAnomaly } : {}),
       };
     }
     return {
@@ -116,7 +118,13 @@ export async function postImSafe(journeyId: string): Promise<BackendResult<{ rec
       'journey',
     );
     if (res.ok) {
-      emitTelemetry({ category: 'backend', event: 'success', operation: 'im_safe', journeyId });
+      emitTelemetry({
+        category: 'backend',
+        event: 'success',
+        operation: 'im_safe',
+        journeyId,
+        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+      });
     } else {
       emitTelemetry({ category: 'backend', event: 'error', operation: 'im_safe', journeyId, error: res.error });
     }
@@ -137,7 +145,13 @@ export async function postShareLocation(journeyId: string): Promise<BackendResul
       'journey',
     );
     if (res.ok) {
-      emitTelemetry({ category: 'backend', event: 'success', operation: 'share_location', journeyId });
+      emitTelemetry({
+        category: 'backend',
+        event: 'success',
+        operation: 'share_location',
+        journeyId,
+        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+      });
     } else {
       emitTelemetry({
         category: 'backend',
@@ -160,7 +174,13 @@ export async function postEmergencyAlert(mode: 'silent' | 'visible'): Promise<Ba
   if (cfg) {
     const res = await remotePost<{ alertId: string }>('/v1/emergency-alerts', { mode }, 'sos');
     if (res.ok) {
-      emitTelemetry({ category: 'backend', event: 'success', operation: 'emergency_alert', mode });
+      emitTelemetry({
+        category: 'backend',
+        event: 'success',
+        operation: 'emergency_alert',
+        mode,
+        ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+      });
     } else {
       emitTelemetry({ category: 'backend', event: 'error', operation: 'emergency_alert', mode, error: res.error });
     }

@@ -63,7 +63,13 @@ export function Emergency() {
       setError(res.userMessage);
       return;
     }
-    emitTelemetry({ category: 'sos', event: 'alert_sent', mode, alertId: res.data.alertId });
+    emitTelemetry({
+      category: 'sos',
+      event: 'alert_sent',
+      mode,
+      alertId: res.data.alertId,
+      ...(res.anomalyHeader ? { anomalyHeader: res.anomalyHeader } : {}),
+    });
     if (res.notice) {
       setInfo(res.notice);
       await new Promise((r) => setTimeout(r, 3200));

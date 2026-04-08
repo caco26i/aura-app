@@ -140,15 +140,28 @@ function ContactForm(props: {
     <div style={{ display: 'grid', gap: 10 }}>
       <label style={{ fontWeight: 700 }}>
         Name
-        <input value={name} onChange={(e) => setName(e.target.value)} style={field} />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          aria-label="Trusted contact name"
+          autoComplete="name"
+          style={field}
+        />
       </label>
       <label style={{ fontWeight: 700 }}>
         Phone (optional)
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} style={field} />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          aria-label="Trusted contact phone number"
+          autoComplete="tel"
+          inputMode="tel"
+          style={field}
+        />
       </label>
       <label style={{ fontWeight: 700 }}>
         Group
-        <select value={group} onChange={(e) => setGroup(e.target.value)} style={field}>
+        <select value={group} onChange={(e) => setGroup(e.target.value)} aria-label="Trusted contact group" style={field}>
           {['Family', 'Friends', 'Work', 'Other'].map((g) => (
             <option key={g} value={g}>
               {g}

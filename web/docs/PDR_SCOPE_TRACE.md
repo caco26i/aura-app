@@ -2,7 +2,7 @@
 
 **Purpose:** Keep [`design/AURA_PDR.md`](../../design/AURA_PDR.md) **§3 (scope)** and **§4 (functional requirements)** traceable to `web/` UX docs and the shipped shell. Complements the design index in PDR §7.
 
-**Related work:** [AURA-41](/AURA/issues/AURA-41), [AURA-44](/AURA/issues/AURA-44), [AURA-47](/AURA/issues/AURA-47), [AURA-49](/AURA/issues/AURA-49).
+**Related work:** [AURA-41](/AURA/issues/AURA-41), [AURA-44](/AURA/issues/AURA-44), [AURA-47](/AURA/issues/AURA-47), [AURA-49](/AURA/issues/AURA-49), [AURA-50](/AURA/issues/AURA-50).
 
 ---
 
@@ -28,12 +28,26 @@
 
 ---
 
+## §5 Non-functional requirements — doc map
+
+| Clause | Verified in |
+|--------|-------------|
+| §5 Accessibility (SOS, journey paths) | `Emergency.tsx` (dialogs, `role` / `aria-*`), `JourneyActive.tsx`, `AuraMap.tsx` (`aria-busy`), `Settings.tsx`, `Trusted.tsx` |
+| §5 Privacy & security | [`SECURITY.md`](./SECURITY.md) |
+| §5 Observability | [`OBSERVABILITY.md`](./OBSERVABILITY.md), `auraTelemetry.ts`, server audit log in `server/README.md` |
+| §5 Visual consistency | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md), `theme.css` |
+
+---
+
 ## Gaps: blocking vs nice-to-have
 
-### Blocking (product/engineering should resolve for full PDR parity)
+### Open product questions (not engineering blockers)
 
-1. **SOS FAB vs bottom nav** — UX specs describe a global **`AuraSOSButton`** FAB; the shell currently exposes SOS via **bottom navigation** and Home tiles only (`AuraSOSButton` is not mounted). Either mount the FAB per spec **or** revise UX specs to declare bottom-nav SOS as the canonical pattern for this product iteration.
-2. **IA vs PDR MVP table** — PDR §3.1 lists Home, Journey, Map, Trusted, Settings as the hub areas. The **primary bottom nav** foregrounds Cita / Transport / Check-in; Map, Trusted, Settings, and Journey are **secondary** (Home links). Confirm with product whether this IA is intentional for launch or whether nav should be realigned to the MVP table.
+1. **IA vs PDR MVP table** — PDR §3.1 lists Home, Journey, Map, Trusted, Settings as hub areas. The **primary bottom nav** foregrounds Cita / Transport / Check-in; Map, Trusted, Settings, and Journey are **secondary** (Home links). Confirm with product whether this IA is intentional for launch or whether nav should be realigned to the MVP table.
+
+### Resolved / aligned
+
+1. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
 
 ### Nice-to-have (polish)
 
@@ -49,3 +63,4 @@
 |------|--------|
 | 2026-04-08 | Initial trace + gap register for [AURA-47](/AURA/issues/AURA-47). |
 | 2026-04-08 | §4.2 verification row expanded + `invalid_journey_id` journey copy; trace link for [AURA-49](/AURA/issues/AURA-49). |
+| 2026-04-08 | §5 trace rows; SOS FAB gap closed vs screen specs; [AURA-50](/AURA/issues/AURA-50) telemetry for `X-Aura-Anomaly` on successful API calls. |

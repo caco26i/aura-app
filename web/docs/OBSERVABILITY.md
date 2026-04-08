@@ -9,9 +9,9 @@ Categories:
 | Category   | Events (examples) |
 | ---------- | ----------------- |
 | `auth`     | `bootstrap` (google_enabled / stub) |
-| `backend`  | `request`, `success`, `error` for journey and SOS API stubs |
+| `backend`  | `request`, `success`, `error` for journey and SOS API stubs; successful responses may include `anomalyHeader` when the API returns `X-Aura-Anomaly` (ops signal, not an error) |
 | `journey`  | `started`, `track_state`, `ended`, `im_safe`, `share_location` |
-| `sos`      | `fab_open`, `alert_sent`, `alert_failed` |
+| `sos`      | `fab_open`, `alert_sent` (optional `anomalyHeader`), `alert_failed` |
 | `map`      | `tile_error` |
 
 ## Metrics
