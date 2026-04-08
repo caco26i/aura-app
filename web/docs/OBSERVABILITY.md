@@ -4,6 +4,8 @@
 
 The Aura API (`server/`) sets **`X-Request-Id`** on every HTTP response. Clients may send **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max 128 characters); invalid or oversized values are ignored and a new UUID is used. JSONL audit events written by the API include the same value as **`requestId`** so operators can join access logs, audit files, and client-reported ids. Details: [`API_CONTRACT.md`](./API_CONTRACT.md) (transport + response headers).
 
+The SPA sends a fresh **`X-Request-Id`** (UUID) on each `fetch` from `src/api/auraBackend.ts` to the Aura API; backend telemetry events include the same `requestId` when the call hits the network.
+
 ## Structured logs
 
 The app emits **one JSON object per line** prefixed with `[aura.telemetry]` from `src/observability/auraTelemetry.ts`.
@@ -13,7 +15,7 @@ Categories:
 | Category   | Events (examples) |
 | ---------- | ----------------- |
 | `auth`     | `bootstrap` (google_enabled / stub) |
-| `backend`  | `request`, `success`, `error` for journey and SOS API stubs; successful responses may include `anomalyHeader` when the API returns `X-Aura-Anomaly` (ops signal, not an error) |
+| `backend`  | `request`, `success`, `error` for journey and SOS API calls; remote calls include `requestId` matching `X-Request-Id`; successful responses may include `anomalyHeader` when the API returns `X-Aura-Anomaly` (ops signal, not an error) |
 | `journey`  | `started`, `track_state`, `ended`, `im_safe`, `share_location` |
 | `sos`      | `fab_open`, `alert_sent` (optional `anomalyHeader`), `alert_failed` |
 | `map`      | `tile_error` |
