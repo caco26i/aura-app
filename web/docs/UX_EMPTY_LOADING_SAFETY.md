@@ -76,16 +76,16 @@
 
 ### 2.5 Global resilience
 
-- **Error boundary:** Recommend a top-level React error boundary (outside router or around `AppShell`) with calm copy + *“Reload the page”* and optional telemetry — avoids white screen on chunk/load failures.
+- **Error boundary:** **Shipped** — `AuraErrorBoundary` wraps routes in `App.tsx` with calm copy + reload (see §1 inventory).
 
 ---
 
 ## 3. A11y checklist (for eng)
 
-- [ ] Map container: `aria-busy` during tile load (see §2.1).  
-- [ ] Async primary buttons: `aria-busy` + `disabled` where appropriate.  
-- [ ] `role="alert"` only for errors; success paths use `role="status"` / `aria-live="polite"`.  
-- [ ] Emergency: if confirmation step added, trap focus in dialog and restore on close.
+- [x] Map container: `aria-busy` during tile load (see §2.1).  
+- [x] Async primary buttons: `aria-busy` + `disabled` where appropriate.  
+- [x] `role="alert"` only for errors; success paths use `role="status"` / `aria-live="polite"`.  
+- [x] Emergency: confirmation sheets/dialogs — focus management shipped (`Emergency.tsx`, `sosReturnFocus.ts`).
 
 ---
 

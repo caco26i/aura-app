@@ -6,7 +6,7 @@
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
-**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`). **Clear-local modal:** [AURA-220](/AURA/issues/AURA-220) — `settings-clear-local.spec.ts` covers §4.3 **A/B**; §4.3 documents **`AuraContext`** re-persist after clear (e2e asserts cold-start JSON, not `localStorage` null).
+**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`). **Clear-local modal:** [AURA-220](/AURA/issues/AURA-220) — `settings-clear-local.spec.ts` covers §4.3 **A/B**; §4.3 documents **`AuraContext`** re-persist after clear (e2e asserts cold-start JSON, not `localStorage` null). **Post–AURA-220 doc sync:** [AURA-232](/AURA/issues/AURA-232) (Apr 2026) — §5 AURA-28 consistency inventory reconciled to shipped `web/` + [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md); no eng copy/layout changes required for launch.
 
 ---
 
@@ -197,16 +197,18 @@ Reuse the **`aura:v1` bootstrap** pattern from [`smoke.spec.ts`](https://github.
 
 ## 5. Consistency pass (with [AURA-28](/AURA/issues/AURA-28))
 
-Track remaining items from [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) that are still open:
+Cross-checked [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) and `web/src` ([AURA-232](/AURA/issues/AURA-232), Apr 2026). Prior “still open” rows below are **shipped**; this table replaces the stale backlog framing.
 
-| Item | Action |
+| Item | Status |
 |------|--------|
-| Map tile loading | Overlay / `aria-busy` until tiles ready |
-| JourneyNew submit | `aria-busy` + disable inputs while starting |
-| Error boundary | Calm fallback + reload |
-| Misconfiguration copy | Participant-safe line if string surfaces in prod |
+| Map tile loading | **Shipped** — `AuraMap` overlay, `aria-busy`, status line until tiles ready |
+| JourneyNew submit | **Shipped** — form `aria-busy`, inputs disabled while starting |
+| Error boundary | **Shipped** — `AuraErrorBoundary` in `App.tsx` |
+| Misconfiguration copy | **Shipped** — participant line in `userMessageForMisconfiguration()` |
 
-Do not duplicate full tables here; implement alongside onboarding/trust work where touching the same files.
+**Deferred (optional polish, non-blocking):** Trusted empty lede vs §3.6 example wording (*stay* vs *are stored* — current copy is clear); user-visible “retry map tiles” if tile errors should surface; Home journey card microcopy noted in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §2.2.
+
+Detail inventory: [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) — do not duplicate full tables here.
 
 ---
 
