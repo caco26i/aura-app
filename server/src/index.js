@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA, optional AURA_API_PROMETHEUS_METRICS (see README). In **NODE_ENV=production**, do not set static bearer vars when AURA_API_BFF_JWT_SECRET is set (JWT-only). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_* (including read-path limits on /health, /ready, /metrics), optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA, optional AURA_API_PROMETHEUS_METRICS (see README). In **NODE_ENV=production**, do not set static bearer vars when AURA_API_BFF_JWT_SECRET is set (JWT-only). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
  */
 
 import cors from 'cors';
@@ -450,6 +450,43 @@ const SHARE_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_LOCATION_SHARE_MAX', 
 const IM_SAFE_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_IM_SAFE_WINDOW_MS', 60 * 60 * 1000, 1000);
 const IM_SAFE_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_IM_SAFE_MAX', 36, 1);
 
+/** Per-IP window for unauthenticated GET /health, /ready, and opt-in /metrics (abuse / scrape storms). */
+const READ_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_READ_WINDOW_MS', 60 * 1000, 1000);
+const READ_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_READ_MAX', 600, 1);
+const READ_LIMIT_SKIP = process.env.AURA_API_RATE_LIMIT_READ_SKIP === '1';
+
+/** @param {string} route */
+function markReadRateLimitRoute(route) {
+  return function markReadRateLimitRouteMw(req, _res, next) {
+    req.auraReadRateLimitRoute = route;
+    next();
+  };
+}
+
+const readRouteLimiter = rateLimit({
+  windowMs: READ_WINDOW_MS,
+  max: READ_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || 'unknown',
+  skip: () => READ_LIMIT_SKIP,
+  message: {
+    ok: false,
+    error: 'rate_limited',
+    detail: 'Too many requests to health, readiness, or metrics endpoints; try again later.',
+  },
+  handler: (req, res, _next, options) => {
+    appendAuditFromReq(req, {
+      ts: new Date().toISOString(),
+      type: 'audit.rate_limited',
+      route: req.auraReadRateLimitRoute || 'read-public',
+      actorHash: actorKey(req),
+      ip: req.ip,
+    });
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
 const globalLimiter = rateLimit({
   windowMs: GLOBAL_WINDOW_MS,
   max: GLOBAL_MAX,
@@ -584,17 +621,22 @@ if (PROMETHEUS_METRICS_ENABLED && httpRequestsTotal) {
 }
 
 if (PROMETHEUS_METRICS_ENABLED && prometheusRegister) {
-  app.get('/metrics', async (_req, res) => {
-    res.setHeader('Content-Type', prometheusRegister.contentType);
-    res.status(200).send(await prometheusRegister.metrics());
-  });
+  app.get(
+    '/metrics',
+    markReadRateLimitRoute('metrics'),
+    readRouteLimiter,
+    async (_req, res) => {
+      res.setHeader('Content-Type', prometheusRegister.contentType);
+      res.status(200).send(await prometheusRegister.metrics());
+    },
+  );
 }
 
-app.get('/health', (_req, res) => {
+app.get('/health', markReadRateLimitRoute('health'), readRouteLimiter, (_req, res) => {
   res.json({ ok: true, service: 'aura-api', ...deployMetadataFields() });
 });
 
-app.get('/ready', (_req, res) => {
+app.get('/ready', markReadRateLimitRoute('ready'), readRouteLimiter, (_req, res) => {
   const meta = deployMetadataFields();
   const r = readinessResult();
   if (r.ok) {

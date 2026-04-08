@@ -292,4 +292,24 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
       }
     }
   });
+
+  test('GET /health returns 429 after read-path burst when limit env is low', async () => {
+    const keys = ['AURA_BFF_RATE_LIMIT_READ_WINDOW_MS', 'AURA_BFF_RATE_LIMIT_READ_MAX'];
+    const prev = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    process.env.AURA_BFF_RATE_LIMIT_READ_WINDOW_MS = '60000';
+    process.env.AURA_BFF_RATE_LIMIT_READ_MAX = '3';
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      for (let i = 0; i < 3; i += 1) {
+        await request(app).get('/health').expect(200);
+      }
+      const res = await request(app).get('/health').expect(429);
+      assert.equal(res.body.error, 'rate_limited');
+    } finally {
+      for (const k of keys) {
+        if (prev[k] === undefined) delete process.env[k];
+        else process.env[k] = prev[k];
+      }
+    }
+  });
 });

@@ -4,6 +4,8 @@
 
 The Aura API (`server/`) sets **`X-Request-Id`** on every HTTP response. Clients may send **`X-Request-Id`** or **`X-Correlation-Id`** (printable ASCII, max 128 characters); invalid or oversized values are ignored and a new UUID is used. JSONL audit events written by the API include the same value as **`requestId`** so operators can join access logs, audit files, and client-reported ids. Details: [`API_CONTRACT.md`](./API_CONTRACT.md) (transport + response headers).
 
+The same API applies a **per-IP read-path rate limit** (shared bucket) to **`GET /health`**, **`GET /ready`**, and opt-in **`GET /metrics`**, tunable via **`AURA_API_RATE_LIMIT_READ_*`** (see [`../../server/README.md`](../../server/README.md)). **429** responses use the same JSON `rate_limited` envelope as mutating routes and emit **`audit.rate_limited`** with `route` **`health`**, **`ready`**, or **`metrics`**. Prefer edge/WAF throttling for heavy abuse; this limiter caps scrape or probe storms at the process.
+
 The SPA sends a fresh **`X-Request-Id`** (UUID) on each `fetch` from `src/api/auraBackend.ts` to the Aura API; backend telemetry events include the same `requestId` when the call hits the network.
 
 ### Authoritative API Prometheus scrape (optional)

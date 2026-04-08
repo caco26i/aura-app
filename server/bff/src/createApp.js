@@ -150,6 +150,26 @@ export function createApp(overrides = {}) {
     detail: 'Too many logout requests; try again later.',
   });
 
+  const readWindowMs = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_READ_WINDOW_MS', 60_000, 1000);
+  const readMax = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_READ_MAX', 600, 1);
+  const readSkip = process.env.AURA_BFF_RATE_LIMIT_READ_SKIP === '1';
+  const bffReadLimiter = rateLimit({
+    windowMs: readWindowMs,
+    max: readMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => req.ip || 'unknown',
+    skip: () => readSkip,
+    message: {
+      ok: false,
+      error: 'rate_limited',
+      detail: 'Too many requests to health or readiness endpoints; try again later.',
+    },
+    handler: (req, res, _next, options) => {
+      res.status(options.statusCode).json(options.message);
+    },
+  });
+
   const oauthRedirectUri = BFF_PUBLIC_URL ? `${BFF_PUBLIC_URL}/auth/google/callback` : undefined;
   const oauthClient = GOOGLE_CLIENT_ID
     ? new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET || undefined, oauthRedirectUri)
@@ -278,11 +298,11 @@ export function createApp(overrides = {}) {
     }),
   );
 
-  app.get('/health', (_req, res) => {
+  app.get('/health', bffReadLimiter, (_req, res) => {
     res.json({ ok: true, service: 'aura-bff' });
   });
 
-  app.get('/ready', (_req, res) => {
+  app.get('/ready', bffReadLimiter, (_req, res) => {
     const cfgErrors = readBffConfigErrors();
     if (cfgErrors.length === 0) {
       res.json({ ok: true, service: 'aura-bff', ready: true });

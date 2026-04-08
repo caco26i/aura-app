@@ -13,7 +13,7 @@ CORS is configured with **`X-Request-Id` / `X-Correlation-Id`** in **allowed** a
 
 ## Rate limiting
 
-`express-rate-limit` applies **separate per-IP** caps to `POST /auth/google`, `POST /auth/firebase`, `GET /session`, and `POST /logout` (see env table). On exceed: **429** with `{ ok: false, error: "rate_limited", detail }` (same `error` code as the authoritative API in [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)). Standard rate-limit response headers are enabled. At the edge, a WAF or CDN should still enforce broader abuse controls; these knobs protect the BFF process when traffic reaches origin.
+`express-rate-limit` applies **separate per-IP** caps to `POST /auth/google`, `POST /auth/firebase`, `GET /session`, and `POST /logout` (see env table), plus a **shared read-path** bucket for **`GET /health`** and **`GET /ready`** (`AURA_BFF_RATE_LIMIT_READ_*`). On exceed: **429** with `{ ok: false, error: "rate_limited", detail }` (same `error` code as the authoritative API in [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)). Standard rate-limit response headers are enabled. At the edge, a WAF or CDN should still enforce broader abuse controls; these knobs protect the BFF process when traffic reaches origin.
 
 ## Threat model (SPA + `GET /session`)
 
@@ -45,6 +45,8 @@ CORS is configured with **`X-Request-Id` / `X-Correlation-Id`** in **allowed** a
 | `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX` | no | Per-IP window + max requests for `POST /auth/google` and `POST /auth/firebase` (defaults `60000` / `5000` — permissive for dev/CI; **lower in production**, e.g. `900000` / `30` for a 15‑minute brute-force throttle) |
 | `AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_SESSION_MAX` | no | Per-IP limits for `GET /session` (defaults `60000` / `10000`) |
 | `AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_LOGOUT_MAX` | no | Per-IP limits for `POST /logout` (defaults `60000` / `2000`) |
+| `AURA_BFF_RATE_LIMIT_READ_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_READ_MAX` | no | Per-IP shared bucket for **`GET /health`** + **`GET /ready`** (defaults `60000` / `600`) |
+| `AURA_BFF_RATE_LIMIT_READ_SKIP` | no | When `1`, disables the read-path limiter |
 | `PORT` | no | Default `8790` |
 
 Aliases: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` are accepted.
