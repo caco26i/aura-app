@@ -31,6 +31,56 @@ export function Settings() {
     <div>
       <h1 style={{ marginTop: 0 }}>Settings</h1>
 
+      {settings.linkedAccountEmail ? (
+        <section style={section} aria-labelledby="account-profile-heading">
+          <h2 id="account-profile-heading" style={h2}>
+            Your account
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8 }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                overflow: 'hidden',
+                background: 'var(--aura-lavender-wash)',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: 20,
+                color: 'var(--aura-text)',
+              }}
+            >
+              {settings.profilePhotoUrl ? (
+                <img
+                  src={settings.profilePhotoUrl}
+                  alt=""
+                  width={56}
+                  height={56}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                (settings.displayName.trim() || '?').charAt(0).toUpperCase()
+              )}
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 17 }}>{settings.displayName.trim() || 'Signed in'}</div>
+              <div style={{ color: 'var(--aura-muted)', fontSize: 14, marginTop: 4 }}>{settings.linkedAccountEmail}</div>
+              <p style={{ color: 'var(--aura-muted)', fontSize: 13, margin: '8px 0 0', lineHeight: 1.45 }}>
+                Name and photo come from Firebase and refresh when you use{' '}
+                <Link to="/auth" style={{ fontWeight: 700, color: 'var(--aura-text)' }}>
+                  sign in
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section style={section} aria-labelledby="data-on-device-heading">
         <h2 id="data-on-device-heading" style={h2}>
           Your data on this device
@@ -59,6 +109,11 @@ export function Settings() {
             style={field}
             autoComplete="name"
           />
+          {settings.linkedAccountEmail ? (
+            <span style={{ display: 'block', marginTop: 6, fontSize: 13, fontWeight: 500, color: 'var(--aura-muted)' }}>
+              You can edit how your name appears; signing in again at /auth reapplies your Firebase profile.
+            </span>
+          ) : null}
         </label>
 
         <label htmlFor="settings-voice-keyword" style={label}>

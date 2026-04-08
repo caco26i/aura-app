@@ -54,6 +54,8 @@ function normalizeEncuentroDraft(raw: unknown): EncuentroDraft {
 
 const defaultSettings: AuraSettings = {
   displayName: '',
+  profilePhotoUrl: '',
+  linkedAccountEmail: '',
   voiceKeyword: 'Aura help',
   silentTriggerMs: 800,
   timerDefaultMinutes: 15,

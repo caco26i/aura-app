@@ -28,6 +28,10 @@ export type MapLayers = {
 export type AuraSettings = {
   /** Shown on the home header (M3 prototype). */
   displayName: string;
+  /** Profile image URL from Firebase (or empty). */
+  profilePhotoUrl: string;
+  /** Email for the Firebase-linked account on this device (or empty). */
+  linkedAccountEmail: string;
   voiceKeyword: string;
   silentTriggerMs: number;
   timerDefaultMinutes: number;

@@ -52,8 +52,10 @@ export function Home() {
             style={{
               width: 32,
               height: 32,
-              background: 'var(--Pbg)',
               borderRadius: '50%',
+              overflow: 'hidden',
+              flexShrink: 0,
+              background: 'var(--Pbg)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -64,7 +66,18 @@ export function Home() {
             }}
             aria-hidden
           >
-            {name.charAt(0).toUpperCase()}
+            {settings.profilePhotoUrl ? (
+              <img
+                src={settings.profilePhotoUrl}
+                alt=""
+                width={32}
+                height={32}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              name.charAt(0).toUpperCase()
+            )}
           </div>
         </div>
       </div>

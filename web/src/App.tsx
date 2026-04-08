@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { FirebaseProfileSync } from './components/FirebaseProfileSync';
 import { AuraProvider } from './context/AuraContext';
 import { AuraErrorBoundary } from './components/AuraErrorBoundary';
 import { AppShell } from './components/AppShell';
@@ -22,6 +23,7 @@ import './styles/aura-m3.css';
 export default function App() {
   return (
     <AuraProvider>
+      <FirebaseProfileSync />
       <BrowserRouter>
         <RouteDocumentTitle />
         <AuraErrorBoundary>

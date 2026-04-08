@@ -8,7 +8,9 @@ import {
 } from 'firebase/auth';
 import { establishAuraBffSessionWithFirebaseIdToken } from '../api/auraBackendAuth';
 import { SkipToContent } from '../components/SkipToContent';
+import { useAura } from '../context/useAura';
 import { firebaseAuthConfigured, getAuraFirebaseAuth } from '../lib/firebaseClient';
+import { auraSettingsPatchFromFirebaseUser } from '../lib/firebaseProfileSync';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
 const bffUrlConfigured = Boolean(import.meta.env.VITE_AURA_BFF_URL?.trim());
@@ -35,6 +37,7 @@ function mapFirebaseAuthError(err: AuthError): string {
 }
 
 export function Auth() {
+  const { updateSettings } = useAura();
   const navigate = useNavigate();
   const formId = useId();
   const emailFieldId = `${formId}-email`;
@@ -74,6 +77,10 @@ export function Auth() {
         );
         setBusy(false);
         return;
+      }
+      const user = auth.currentUser;
+      if (user) {
+        updateSettings(auraSettingsPatchFromFirebaseUser(user));
       }
       navigate('/settings', { replace: true });
     } catch (e) {
