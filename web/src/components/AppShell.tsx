@@ -13,7 +13,7 @@ function NavItem({
 }) {
   return (
     <NavLink to={to} end={end} className={({ isActive }) => `nbi${isActive ? ' on' : ''}`}>
-      <div className="nbi-ind">
+      <div className="nbi-ind" aria-hidden>
         <span className="mi material-symbols-rounded">{icon}</span>
       </div>
       <span className="nbi-l">{label}</span>
@@ -27,7 +27,7 @@ export function AppShell() {
       <main className="aura-m3-main">
         <Outlet />
       </main>
-      <nav className="nbar" aria-label="Primary">
+      <nav className="nbar" aria-label="Navegación principal">
         <NavItem to="/" end label="Home" icon="home" />
         <NavItem to="/cita" label="Cita" icon="favorite" />
         <NavItem to="/transport" label="Transp." icon="directions_car" />

@@ -1,23 +1,38 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export function ModoCita() {
+  useEffect(() => {
+    document.title = 'Modo Cita · Aura';
+    return () => {
+      document.title = 'Aura';
+    };
+  }, []);
+
   return (
     <div>
       <header className="m3-tbar">
         <Link to="/" className="ibtn" aria-label="Volver al inicio">
-          <span className="mi material-symbols-rounded">arrow_back</span>
+          <span className="mi material-symbols-rounded" aria-hidden>
+            arrow_back
+          </span>
         </Link>
         <h1 className="m3-tbar-title" style={{ margin: 0 }}>
           Modo Cita
         </h1>
         <span className="feat-badge">
-          <span className="mi material-symbols-rounded s18">auto_awesome</span> Nuevo
+          <span className="mi material-symbols-rounded s18" aria-hidden>
+            auto_awesome
+          </span>{' '}
+          Nuevo
         </span>
       </header>
 
       <div className="mode-banner">
         <div className="mb-ic">
-          <span className="mi material-symbols-rounded s28">favorite</span>
+          <span className="mi material-symbols-rounded s28" aria-hidden>
+            favorite
+          </span>
         </div>
         <div>
           <div className="mb-title">Modo Cita / Encuentro</div>
