@@ -46,6 +46,21 @@ jobs:
           curl -fsS "http://127.0.0.1:8080/ready"
           echo
 
+      - name: Assert nginx serves SPA index shell at /
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/aura_compose_spa_index.html -w "%{http_code}" "http://127.0.0.1:8080/")"
+          if [ "${code}" != "200" ]; then
+            echo "::error::compose-smoke SPA check: GET / returned HTTP ${code}, expected 200 (nginx static root / aura-web asset wiring)"
+            exit 1
+          fi
+          if ! grep -qF '<div id="root"' /tmp/aura_compose_spa_index.html; then
+            echo "::error::compose-smoke SPA check: HTML missing Vite mount <div id=\"root\" (expected shell from web/index.html)"
+            head -c 800 /tmp/aura_compose_spa_index.html || true
+            exit 1
+          fi
+          echo "compose-smoke SPA check ok: GET / is 200 and contains <div id=\"root\""
+
       - name: Tear down
         if: always()
         run: docker compose down -v --remove-orphans
