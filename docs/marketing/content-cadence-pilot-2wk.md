@@ -66,6 +66,8 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 ## Publication log (paste LinkedIn permalinks after each post)
 
+**Publishing owner:** Board / CEO on [AURA-89](/AURA/issues/AURA-89). After each live post, paste the **LinkedIn permalink** there *or* add it below; CMO ([AURA-90](/AURA/issues/AURA-90)) will keep this table as the doc source of truth.
+
 | # | Target date | Post URL |
 | --- | --- | --- |
 | 1 | 2026-04-09 | |
