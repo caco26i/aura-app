@@ -75,4 +75,4 @@ Allowed anomaly tokens today: `burst_sos`, `burst_location_share` (comma-separat
 
 ## Regression coverage
 
-Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`).
+Server integration tests: `server/test/api.integration.test.js` (`npm test` in `server/`). Includes `invalid_journey_id` on `:journeyId` routes; `journey_forbidden` is exercised once the API accepts multiple distinct authenticated actors (today’s single shared beta token maps to one actor key).

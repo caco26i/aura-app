@@ -66,6 +66,20 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'journey_not_found');
   });
 
+  test('location-shares returns invalid_journey_id for non-uuid param', async () => {
+    const res = await request(app)
+      .post('/v1/journeys/not-a-uuid/location-shares')
+      .set(bearer)
+      .send({})
+      .expect(400);
+    assert.equal(res.body.error, 'invalid_journey_id');
+  });
+
+  test('im-safe returns invalid_journey_id for non-uuid param', async () => {
+    const res = await request(app).post('/v1/journeys/bad/im-safe').set(bearer).expect(400);
+    assert.equal(res.body.error, 'invalid_journey_id');
+  });
+
   test('im-safe works with no JSON body (client sends fetch without body)', async () => {
     const create = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
     const { journeyId } = create.body.data;

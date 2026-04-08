@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'server/**'
+      - 'web/docs/API_CONTRACT.md'
       - '.github/workflows/server-tests.yml'
   pull_request:
     paths:
       - 'server/**'
+      - 'web/docs/API_CONTRACT.md'
       - '.github/workflows/server-tests.yml'
 
 jobs:

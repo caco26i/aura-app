@@ -20,7 +20,7 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
 | `/transport` | Modo transporte (inside shell; same note) |
 | `/checkin` | Check-in IA (inside shell; same note) |
 
-**Wildcard:** `*` → redirect to `/` (see [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) for global error-boundary gap).
+**Wildcard:** `*` → redirect to `/`. Global render errors are handled by `AuraErrorBoundary` (inventory in [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) §“Resolved vs earlier gap register”).
 
 ---
 
