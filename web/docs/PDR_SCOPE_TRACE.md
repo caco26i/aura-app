@@ -89,3 +89,4 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): GitHub Actions **Web lint & build** for `web/` (ESLint + `tsc` + Vite production build). |
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): server integration tests for unknown-path `not_found` (404); API_CONTRACT regression line updated. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): skip-to-main link + `#main-content` landmark on shell, welcome, and emergency (PDR §5 / WCAG 2.4.1). |
+| 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): integration tests for GET-on-POST-only `not_found` + OPTIONS CORS preflight headers. |

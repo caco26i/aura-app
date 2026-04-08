@@ -45,6 +45,23 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'not_found');
   });
 
+  test('GET on POST-only route returns not_found', async () => {
+    const res = await request(app).get('/v1/journeys').expect(404);
+    assert.equal(res.body.error, 'not_found');
+  });
+
+  test('OPTIONS preflight for mutating route includes CORS headers', async () => {
+    const res = await request(app)
+      .options('/v1/journeys')
+      .set('Origin', 'http://localhost:5173')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'authorization,content-type')
+      .expect(204);
+    assert.equal(res.headers['access-control-allow-origin'], 'http://localhost:5173');
+    assert.match(String(res.headers['access-control-allow-methods'] || ''), /POST/);
+    assert.match(String(res.headers['access-control-allow-headers'] || ''), /authorization/i);
+  });
+
   test('mutating routes require bearer token', async () => {
     await request(app).post('/v1/journeys').send({}).expect(401);
   });
