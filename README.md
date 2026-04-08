@@ -48,7 +48,7 @@ Use real product captures so newcomers see Aura at a glance. With `main` on GitH
 | [`web/`](./web/) | Vite + React + TypeScript SPA (maps, OAuth hook, app shell) |
 | [`server/`](./server/) | Aura API — validated POST routes, audit log, rate limits |
 | [`web/docs/`](./web/docs/) | Auth, deploy, security, observability, beta backend notes |
-| [`docs/`](./docs/) | Public beta runbook, CEO-approved external narrative (see `PUBLIC_BETA.md`, `launch-narrative.md`) |
+| [`docs/`](./docs/) | Public beta runbook, CEO-approved narrative, beta analytics/outcomes one-pager (see `PUBLIC_BETA.md`, `launch-narrative.md`, `beta-analytics-outcomes-narrative.md`) |
 | [`design/`](./design/) | PDR, design system, screen specs, launch UX copy guidance |
 | [`.agents/skills/`](./.agents/skills/) | Checked-in agent skills for Cursor / Paperclip (see below) |
 
@@ -137,6 +137,7 @@ The **server** package documents API env vars and routes in [`server/README.md`]
 |----------|--------|
 | [`docs/PUBLIC_BETA.md`](./docs/PUBLIC_BETA.md) | Public beta: install, env, flows, optional API, observability pointers |
 | [`docs/launch-narrative.md`](./docs/launch-narrative.md) | CEO-approved external narrative one-pager ([AURA-64](/AURA/issues/AURA-64)) |
+| [`docs/beta-analytics-outcomes-narrative.md`](./docs/beta-analytics-outcomes-narrative.md) | Beta metrics, reporting, privacy boundaries, outcomes FAQ ([AURA-72](/AURA/issues/AURA-72)) |
 | [`web/docs/AUTH.md`](./web/docs/AUTH.md) | Google sign-in and stub mode |
 | [`web/docs/BETA_BACKEND.md`](./web/docs/BETA_BACKEND.md) | Client ↔ API wiring, journey ownership, swap path |
 | [`web/docs/DEPLOY.md`](./web/docs/DEPLOY.md) | Staging / production deployment notes |

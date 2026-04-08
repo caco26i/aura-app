@@ -82,6 +82,8 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 
 **Release-ready drafts** (changelog bullets, three landing hero variants, three social posts) live in [`docs/public-beta-announcement-kit.md`](./public-beta-announcement-kit.md) ([AURA-71](/AURA/issues/AURA-71)); paste from there for timing-specific launches while keeping narrative alignment with `launch-narrative.md`.
 
+**Partners / press — beta metrics story:** what we measure, how we report it, and explicit **privacy boundaries** (what we will not claim), plus a short FAQ for “how do you know it works?”, is in [`docs/beta-analytics-outcomes-narrative.md`](./beta-analytics-outcomes-narrative.md) ([AURA-72](/AURA/issues/AURA-72)).
+
 ---
 
 ## 6. More reading
@@ -92,4 +94,5 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 | [`web/docs/AUTH.md`](../web/docs/AUTH.md) | Google vs stub auth |
 | [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md) | Hosting the SPA and API |
 | [`web/docs/SECURITY.md`](../web/docs/SECURITY.md) | Threat model and client/API notes |
+| [`docs/beta-analytics-outcomes-narrative.md`](./beta-analytics-outcomes-narrative.md) | Beta metrics narrative, reporting, privacy boundaries ([AURA-72](/AURA/issues/AURA-72)) |
 | [`web/README.md`](../web/README.md) | Web package overview |
