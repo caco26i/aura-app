@@ -186,7 +186,7 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
-  test('Map intel: layer toggle exposes switch role and aria-checked, no page/console errors', async ({ page }) => {
+  test('Map intel: layer toggles, demo safest-route status region, no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));
@@ -206,6 +206,11 @@ test.describe('shell smoke', () => {
 
     await riskSwitch.click();
     await expect(riskSwitch).toHaveAttribute('aria-checked', 'true');
+
+    await page.getByRole('button', { name: /Find safest route/i }).click();
+    const demoStatus = page.locator('#map-demo-route-status');
+    await expect(demoStatus).toBeVisible();
+    await expect(demoStatus).toContainText(/Demo only/i);
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
