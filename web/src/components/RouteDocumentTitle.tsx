@@ -10,6 +10,8 @@ function titleForPath(pathname: string): string {
       return `Home · ${APP_NAME}`;
     case '/welcome':
       return `Welcome · ${APP_NAME}`;
+    case '/auth':
+      return `Sign in · ${APP_NAME}`;
     case '/emergency':
       return `Emergency · ${APP_NAME}`;
     case '/journey/new':
