@@ -11,16 +11,19 @@ import { after, describe, test } from 'node:test';
 import request from 'supertest';
 
 const TOKEN = 'integration-test-bearer-token';
+const TOKEN_ALT = 'integration-test-bearer-token-alt';
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-api-test-'));
 const auditPath = path.join(tmpDir, 'audit.log');
 
 process.env.AURA_API_BEARER_TOKEN = TOKEN;
+process.env.AURA_API_BEARER_TOKEN_ALT = TOKEN_ALT;
 process.env.AURA_API_SKIP_LISTEN = '1';
 process.env.AUDIT_LOG_PATH = auditPath;
 
 const { app } = await import('../src/index.js');
 
 const bearer = { Authorization: `Bearer ${TOKEN}` };
+const bearerAlt = { Authorization: `Bearer ${TOKEN_ALT}` };
 
 describe('Aura API', () => {
   after(() => {
@@ -104,6 +107,18 @@ describe('Aura API', () => {
     const res = await request(app).post('/v1/journeys').set(bearer).send({ extra: 1 }).expect(400);
     assert.equal(res.body.ok, false);
     assert.equal(res.body.error, 'validation_failed');
+  });
+
+  test('location-shares returns journey_forbidden for a second authenticated actor', async () => {
+    const created = await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
+    const { journeyId } = created.body.data;
+    const res = await request(app)
+      .post(`/v1/journeys/${journeyId}/location-shares`)
+      .set(bearerAlt)
+      .send({})
+      .expect(403);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'journey_forbidden');
   });
 
   test('location-shares returns journey_not_found for unknown id', async () => {

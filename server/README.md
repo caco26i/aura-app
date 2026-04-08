@@ -31,6 +31,7 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `AURA_API_BEARER_TOKEN` | yes | Shared secret; `Authorization: Bearer …` on all mutating routes |
+| `AURA_API_BEARER_TOKEN_ALT` | no | Optional second valid bearer (separate actor key). Omit in production unless you intentionally run a two-token beta; integration tests set it to assert `journey_forbidden` across actors. |
 | `PORT` | no | Default `8787` |
 | `AUDIT_LOG_PATH` | no | Default `./data/audit.log` |
 | `CORS_ORIGIN` | no | `*` or comma-separated allowlist |

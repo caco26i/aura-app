@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN (required), PORT (default 8787), AUDIT_LOG_PATH, CORS_ORIGIN
+ * Env: AURA_API_BEARER_TOKEN (required), AURA_API_BEARER_TOKEN_ALT (optional second actor), PORT (default 8787), AUDIT_LOG_PATH, CORS_ORIGIN
  */
 
 import cors from 'cors';
@@ -13,6 +13,8 @@ import { z } from 'zod';
 
 const PORT = Number(process.env.PORT || 8787);
 const BEARER = process.env.AURA_API_BEARER_TOKEN;
+/** Optional second beta token (staging / integration tests) — distinct actor key from primary bearer. */
+const BEARER_ALT = process.env.AURA_API_BEARER_TOKEN_ALT || '';
 const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
@@ -125,6 +127,10 @@ function appendAudit(entry) {
   fs.appendFileSync(AUDIT_LOG_PATH, line, { encoding: 'utf8' });
 }
 
+function bearerAccepted(rawToken) {
+  return rawToken === BEARER || (!!BEARER_ALT && rawToken === BEARER_ALT);
+}
+
 function requireBearer(req, res, next) {
   if (!BEARER) {
     res.status(503).json({ ok: false, error: 'server_misconfigured', detail: 'AURA_API_BEARER_TOKEN not set' });
@@ -135,7 +141,7 @@ function requireBearer(req, res, next) {
     res.status(401).json({ ok: false, error: 'unauthorized' });
     return;
   }
-  if (h.slice(7) !== BEARER) {
+  if (!bearerAccepted(h.slice(7))) {
     res.status(403).json({ ok: false, error: 'forbidden' });
     return;
   }
