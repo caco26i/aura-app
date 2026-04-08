@@ -57,6 +57,12 @@ describe('Aura API', () => {
     assert.equal(res.body.service, 'aura-api');
   });
 
+  test('GET /metrics returns not_found when AURA_API_PROMETHEUS_METRICS unset', async () => {
+    const res = await request(app).get('/metrics').expect(404);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'not_found');
+  });
+
   test('responses include baseline security headers', async () => {
     const res = await request(app).get('/health').expect(200);
     assert.equal(res.headers['x-content-type-options'], 'nosniff');

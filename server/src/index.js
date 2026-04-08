@@ -1,11 +1,12 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README). In **NODE_ENV=production**, do not set static bearer vars when AURA_API_BFF_JWT_SECRET is set (JWT-only). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA, optional AURA_API_PROMETHEUS_METRICS (see README). In **NODE_ENV=production**, do not set static bearer vars when AURA_API_BFF_JWT_SECRET is set (JWT-only). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
  */
 
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import client from 'prom-client';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
@@ -34,6 +35,53 @@ const JOURNEY_JSONL_PATH =
   process.env.AURA_API_JOURNEY_JSONL_PATH ||
   path.join(process.cwd(), 'data', 'journeys.jsonl');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
+/**
+ * When true, exposes `GET /metrics` (no auth) and records HTTP request counts. Off by default.
+ * @returns {boolean}
+ */
+function isPrometheusMetricsEnabled() {
+  const raw = process.env.AURA_API_PROMETHEUS_METRICS;
+  if (raw === undefined || raw === null) return false;
+  const t = String(raw).trim();
+  if (t.length === 0) return false;
+  const lower = t.toLowerCase();
+  if (lower === '0' || lower === 'false' || lower === 'no') return false;
+  return true;
+}
+
+const PROMETHEUS_METRICS_ENABLED = isPrometheusMetricsEnabled();
+
+/** @type {import('prom-client').Registry | null} */
+let prometheusRegister = null;
+/** @type {import('prom-client').Counter<string> | null} */
+let httpRequestsTotal = null;
+
+if (PROMETHEUS_METRICS_ENABLED) {
+  prometheusRegister = new client.Registry();
+  client.collectDefaultMetrics({ register: prometheusRegister });
+  httpRequestsTotal = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total HTTP requests handled by aura-api',
+    labelNames: ['method', 'status_code', 'route'],
+    registers: [prometheusRegister],
+  });
+}
+
+/**
+ * @param {import('express').Request} req
+ * @returns {string}
+ */
+function prometheusRouteLabel(req) {
+  if (req.route && typeof req.route.path === 'string') {
+    const base = req.baseUrl || '';
+    const full = `${base}${req.route.path}`;
+    return full.length > 0 ? full : 'unknown';
+  }
+  const p = req.path || '';
+  if (p === '/health' || p === '/ready' || p === '/metrics') return p;
+  return 'unmatched';
+}
 
 /** Max length for optional deploy metadata strings (env); longer values are truncated. */
 const DEPLOY_META_MAX_LEN = 256;
@@ -521,6 +569,26 @@ app.use((err, req, res, next) => {
   }
   next(err);
 });
+
+if (PROMETHEUS_METRICS_ENABLED && httpRequestsTotal) {
+  app.use((req, res, next) => {
+    res.on('finish', () => {
+      httpRequestsTotal.inc({
+        method: req.method,
+        status_code: String(res.statusCode),
+        route: prometheusRouteLabel(req),
+      });
+    });
+    next();
+  });
+}
+
+if (PROMETHEUS_METRICS_ENABLED && prometheusRegister) {
+  app.get('/metrics', async (_req, res) => {
+    res.setHeader('Content-Type', prometheusRegister.contentType);
+    res.status(200).send(await prometheusRegister.metrics());
+  });
+}
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'aura-api', ...deployMetadataFields() });
