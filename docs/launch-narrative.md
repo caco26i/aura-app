@@ -1,6 +1,8 @@
 # Aura — external launch narrative (one-pager)
 
-**Purpose:** Single source of truth for **public-beta positioning** ahead of broader marketing surfaces. Grounded in [`design/AURA_PDR.md`](../design/AURA_PDR.md) §§1–2 (vision, problem, users) and consistent with repo [`README.md`](../README.md).
+**Status:** CEO-approved source of truth for public-beta external positioning. Audit trail: [AURA-64](/AURA/issues/AURA-64).
+
+**Purpose:** Single source of truth for **public-beta positioning** and announcement copy; align new marketing surfaces with this file as they ship. Grounded in [`design/AURA_PDR.md`](../design/AURA_PDR.md) §§1–2 (vision, problem, users) and consistent with repo [`README.md`](../README.md).
 
 **Related work:** In-app string refinements remain owned by [AURA-63](/AURA/issues/AURA-63); this document uses the same voice as current onboarding (`Welcome to Aura`, calm SOS explanation, journeys/location primer) without rewriting those strings here.
 
@@ -46,4 +48,4 @@ From the **safety hub** through **journeys** (map, share, “I’m safe”) to *
 | README opening | Hero wording kept consistent |
 | [AURA-63](/AURA/issues/AURA-63) | No conflict flagged: external lines echo onboarding themes without changing in-product strings |
 
-**Revision:** Update this file when PDR §1–2 or launch positioning materially changes; link the PR to the tracking issue.
+**Change control:** Update this file when PDR §1–2 or launch positioning materially changes; link the PR to the tracking issue.
