@@ -4,7 +4,7 @@
  * See web/docs/OBSERVABILITY.md.
  */
 
-export type TelemetryCategory = 'auth' | 'journey' | 'sos' | 'map' | 'backend';
+export type TelemetryCategory = 'app' | 'auth' | 'journey' | 'sos' | 'map' | 'backend';
 
 export type TelemetryEvent = {
   category: TelemetryCategory;

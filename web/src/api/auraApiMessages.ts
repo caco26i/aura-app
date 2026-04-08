@@ -106,7 +106,10 @@ export function userMessageForNetworkFailure(surface: ApiSurface): string {
 }
 
 export function userMessageForMisconfiguration(): string {
-  return 'Live backend is not connected (missing API URL or token in this build).';
+  return (
+    'Live backend is not connected (missing API URL or token in this build). ' +
+    "If you're a participant, contact your organizer."
+  );
 }
 
 export function noticeForAnomalyHeader(header: string | null): string | undefined {

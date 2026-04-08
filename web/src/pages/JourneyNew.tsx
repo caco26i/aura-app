@@ -47,45 +47,56 @@ export function JourneyNew() {
       <h1 style={{ marginTop: 0 }}>New journey</h1>
       <p style={{ color: 'var(--aura-muted)' }}>Details persist once you start — refresh mid-journey is safe.</p>
 
-      <label style={{ display: 'block', marginTop: 16, fontWeight: 600 }} htmlFor="j-label">
-        Journey name
-      </label>
-      <input
-        id="j-label"
-        value={label}
-        onChange={(e) => setLabel(e.target.value)}
-        style={inputStyle}
-      />
+      <div aria-busy={starting}>
+        <label style={{ display: 'block', marginTop: 16, fontWeight: 600 }} htmlFor="j-label">
+          Journey name
+        </label>
+        <input
+          id="j-label"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          style={inputStyle}
+          disabled={starting}
+        />
 
-      <label style={{ display: 'block', marginTop: 12, fontWeight: 600 }} htmlFor="j-dest">
-        Destination
-      </label>
-      <input
-        id="j-dest"
-        value={destination}
-        onChange={(e) => setDestination(e.target.value)}
-        style={inputStyle}
-      />
+        <label style={{ display: 'block', marginTop: 12, fontWeight: 600 }} htmlFor="j-dest">
+          Destination
+        </label>
+        <input
+          id="j-dest"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          style={inputStyle}
+          disabled={starting}
+        />
 
-      <label style={{ display: 'block', marginTop: 12, fontWeight: 600 }} htmlFor="j-eta">
-        ETA (minutes)
-      </label>
-      <input
-        id="j-eta"
-        inputMode="numeric"
-        value={eta}
-        onChange={(e) => setEta(e.target.value)}
-        style={inputStyle}
-      />
+        <label style={{ display: 'block', marginTop: 12, fontWeight: 600 }} htmlFor="j-eta">
+          ETA (minutes)
+        </label>
+        <input
+          id="j-eta"
+          inputMode="numeric"
+          value={eta}
+          onChange={(e) => setEta(e.target.value)}
+          style={inputStyle}
+          disabled={starting}
+        />
 
-      {startError ? (
-        <p role="alert" style={{ marginTop: 12, color: '#b42318', fontSize: 14 }}>
-          {startError}
-        </p>
-      ) : null}
-      <button type="button" onClick={onStart} style={btnPrimary} disabled={starting}>
-        {starting ? 'Starting…' : 'Start live tracking'}
-      </button>
+        {startError ? (
+          <p role="alert" style={{ marginTop: 12, color: '#b42318', fontSize: 14 }}>
+            {startError}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={onStart}
+          style={btnPrimary}
+          disabled={starting}
+          aria-busy={starting}
+        >
+          {starting ? 'Starting…' : 'Start live tracking'}
+        </button>
+      </div>
     </div>
   );
 }

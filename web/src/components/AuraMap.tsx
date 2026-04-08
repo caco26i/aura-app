@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -31,7 +31,27 @@ export type AuraMapProps = {
 
 let lastTap = 0;
 
+const TILE_LOAD_TIMEOUT_MS = 15_000;
+
 export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProps) {
+  const [tilesBusy, setTilesBusy] = useState(true);
+  const fallbackClearTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  const clearFallbackTimer = () => {
+    if (fallbackClearTimerRef.current !== null) {
+      window.clearTimeout(fallbackClearTimerRef.current);
+      fallbackClearTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    fallbackClearTimerRef.current = window.setTimeout(() => {
+      setTilesBusy(false);
+      fallbackClearTimerRef.current = null;
+    }, TILE_LOAD_TIMEOUT_MS);
+    return () => clearFallbackTimer();
+  }, []);
+
   const handlePointerUp = () => {
     const now = Date.now();
     if (now - lastTap < 350) {
@@ -43,54 +63,80 @@ export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProp
   };
 
   return (
-    <div
-      role="application"
-      aria-label="Map"
-      onPointerUp={onDoubleTapHint ? handlePointerUp : undefined}
-      style={{
-        height,
-        borderRadius: 'var(--aura-radius-md)',
-        overflow: 'hidden',
-        border: '1px solid var(--aura-border)',
-      }}
-    >
-      <MapContainer
-        center={DEFAULT_CENTER}
-        zoom={13}
-        style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom
+    <div>
+      <div
+        role="application"
+        aria-label="Map"
+        aria-busy={tilesBusy}
+        onPointerUp={onDoubleTapHint ? handlePointerUp : undefined}
+        style={{
+          position: 'relative',
+          height,
+          borderRadius: 'var(--aura-radius-md)',
+          overflow: 'hidden',
+          border: '1px solid var(--aura-border)',
+        }}
       >
-        <FixResize />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          eventHandlers={{
-            tileerror: (e) => {
-              emitTelemetry({
-                category: 'map',
-                event: 'tile_error',
-                tileUrl: (e.tile as { src?: string } | undefined)?.src,
-              });
-            },
-          }}
-        />
-        {features.map((f) => (
-          <CircleMarker
-            key={f.id}
-            center={[f.lat, f.lng]}
-            radius={10}
-            pathOptions={{ color: colors[f.kind], fillColor: colors[f.kind], fillOpacity: 0.55 }}
-          >
-            <Popup>
-              <strong>{f.title}</strong>
-              <div style={{ marginTop: 6 }}>{f.description}</div>
-              {f.curatedNote ? (
-                <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{f.curatedNote}</div>
-              ) : null}
-            </Popup>
-          </CircleMarker>
-        ))}
-      </MapContainer>
+        {tilesBusy ? (
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 400,
+              background: 'rgba(255,255,255,0.72)',
+              pointerEvents: 'none',
+            }}
+          />
+        ) : null}
+        <MapContainer
+          center={DEFAULT_CENTER}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom
+        >
+          <FixResize />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            eventHandlers={{
+              loading: () => setTilesBusy(true),
+              load: () => {
+                clearFallbackTimer();
+                setTilesBusy(false);
+              },
+              tileerror: (e) => {
+                emitTelemetry({
+                  category: 'map',
+                  event: 'tile_error',
+                  tileUrl: (e.tile as { src?: string } | undefined)?.src,
+                });
+              },
+            }}
+          />
+          {features.map((f) => (
+            <CircleMarker
+              key={f.id}
+              center={[f.lat, f.lng]}
+              radius={10}
+              pathOptions={{ color: colors[f.kind], fillColor: colors[f.kind], fillOpacity: 0.55 }}
+            >
+              <Popup>
+                <strong>{f.title}</strong>
+                <div style={{ marginTop: 6 }}>{f.description}</div>
+                {f.curatedNote ? (
+                  <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{f.curatedNote}</div>
+                ) : null}
+              </Popup>
+            </CircleMarker>
+          ))}
+        </MapContainer>
+      </div>
+      {tilesBusy ? (
+        <p role="status" style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--aura-muted)' }}>
+          Loading map…
+        </p>
+      ) : null}
     </div>
   );
 }

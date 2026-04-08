@@ -128,10 +128,22 @@ export function JourneyActive() {
       ) : null}
 
       <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
-        <button type="button" disabled={busy !== null} onClick={runSafe} style={actionBtn}>
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={runSafe}
+          style={actionBtn}
+          aria-busy={busy === 'safe'}
+        >
           {busy === 'safe' ? 'Sending…' : "I'm safe"}
         </button>
-        <button type="button" disabled={busy !== null} onClick={runShare} style={actionBtn}>
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={runShare}
+          style={actionBtn}
+          aria-busy={busy === 'share'}
+        >
           {busy === 'share' ? 'Sharing…' : 'Share live location'}
         </button>
         <button
