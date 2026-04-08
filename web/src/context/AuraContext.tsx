@@ -8,6 +8,7 @@ import type {
   TrustedContact,
 } from '../types';
 import { AuraContext } from './auraContext';
+import { emitTelemetry } from '../observability/auraTelemetry';
 
 const STORAGE_KEY = 'aura:v1';
 
@@ -175,6 +176,16 @@ export function AuraProvider({ children }: { children: ReactNode }) {
 
   const setGlobalStatus = useCallback((s: GlobalStatus) => setGlobalStatusState(s), []);
 
+  const clearLocalAuraData = useCallback(() => {
+    emitTelemetry({ category: 'app', event: 'local_data_cleared' });
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore quota / private mode */
+    }
+    window.location.reload();
+  }, []);
+
   const value = useMemo(
     () => ({
       contacts,
@@ -195,6 +206,7 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       setOnboardingCompleted,
       shareLocationPrimerAcknowledged,
       setShareLocationPrimerAcknowledged,
+      clearLocalAuraData,
     }),
     [
       contacts,
@@ -215,6 +227,7 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       setOnboardingCompleted,
       shareLocationPrimerAcknowledged,
       setShareLocationPrimerAcknowledged,
+      clearLocalAuraData,
     ],
   );
 

@@ -47,7 +47,7 @@ export function Home() {
       </Link>
 
       <Link to="/settings" style={card}>
-        <div style={{ fontWeight: 700 }}>Safety settings</div>
+        <div style={{ fontWeight: 700 }}>Settings</div>
         <div style={{ fontSize: 13, color: 'var(--aura-muted)', marginTop: 6 }}>
           Voice keyword, silent trigger, timers
         </div>

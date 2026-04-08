@@ -34,6 +34,8 @@ export type AuraContextValue = {
   setOnboardingCompleted: (completed: boolean) => void;
   shareLocationPrimerAcknowledged: boolean;
   setShareLocationPrimerAcknowledged: (acknowledged: boolean) => void;
+  /** Removes persisted Aura state in this browser and reloads the app. */
+  clearLocalAuraData: () => void;
 };
 
 export const AuraContext = createContext<AuraContextValue | null>(null);

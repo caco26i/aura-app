@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
@@ -7,26 +7,63 @@ type Step = 0 | 1 | 2;
 
 export function Welcome() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const locationReview = searchParams.get('review') === 'location';
   const { onboardingCompleted, setOnboardingCompleted } = useAura();
   const [step, setStep] = useState<Step>(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const titleId = `welcome-step-${step}-title`;
 
   useEffect(() => {
-    if (onboardingCompleted) {
+    if (onboardingCompleted && !locationReview) {
       navigate('/', { replace: true });
     }
-  }, [onboardingCompleted, navigate]);
+  }, [onboardingCompleted, navigate, locationReview]);
 
   useEffect(() => {
     headingRef.current?.focus();
-  }, [step]);
+  }, [step, locationReview]);
 
   const finish = (source: 'finish' | 'skip') => {
     setOnboardingCompleted(true);
     emitTelemetry({ category: 'app', event: 'onboarding_completed', source });
     navigate('/', { replace: true });
   };
+
+  if (locationReview) {
+    return (
+      <div
+        style={{
+          minHeight: '100%',
+          padding: '24px 20px calc(32px + var(--aura-safe-area-bottom))',
+          background: 'linear-gradient(180deg, var(--aura-lavender-wash), var(--aura-canvas))',
+          color: 'var(--aura-text)',
+        }}
+      >
+        <div style={{ maxWidth: 440, margin: '0 auto' }}>
+          <h1
+            ref={headingRef}
+            style={{ marginTop: 0, fontSize: 26, lineHeight: 1.2 }}
+            tabIndex={-1}
+            id="welcome-review-location-title"
+          >
+            Journeys and location
+          </h1>
+          <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, fontSize: 16 }}>
+            When you start a journey or use the map, your browser may ask for location. You can choose approximate or
+            precise sharing in Settings.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/settings')}
+            style={{ ...primaryBtn, marginTop: 24, width: '100%' }}
+          >
+            Back to settings
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (onboardingCompleted) {
     return null;
@@ -85,7 +122,7 @@ export function Welcome() {
             </h1>
             <p style={{ color: 'var(--aura-muted)', lineHeight: 1.55, fontSize: 16 }}>
               When you start a journey or use the map, your browser may ask for location. You can choose approximate or
-              precise sharing in Safety settings.
+              precise sharing in Settings.
             </p>
           </>
         ) : null}
