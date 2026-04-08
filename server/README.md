@@ -2,6 +2,8 @@
 
 Validates SOS, location share, and “I’m safe” payloads; enforces bearer auth and rate limits; appends an **immutable JSON-lines audit log** (treat the log file as WORM in production — ship to object storage / SIEM).
 
+**Client contract:** [`../web/docs/API_CONTRACT.md`](../web/docs/API_CONTRACT.md) (envelopes, error codes, headers). Change it in lockstep with `web/src/api/auraBackend.ts` / `auraApiMessages.ts`.
+
 ## Related docs (web package)
 
 Stack setup beyond this README (client auth, deploy, security, observability, and **client ↔ API** integration) lives under **[`../web/docs/`](../web/docs/)** in the web package. For local wiring, start with [`../web/docs/BETA_BACKEND.md`](../web/docs/BETA_BACKEND.md) alongside the env table below. That doc ties **PDR §4.2** to the web app: create journey first, then share / I’m safe; the web client maps `journey_not_found`, `journey_forbidden`, and related codes to calm session-style copy in [`../web/src/api/auraApiMessages.ts`](../web/src/api/auraApiMessages.ts).

@@ -1,5 +1,7 @@
 # Beta backend boundary
 
+**API contract (envelopes, error codes, headers):** [API_CONTRACT.md](./API_CONTRACT.md) — coordinate with backend before changing response shapes or `error` strings.
+
 Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) while routing network calls through `src/api/auraBackend.ts`.
 
 **PDR §4.2 (journey + API):** The client **must** call `POST /v1/journeys` and use the returned `journeyId` before any `location-shares` or `im-safe` for that id. Flow: [`JourneyNew.tsx`](../src/pages/JourneyNew.tsx) → `postCreateJourney()` in [`auraBackend.ts`](../src/api/auraBackend.ts) → active journey state, then [`JourneyActive.tsx`](../src/pages/JourneyActive.tsx) for share / I’m safe. User-facing API copy is centralized in [`auraApiMessages.ts`](../src/api/auraApiMessages.ts) (session/sync framing for ownership errors, not danger).
