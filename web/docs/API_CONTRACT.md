@@ -60,8 +60,8 @@ The client reads **`error`** (string) for mapping; `detail` is diagnostic.
 | 404 | `journey_not_found` | Journey id unknown to server for this deployment |
 | 404 | `not_found` | Unknown path |
 | 429 | `rate_limited` | express-rate-limit — **minute** windows (`globalLimiter` / `journeyLimiter` on mutating routes) or **hourly** caps (SOS, location-shares, im-safe); JSON envelope `{ ok: false, error, detail }`; `audit.rate_limited` with a `route` label |
-| 503 | `server_misconfigured` | Neither `AURA_API_BEARER_TOKEN` nor `AURA_API_BFF_JWT_SECRET` configured |
-| 503 | `not_ready` | `GET /ready` only: neither static bearer nor BFF JWT secret configured, or audit log directory not writable |
+| 503 | `server_misconfigured` | Neither `AURA_API_BEARER_TOKEN` nor `AURA_API_BFF_JWT_SECRET` configured; or **`NODE_ENV=production`** with both a non-empty static bearer (`AURA_API_BEARER_TOKEN` or `AURA_API_BEARER_TOKEN_ALT`) and `AURA_API_BFF_JWT_SECRET` (JWT-only stack — clear static bearer env on the API) |
+| 503 | `not_ready` | `GET /ready` only: neither static bearer nor BFF JWT secret configured; audit log directory not writable; or the same **production** static-bearer + BFF-JWT conflict as above |
 
 ## Response headers
 

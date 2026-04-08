@@ -58,7 +58,7 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `AURA_API_BEARER_TOKEN` | one of | Shared secret for beta / dev; use with `Authorization: Bearer …`. Omit in production if you rely only on JWTs. |
+| `AURA_API_BEARER_TOKEN` | one of | Shared secret for beta / dev; use with `Authorization: Bearer …`. Omit for **JWT-only** / BFF-first production (`AURA_API_BFF_JWT_SECRET` only). When **`NODE_ENV=production`**, a non-empty `AURA_API_BEARER_TOKEN` or `AURA_API_BEARER_TOKEN_ALT` together with `AURA_API_BFF_JWT_SECRET` makes **`GET /ready`** and authenticated routes return **503** — clear static bearer vars on the API container for BFF-first deploys. |
 | `AURA_API_BFF_JWT_SECRET` | one of | HS256 secret for **BFF-issued** access tokens. When set, a **three-segment** Bearer value is verified as JWT (claims: **`sub`** required, **`exp`** enforced; optional **`iss`** / **`aud`** via env below). Journey ownership is keyed by `sub`, so refreshed tokens for the same user stay compatible. |
 | `AURA_API_BFF_JWT_ISSUER` | no | If set, JWT `iss` must match. |
 | `AURA_API_BFF_JWT_AUDIENCE` | no | If set, JWT `aud` must match (string or array). |
@@ -94,7 +94,7 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 - `POST /v1/journeys/:journeyId/location-shares` — UUID journey id **registered via** `POST /v1/journeys` **for this token**; otherwise `404 journey_not_found` or `403 journey_forbidden`. JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
 - `POST /v1/journeys/:journeyId/im-safe` — same ownership rules as location-shares; **hourly** rate limit (layered under global + per-minute journey limits)
 - `GET /health` — liveness (process up). JSON is `{ ok, service }`; when `AURA_API_DEPLOY_VERSION` and/or `AURA_API_GIT_SHA` are set, response also includes **`deployVersion`** and/or **`gitSha`**.
-- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and directories for `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` writable (**503** `not_ready` otherwise). Base JSON includes `ready`; optional **`deployVersion`** / **`gitSha`** are merged into both **200** and **503** responses when those env vars are set.
+- `GET /ready` — readiness: **at least one** of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` set, and directories for `AUDIT_LOG_PATH`, `AURA_API_JOURNEY_STORE_SQLITE_PATH`, and `AURA_API_JOURNEY_STORE_JSONL_PATH` writable (**503** `not_ready` otherwise). In **`NODE_ENV=production`**, **503** `not_ready` also applies if both a non-empty static bearer (`AURA_API_BEARER_TOKEN` or `AURA_API_BEARER_TOKEN_ALT`) and `AURA_API_BFF_JWT_SECRET` are set. Base JSON includes `ready`; optional **`deployVersion`** / **`gitSha`** are merged into both **200** and **503** responses when those env vars are set.
 
 All JSON responses include baseline headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and **`X-Request-Id`** (request correlation; see [`API_CONTRACT.md`](../web/docs/API_CONTRACT.md)).
 

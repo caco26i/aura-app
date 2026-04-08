@@ -134,6 +134,13 @@ async function fetchBffSession(): Promise<AuraApiAuthResolution> {
 }
 
 export async function resolveAuraApiBearer(): Promise<AuraApiAuthResolution> {
+  if (import.meta.env.PROD && staticToken && bffRaw) {
+    return {
+      kind: 'error',
+      error:
+        'BFF URL and static API token are both set; production builds must not ship a static bearer with VITE_AURA_BFF_URL (see web/docs/DEPLOY.md).',
+    };
+  }
   if (staticToken) {
     return { kind: 'ready', token: staticToken };
   }

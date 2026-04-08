@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_*, optional AURA_API_DEPLOY_VERSION / AURA_API_GIT_SHA (see README). In **NODE_ENV=production**, do not set static bearer vars when AURA_API_BFF_JWT_SECRET is set (JWT-only). **SIGUSR2** (Unix) reopens the audit log file — see README / RUNBOOK_AUDIT.
  */
 
 import cors from 'cors';
@@ -14,6 +14,7 @@ import { createAuditWriter, installAuditLogReopenOnUsr2 } from './auditWriter.js
 import { createJourneyRegistry } from './journeyRegistry.js';
 
 const PORT = Number(process.env.PORT || 8787);
+const IS_PRODUCTION = (process.env.NODE_ENV || '').toLowerCase() === 'production';
 const BEARER = process.env.AURA_API_BEARER_TOKEN;
 /** Optional second beta token (staging / integration tests) — distinct actor key from primary bearer. */
 const BEARER_ALT = process.env.AURA_API_BEARER_TOKEN_ALT || '';
@@ -292,8 +293,25 @@ function probeDirWritable(dir) {
   fs.unlinkSync(probe);
 }
 
+/** Non-empty trimmed env string — used to detect static bearer configured alongside BFF JWT in production. */
+function envBearerStringPresent(raw) {
+  return typeof raw === 'string' && raw.trim().length > 0;
+}
+
+/** In production, operators must not combine static bearer with BFF JWT secret (JWT-only / BFF-first stacks). */
+function productionBffJwtStaticBearerConflict() {
+  if (!IS_PRODUCTION || !BFF_JWT_SECRET) return false;
+  return envBearerStringPresent(process.env.AURA_API_BEARER_TOKEN) || envBearerStringPresent(process.env.AURA_API_BEARER_TOKEN_ALT);
+}
+
+const PRODUCTION_JWT_STATIC_CONFLICT_DETAIL =
+  'Production (NODE_ENV=production): omit AURA_API_BEARER_TOKEN and AURA_API_BEARER_TOKEN_ALT when AURA_API_BFF_JWT_SECRET is set. Use JWT-only auth for BFF-first deploys; see web/docs/DEPLOY.md.';
+
 /** Verifies auth is configured and audit + journey store directories are writable. */
 function readinessResult() {
+  if (productionBffJwtStaticBearerConflict()) {
+    return { ok: false, detail: PRODUCTION_JWT_STATIC_CONFLICT_DETAIL };
+  }
   if (!BEARER && !BFF_JWT_SECRET) {
     return { ok: false, detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET' };
   }
@@ -330,6 +348,14 @@ function requireAuth(req, res, next) {
       ok: false,
       error: 'server_misconfigured',
       detail: 'Set AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET',
+    });
+    return;
+  }
+  if (productionBffJwtStaticBearerConflict()) {
+    res.status(503).json({
+      ok: false,
+      error: 'server_misconfigured',
+      detail: PRODUCTION_JWT_STATIC_CONFLICT_DETAIL,
     });
     return;
   }
