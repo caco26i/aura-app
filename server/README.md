@@ -19,7 +19,7 @@ npm run dev
 
 ## Docker
 
-The API image compiles **`better-sqlite3`** during `npm ci`, so the build stage uses **Debian bookworm-slim** with `python3`, `make`, and `g++`. The runtime image stays slim and reuses the compiled `node_modules` from the build stage.
+The API image compiles **`better-sqlite3`** during `npm ci`, so the build stage uses **Debian bookworm-slim** with `python3`, `make`, and `g++`. The runtime image stays slim and reuses the compiled `node_modules` from the build stage. **CI:** the [Server API tests](../.github/workflows/server-tests.yml) workflow runs **`docker build -f server/Dockerfile server`** on pushes/PRs that touch `server/` (same triggers as `npm test`) so native compile regressions fail in GitHub Actions, not only locally.
 
 ```bash
 cd server
@@ -50,7 +50,7 @@ npm test
 
 Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), append-only audit writes, **journey store unit restart checks** (`journey-registry.restart.test.js`), and **HTTP continuity across two Node processes** (`journey-http-restart.integration.test.js` + `journey-restart-phase.mjs`). Default API tests set `AURA_API_JOURNEY_STORE=memory`; subprocess test uses a temp SQLite file.
 
-On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` when `server/` or that workflow file changes.
+On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` and a **`docker build`** smoke on `server/Dockerfile` when `server/`, `web/docs/API_CONTRACT.md`, or that workflow file changes.
 
 ## Env
 
