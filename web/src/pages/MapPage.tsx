@@ -73,32 +73,38 @@ export function MapPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Map intel</h1>
-      <p style={{ color: 'var(--aura-muted)' }}>Layers and POIs persist across reloads (local device).</p>
+      <h1 id="map-intel-heading" style={{ marginTop: 0 }}>
+        Map intel
+      </h1>
+      <p id="map-intel-lede" style={{ color: 'var(--aura-muted)' }}>
+        Layers and POIs persist across reloads (local device).
+      </p>
 
-      {toggleRow('map-layer-risk', 'Risk signals', 'risk', 'Areas to stay aware near')}
-      {toggleRow('map-layer-safe', 'Safe points', 'safePoints', 'Lit checkpoints and safer zones')}
-      {toggleRow('map-layer-activity', 'Activity', 'activity', 'Events and crowd context')}
+      <section aria-labelledby="map-intel-heading" aria-describedby="map-intel-lede">
+        {toggleRow('map-layer-risk', 'Risk signals', 'risk', 'Areas to stay aware near')}
+        {toggleRow('map-layer-safe', 'Safe points', 'safePoints', 'Lit checkpoints and safer zones')}
+        {toggleRow('map-layer-activity', 'Activity', 'activity', 'Events and crowd context')}
 
-      <AuraMap features={visible} height={340} />
+        <AuraMap features={visible} height={340} />
 
-      {visible.length === 0 ? (
-        <p role="status" style={{ marginTop: 12, color: 'var(--aura-muted)' }}>
-          All layers are off — enable at least one to see curated POIs.
-        </p>
-      ) : (
-        <ul style={{ paddingLeft: 18 }}>
-          {visible.map((f) => (
-            <li key={f.id} style={{ marginBottom: 8 }}>
-              <strong>{f.title}</strong>
-              <div style={{ fontSize: 13, color: 'var(--aura-muted)' }}>{f.description}</div>
-              {f.curatedNote ? (
-                <div style={{ fontSize: 12, color: 'var(--aura-muted)' }}>{f.curatedNote}</div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+        {visible.length === 0 ? (
+          <p role="status" style={{ marginTop: 12, color: 'var(--aura-muted)' }}>
+            All layers are off — enable at least one to see curated POIs.
+          </p>
+        ) : (
+          <ul style={{ paddingLeft: 18 }}>
+            {visible.map((f) => (
+              <li key={f.id} style={{ marginBottom: 8 }}>
+                <strong>{f.title}</strong>
+                <div style={{ fontSize: 13, color: 'var(--aura-muted)' }}>{f.description}</div>
+                {f.curatedNote ? (
+                  <div style={{ fontSize: 12, color: 'var(--aura-muted)' }}>{f.curatedNote}</div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
