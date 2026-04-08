@@ -79,6 +79,6 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 ## Completion checklist
 
-- [ ] Schedule published in-repo (this file) **before** first post.
+- [x] Schedule published in-repo (this file) **before** first post.
 - [ ] ≥ **6** LinkedIn posts on schedule (or documented slip with reason).
 - [ ] Retro section filled within **3 business days** of last post.
