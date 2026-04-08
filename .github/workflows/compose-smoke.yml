@@ -143,3 +143,97 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml down -v --remove-orphans
+
+  compose-bff-telemetry-proxy-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate merged compose (BFF + telemetry stub)
+        run: |
+          set -euo pipefail
+          export VITE_GOOGLE_CLIENT_ID=ci-smoke-placeholder.apps.googleusercontent.com
+          export AURA_API_BFF_JWT_SECRET="$(openssl rand -hex 32)"
+          export AURA_BFF_SESSION_SECRET="$(openssl rand -hex 32)"
+          python3 <<'PY'
+          import json, os, subprocess
+
+          r = subprocess.run(
+              [
+                  "docker",
+                  "compose",
+                  "-f",
+                  "docker-compose.yml",
+                  "-f",
+                  "docker-compose.bff.yml",
+                  "-f",
+                  "docker-compose.telemetry-smoke.yml",
+                  "config",
+                  "--format",
+                  "json",
+              ],
+              capture_output=True,
+              text=True,
+              env=os.environ,
+          )
+          if r.returncode != 0:
+              print(r.stderr, file=__import__("sys").stderr)
+              raise SystemExit(r.returncode)
+          deps = json.loads(r.stdout)["services"]["aura-web"].get("depends_on") or {}
+          need = {"aura-api", "aura-bff", "aura-telemetry-stub"}
+          missing = need - set(deps)
+          assert not missing, f"aura-web depends_on missing: {missing}"
+          PY
+
+      - name: JWT + BFF + same-origin telemetry .env
+        run: |
+          cat > .env <<EOF
+          AURA_API_BFF_JWT_SECRET=$(openssl rand -hex 32)
+          AURA_BFF_SESSION_SECRET=$(openssl rand -hex 32)
+          VITE_GOOGLE_CLIENT_ID=ci-smoke-placeholder.apps.googleusercontent.com
+          AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080
+          VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura
+          AURA_TELEMETRY_PROXY_TARGET=http://aura-telemetry-stub:8080/ingest/aura
+          EOF
+          short_sha="${GITHUB_SHA:0:7}"
+          echo "AURA_API_GIT_SHA=${short_sha}" >> .env
+          echo "AURA_API_DEPLOY_VERSION=compose-smoke" >> .env
+
+      - name: Build and start stack (BFF + telemetry stub)
+        run: docker compose -f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml up -d --build
+
+      - name: Wait for /health, /ready, BFF, then POST /ingest/aura
+        run: |
+          set -euo pipefail
+          COMPOSE_FILES=(-f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml)
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8080/health" >/dev/null 2>&1; then
+              echo "health ok (attempt $i)"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "::group::compose ps + logs"
+              docker compose "${COMPOSE_FILES[@]}" ps
+              docker compose "${COMPOSE_FILES[@]}" logs --tail=200
+              echo "::endgroup::"
+              exit 1
+            fi
+            sleep 2
+          done
+          health_json="$(curl -fsS "http://127.0.0.1:8080/health")"
+          echo "${health_json}"
+          echo "${health_json}" | jq -e --arg sha "${GITHUB_SHA:0:7}" '.gitSha == $sha' >/dev/null
+          echo "${health_json}" | jq -e '.deployVersion == "compose-smoke"' >/dev/null
+          curl -fsS "http://127.0.0.1:8080/ready"
+          echo
+          curl -fsS "http://127.0.0.1:8080/aura-bff/health"
+          echo
+          code="$(curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:8080/ingest/aura" \
+            -H "Content-Type: application/json" -d '{"smoke":true}')"
+          echo "POST /ingest/aura HTTP ${code}"
+          test "${code}" = "200"
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml down -v --remove-orphans

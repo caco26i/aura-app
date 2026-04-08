@@ -69,6 +69,8 @@ curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:${WEB_PORT:-80
 
 Expect a non-`405` response from nginx (exact code depends on the collector). CI uses [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) with an echo stub.
 
+**BFF + telemetry proxy together:** merge `docker-compose.yml`, then [`docker-compose.bff.yml`](../../docker-compose.bff.yml), then [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) (that order). Set `.env` with BFF secrets, `VITE_GOOGLE_CLIENT_ID`, `VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`, and point `AURA_TELEMETRY_PROXY_TARGET` at your collector (the telemetry override sets the stub URL on `aura-web` when using the echo image). Current Compose merges `depends_on` so `aura-web` waits on `aura-api`, `aura-bff`, and `aura-telemetry-stub`. Manual CI job: `compose-bff-telemetry-proxy-smoke` in [`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml).
+
 ### Staging smoke: BFF JWT path (no static web token)
 
 Use this checklist on **staging** (or a local stack that mirrors staging) to prove **BFF-issued JWT** auth works end-to-end **without** `VITE_AURA_API_TOKEN` in the web bundle. Contract and dev notes: [BETA_BACKEND.md](./BETA_BACKEND.md); BFF env and routes: [`server/bff/README.md`](../../server/bff/README.md).
