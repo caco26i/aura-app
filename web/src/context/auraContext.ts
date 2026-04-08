@@ -2,6 +2,7 @@ import { createContext } from 'react';
 import type {
   ActiveJourney,
   AuraSettings,
+  EncuentroDraft,
   GlobalStatus,
   JourneyTrackState,
   MapLayers,
@@ -36,6 +37,8 @@ export type AuraContextValue = {
   setShareLocationPrimerAcknowledged: (acknowledged: boolean) => void;
   /** Removes persisted Aura state in this browser and reloads the app. */
   clearLocalAuraData: () => void;
+  encuentroDraft: EncuentroDraft;
+  updateEncuentroDraft: (patch: Partial<EncuentroDraft>) => void;
 };
 
 export const AuraContext = createContext<AuraContextValue | null>(null);

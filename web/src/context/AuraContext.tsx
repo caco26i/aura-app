@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type {
-  ActiveJourney,
-  AuraSettings,
-  GlobalStatus,
-  JourneyTrackState,
-  MapLayers,
-  TrustedContact,
+import {
+  defaultEncuentroDraft,
+  type ActiveJourney,
+  type AuraSettings,
+  type EncuentroDraft,
+  type GlobalStatus,
+  type JourneyTrackState,
+  type MapLayers,
+  type TrustedContact,
 } from '../types';
 import { AuraContext } from './auraContext';
 import { emitTelemetry } from '../observability/auraTelemetry';
@@ -20,7 +22,25 @@ type Persisted = {
   globalStatus: GlobalStatus;
   onboardingCompleted: boolean;
   shareLocationPrimerAcknowledged: boolean;
+  encuentroDraft: EncuentroDraft;
 };
+
+function normalizeEncuentroDraft(raw: unknown): EncuentroDraft {
+  const d = defaultEncuentroDraft();
+  if (!raw || typeof raw !== 'object') return d;
+  const o = raw as Record<string, unknown>;
+  const interval =
+    typeof o.checkInIntervalMinutes === 'number' && Number.isFinite(o.checkInIntervalMinutes)
+      ? Math.min(120, Math.max(1, Math.round(o.checkInIntervalMinutes)))
+      : d.checkInIntervalMinutes;
+  return {
+    contactName: typeof o.contactName === 'string' ? o.contactName : d.contactName,
+    place: typeof o.place === 'string' ? o.place : d.place,
+    safetyKeyword: typeof o.safetyKeyword === 'string' ? o.safetyKeyword : d.safetyKeyword,
+    meetingLocalValue: typeof o.meetingLocalValue === 'string' ? o.meetingLocalValue : d.meetingLocalValue,
+    checkInIntervalMinutes: interval,
+  };
+}
 
 const defaultSettings: AuraSettings = {
   displayName: '',
@@ -48,6 +68,7 @@ function loadPersisted(): Persisted {
         globalStatus: 'calm',
         onboardingCompleted: false,
         shareLocationPrimerAcknowledged: false,
+        encuentroDraft: defaultEncuentroDraft(),
       };
     }
     const parsed = JSON.parse(raw) as Partial<Persisted>;
@@ -67,6 +88,7 @@ function loadPersisted(): Persisted {
       globalStatus: parsed.globalStatus === 'alert' ? 'alert' : 'calm',
       onboardingCompleted,
       shareLocationPrimerAcknowledged,
+      encuentroDraft: normalizeEncuentroDraft(parsed.encuentroDraft),
     };
   } catch {
     return {
@@ -77,6 +99,7 @@ function loadPersisted(): Persisted {
       globalStatus: 'calm',
       onboardingCompleted: false,
       shareLocationPrimerAcknowledged: false,
+      encuentroDraft: defaultEncuentroDraft(),
     };
   }
 }
@@ -97,6 +120,9 @@ export function AuraProvider({ children }: { children: ReactNode }) {
   const [shareLocationPrimerAcknowledged, setShareLocationPrimerAcknowledgedState] = useState(
     () => loadPersisted().shareLocationPrimerAcknowledged,
   );
+  const [encuentroDraft, setEncuentroDraftState] = useState<EncuentroDraft>(
+    () => loadPersisted().encuentroDraft,
+  );
 
   useEffect(() => {
     const payload: Persisted = {
@@ -107,6 +133,7 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       globalStatus,
       onboardingCompleted,
       shareLocationPrimerAcknowledged,
+      encuentroDraft,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [
@@ -117,6 +144,7 @@ export function AuraProvider({ children }: { children: ReactNode }) {
     globalStatus,
     onboardingCompleted,
     shareLocationPrimerAcknowledged,
+    encuentroDraft,
   ]);
 
   const setOnboardingCompleted = useCallback((completed: boolean) => {
@@ -177,6 +205,10 @@ export function AuraProvider({ children }: { children: ReactNode }) {
 
   const setGlobalStatus = useCallback((s: GlobalStatus) => setGlobalStatusState(s), []);
 
+  const updateEncuentroDraft = useCallback((patch: Partial<EncuentroDraft>) => {
+    setEncuentroDraftState((prev) => ({ ...prev, ...patch }));
+  }, []);
+
   const clearLocalAuraData = useCallback(() => {
     emitTelemetry({ category: 'app', event: 'local_data_cleared' });
     try {
@@ -208,6 +240,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       shareLocationPrimerAcknowledged,
       setShareLocationPrimerAcknowledged,
       clearLocalAuraData,
+      encuentroDraft,
+      updateEncuentroDraft,
     }),
     [
       contacts,
@@ -229,6 +263,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       shareLocationPrimerAcknowledged,
       setShareLocationPrimerAcknowledged,
       clearLocalAuraData,
+      encuentroDraft,
+      updateEncuentroDraft,
     ],
   );
 

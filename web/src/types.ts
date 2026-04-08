@@ -35,3 +35,23 @@ export type AuraSettings = {
 };
 
 export type GlobalStatus = 'calm' | 'alert';
+
+/** Modo Cita — local draft only (no backend). */
+export type EncuentroDraft = {
+  contactName: string;
+  place: string;
+  safetyKeyword: string;
+  /** Value for `<input type="datetime-local">` (local, no timezone suffix). */
+  meetingLocalValue: string;
+  checkInIntervalMinutes: number;
+};
+
+export function defaultEncuentroDraft(): EncuentroDraft {
+  return {
+    contactName: '',
+    place: '',
+    safetyKeyword: '',
+    meetingLocalValue: '',
+    checkInIntervalMinutes: 15,
+  };
+}

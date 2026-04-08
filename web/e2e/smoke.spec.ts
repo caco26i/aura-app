@@ -15,11 +15,20 @@ const AURA_STORAGE_BOOTSTRAP = JSON.stringify({
   globalStatus: 'calm',
   onboardingCompleted: true,
   shareLocationPrimerAcknowledged: false,
+  encuentroDraft: {
+    contactName: '',
+    place: '',
+    safetyKeyword: '',
+    meetingLocalValue: '',
+    checkInIntervalMinutes: 15,
+  },
 });
 
 test.describe('shell smoke', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
+      // Do not clobber on reload — tests assert `aura:v1` survives full navigation.
+      if (window.localStorage.getItem('aura:v1')) return;
       window.localStorage.setItem('aura:v1', payload);
     }, AURA_STORAGE_BOOTSTRAP);
   });
@@ -100,6 +109,30 @@ test.describe('shell smoke', () => {
     await page.getByRole('link', { name: /Modo Cita/i }).click();
     await expect(page).toHaveURL(/\/cita$/);
     await expect(page.getByRole('heading', { name: 'Modo Cita', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Modo Cita: encuentro draft survives reload (aura:v1)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/cita');
+
+    await page.getByLabel(/Nombre o apodo del contacto/i).fill('María prueba');
+    await page.getByLabel(/^Lugar$/i).fill('Café Central');
+    await page.getByLabel(/Palabra de seguridad/i).fill('cactus');
+
+    await page.reload();
+
+    await expect(page.getByLabel(/Nombre o apodo del contacto/i)).toHaveValue('María prueba');
+    await expect(page.getByLabel(/^Lugar$/i)).toHaveValue('Café Central');
+    await expect(page.getByLabel(/Palabra de seguridad/i)).toHaveValue('cactus');
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
