@@ -2,7 +2,7 @@
 
 | Route | Purpose |
 |-------|---------|
-| `/welcome` | First-run onboarding (planned — see [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md)); outside shell |
+| `/welcome` | First-run onboarding (see [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §2); outside shell |
 | `/` | Home hub |
 | `/journey/new` | Configure journey |
 | `/journey/active` | Live tracking, map, backend actions |
@@ -13,4 +13,4 @@
 
 Global SOS FAB: fixed; hidden on `/emergency`. Bottom navigation in `AppShell`.
 
-**Onboarding:** Until `/welcome` ships, cold start goes straight to Home. Spec sets `onboardingCompleted` in persisted state and recommends skipping the flow for existing `aura:v1` users on migration.
+**Onboarding:** Cold start redirects to `/welcome` when `onboardingCompleted` is false in `aura:v1`. Existing payloads without that field are treated as already completed (migration). `/emergency` stays reachable without finishing onboarding.

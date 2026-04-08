@@ -30,6 +30,8 @@ export type AuraContextValue = {
   updateSettings: (patch: Partial<AuraSettings>) => void;
   globalStatus: GlobalStatus;
   setGlobalStatus: (s: GlobalStatus) => void;
+  onboardingCompleted: boolean;
+  setOnboardingCompleted: (completed: boolean) => void;
 };
 
 export const AuraContext = createContext<AuraContextValue | null>(null);

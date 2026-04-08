@@ -17,6 +17,7 @@ type Persisted = {
   mapLayers: MapLayers;
   settings: AuraSettings;
   globalStatus: GlobalStatus;
+  onboardingCompleted: boolean;
 };
 
 const defaultSettings: AuraSettings = {
@@ -42,15 +43,21 @@ function loadPersisted(): Persisted {
         mapLayers: defaultLayers,
         settings: defaultSettings,
         globalStatus: 'calm',
+        onboardingCompleted: false,
       };
     }
     const parsed = JSON.parse(raw) as Partial<Persisted>;
+    const onboardingCompleted =
+      typeof parsed.onboardingCompleted === 'boolean'
+        ? parsed.onboardingCompleted
+        : true;
     return {
       contacts: Array.isArray(parsed.contacts) ? parsed.contacts : [],
       activeJourney: parsed.activeJourney ?? null,
       mapLayers: { ...defaultLayers, ...parsed.mapLayers },
       settings: { ...defaultSettings, ...parsed.settings },
       globalStatus: parsed.globalStatus === 'alert' ? 'alert' : 'calm',
+      onboardingCompleted,
     };
   } catch {
     return {
@@ -59,6 +66,7 @@ function loadPersisted(): Persisted {
       mapLayers: defaultLayers,
       settings: defaultSettings,
       globalStatus: 'calm',
+      onboardingCompleted: false,
     };
   }
 }
@@ -73,6 +81,9 @@ export function AuraProvider({ children }: { children: ReactNode }) {
   const [globalStatus, setGlobalStatusState] = useState<GlobalStatus>(
     () => loadPersisted().globalStatus,
   );
+  const [onboardingCompleted, setOnboardingCompletedState] = useState(
+    () => loadPersisted().onboardingCompleted,
+  );
 
   useEffect(() => {
     const payload: Persisted = {
@@ -81,9 +92,14 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       mapLayers,
       settings,
       globalStatus,
+      onboardingCompleted,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [contacts, activeJourney, mapLayers, settings, globalStatus]);
+  }, [contacts, activeJourney, mapLayers, settings, globalStatus, onboardingCompleted]);
+
+  const setOnboardingCompleted = useCallback((completed: boolean) => {
+    setOnboardingCompletedState(completed);
+  }, []);
 
   const addContact = useCallback((c: Omit<TrustedContact, 'id'>) => {
     const id = crypto.randomUUID();
@@ -151,6 +167,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       updateSettings,
       globalStatus,
       setGlobalStatus,
+      onboardingCompleted,
+      setOnboardingCompleted,
     }),
     [
       contacts,
@@ -167,6 +185,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       updateSettings,
       globalStatus,
       setGlobalStatus,
+      onboardingCompleted,
+      setOnboardingCompleted,
     ],
   );
 
