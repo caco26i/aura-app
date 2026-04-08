@@ -80,6 +80,8 @@ The web client emits **structured JSON** lines prefixed with `[aura.telemetry]` 
 
 **CEO-approved** public positioning, hero, pillars, and primary CTA are in [`docs/launch-narrative.md`](./launch-narrative.md). Use that file as the source of truth for external sites and announcements; the approval thread is [AURA-64](/AURA/issues/AURA-64). If the one-pager is revised later, keep public-facing copy aligned with the updated file.
 
+**Release-ready drafts** (changelog bullets, three landing hero variants, three social posts) live in [`docs/public-beta-announcement-kit.md`](./public-beta-announcement-kit.md) ([AURA-71](/AURA/issues/AURA-71)); paste from there for timing-specific launches while keeping narrative alignment with `launch-narrative.md`.
+
 ---
 
 ## 6. More reading
