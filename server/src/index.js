@@ -121,6 +121,23 @@ function ensureAuditDir() {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+/** Verifies bearer is configured and audit log directory is writable (for load balancers / orchestration readiness). */
+function readinessResult() {
+  if (!BEARER) {
+    return { ok: false, detail: 'AURA_API_BEARER_TOKEN not set' };
+  }
+  try {
+    ensureAuditDir();
+    const probe = path.join(path.dirname(AUDIT_LOG_PATH), `.aura-ready-probe-${process.pid}`);
+    fs.writeFileSync(probe, '', { flag: 'w' });
+    fs.unlinkSync(probe);
+    return { ok: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, detail: 'audit_log_path_not_writable', message };
+  }
+}
+
 function appendAudit(entry) {
   ensureAuditDir();
   const line = JSON.stringify(entry) + '\n';
@@ -212,6 +229,22 @@ app.use((err, req, res, next) => {
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'aura-api' });
+});
+
+app.get('/ready', (_req, res) => {
+  const r = readinessResult();
+  if (r.ok) {
+    res.json({ ok: true, service: 'aura-api', ready: true });
+    return;
+  }
+  res.status(503).json({
+    ok: false,
+    service: 'aura-api',
+    ready: false,
+    error: 'not_ready',
+    detail: r.detail,
+    ...(r.message ? { message: r.message } : {}),
+  });
 });
 
 app.post('/v1/journeys', globalLimiter, journeyLimiter, requireBearer, (req, res) => {

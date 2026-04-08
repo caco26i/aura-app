@@ -6,7 +6,7 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 **PDR §4.2 (journey + API):** The client **must** call `POST /v1/journeys` and use the returned `journeyId` before any `location-shares` or `im-safe` for that id. Flow: [`JourneyNew.tsx`](../src/pages/JourneyNew.tsx) → `postCreateJourney()` in [`auraBackend.ts`](../src/api/auraBackend.ts) → active journey state, then [`JourneyActive.tsx`](../src/pages/JourneyActive.tsx) for share / I’m safe. User-facing API copy is centralized in [`auraApiMessages.ts`](../src/api/auraApiMessages.ts) (session/sync framing for ownership errors, not danger).
 
-**Local dev with real API:** run `server/` on `:8787`, set `VITE_AURA_API_TOKEN` in `web/.env.local` (see `web/.env.example`). Leave `VITE_AURA_API_URL` unset so requests hit the Vite dev server, which **proxies** `/v1` and `/health` to the Node API (`VITE_AURA_DEV_API_PROXY` overrides the target, default `http://127.0.0.1:8787`).
+**Local dev with real API:** run `server/` on `:8787`, set `VITE_AURA_API_TOKEN` in `web/.env.local` (see `web/.env.example`). Leave `VITE_AURA_API_URL` unset so requests hit the Vite dev server, which **proxies** `/v1`, `/health`, and `/ready` to the Node API (`VITE_AURA_DEV_API_PROXY` overrides the target, default `http://127.0.0.1:8787`).
 
 ## Swap path
 
@@ -29,3 +29,5 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 ## Observability
 
 Client structured logs and staging HTTP mirror: [OBSERVABILITY.md](./OBSERVABILITY.md).
+
+**Server:** `GET /health` (liveness) and `GET /ready` (readiness: auth env + writable audit log dir) — see [`API_CONTRACT.md`](./API_CONTRACT.md) and [`server/README.md`](../../server/README.md).

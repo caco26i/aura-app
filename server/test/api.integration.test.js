@@ -36,6 +36,13 @@ describe('Aura API', () => {
     assert.equal(res.body.service, 'aura-api');
   });
 
+  test('GET /ready returns ready when bearer and audit path are ok', async () => {
+    const res = await request(app).get('/ready').expect(200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.service, 'aura-api');
+    assert.equal(res.body.ready, true);
+  });
+
   test('unknown GET path returns not_found', async () => {
     const res = await request(app).get('/v1/no-such-route').expect(404);
     assert.equal(res.body.ok, false);

@@ -17,7 +17,7 @@ Canonical server behavior: [`../../server/README.md`](../../server/README.md). T
 
 ## Success envelope
 
-HTTP **201** (creates) or **200** (`GET /health`). Body shape:
+HTTP **201** (creates) or **200** (`GET /health`, `GET /ready` when ready). Body shape:
 
 ```json
 { "ok": true, "data": { /* route-specific */ } }
@@ -30,8 +30,9 @@ HTTP **201** (creates) or **200** (`GET /health`). Body shape:
 | `POST /v1/journeys/:id/location-shares` | `{ "shareId": "<uuid>" }` |
 | `POST /v1/journeys/:id/im-safe` | `{ "receivedAt": "<ISO-8601>" }` |
 | `GET /health` | `{ "ok": true, "service": "aura-api" }` (no nested `data`) |
+| `GET /ready` | `{ "ok": true, "service": "aura-api", "ready": true }` when configured and audit dir writable; **503** with `error: "not_ready"` otherwise (no nested `data`) |
 
-**Note:** `/health` is the only documented JSON success without `{ ok, data }`; the web app does not call it through `auraBackend.ts`.
+**Note:** `/health` and `/ready` are documented JSON successes without `{ ok, data }`; the web app does not call them through `auraBackend.ts`.
 
 ## Error envelope
 
@@ -55,6 +56,7 @@ The client reads **`error`** (string) for mapping; `detail` is diagnostic.
 | 404 | `not_found` | Unknown path |
 | 429 | `rate_limited` | express-rate-limit (SOS or location-shares) |
 | 503 | `server_misconfigured` | e.g. `AURA_API_BEARER_TOKEN` unset |
+| 503 | `not_ready` | `GET /ready` only: bearer missing or audit log directory not writable |
 
 ## Response headers
 

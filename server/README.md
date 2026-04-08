@@ -42,7 +42,8 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 - `POST /v1/emergency-alerts` — body `{ "mode": "silent" \| "visible" }`
 - `POST /v1/journeys/:journeyId/location-shares` — UUID journey id **registered via** `POST /v1/journeys` **for this token**; otherwise `404 journey_not_found` or `403 journey_forbidden`. JSON body `{}` or optional `{ latitude, longitude, accuracyM?, recordedAt? }` (lat/lon must appear together). Hourly rate limit + burst anomaly header `X-Aura-Anomaly: burst_location_share` when thresholds are exceeded.
 - `POST /v1/journeys/:journeyId/im-safe` — same ownership rules as location-shares
-- `GET /health`
+- `GET /health` — liveness (process up).
+- `GET /ready` — readiness: bearer token configured and `AUDIT_LOG_PATH` directory writable (**503** `not_ready` otherwise). Use for orchestration / load balancer health when audit persistence must succeed.
 
 Optional header: `X-Aura-Device-Fingerprint` (opaque client id; stored hashed in audit).
 
