@@ -9,15 +9,25 @@ import { MAP_INTEL_SEED } from '../data/mapIntelSeed';
 
 export function JourneyActive() {
   const navigate = useNavigate();
-  const { activeJourney, contacts, endJourney, setTrackState, mapLayers } = useAura();
+  const {
+    activeJourney,
+    contacts,
+    endJourney,
+    setTrackState,
+    mapLayers,
+    shareLocationPrimerAcknowledged,
+    setShareLocationPrimerAcknowledged,
+  } = useAura();
   const [busy, setBusy] = useState<'safe' | 'share' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [silentSheetOpen, setSilentSheetOpen] = useState(false);
+  const [sharePrimerOpen, setSharePrimerOpen] = useState(false);
   const [endJourneyConfirmOpen, setEndJourneyConfirmOpen] = useState(false);
   const endJourneyDialogRef = useRef<HTMLDivElement>(null);
   const silentSheetRef = useRef<HTMLDivElement>(null);
+  const sharePrimerRef = useRef<HTMLDivElement>(null);
 
-  const overlayOpen = silentSheetOpen || endJourneyConfirmOpen;
+  const overlayOpen = silentSheetOpen || sharePrimerOpen || endJourneyConfirmOpen;
 
   useEffect(() => {
     if (!overlayOpen) return;
@@ -25,6 +35,7 @@ export function JourneyActive() {
       if (e.key === 'Escape') {
         e.preventDefault();
         setSilentSheetOpen(false);
+        setSharePrimerOpen(false);
         setEndJourneyConfirmOpen(false);
       }
     };
@@ -43,6 +54,12 @@ export function JourneyActive() {
       silentSheetRef.current?.querySelector<HTMLButtonElement>('button[type="button"]')?.focus();
     }
   }, [silentSheetOpen]);
+
+  useEffect(() => {
+    if (sharePrimerOpen) {
+      sharePrimerRef.current?.querySelector<HTMLButtonElement>('button[type="button"]')?.focus();
+    }
+  }, [sharePrimerOpen]);
 
   if (!activeJourney) {
     return (
@@ -81,7 +98,7 @@ export function JourneyActive() {
     emitTelemetry({ category: 'journey', event: 'im_safe', journeyId: activeJourney.id });
   };
 
-  const runShare = async () => {
+  const performShare = async () => {
     setError(null);
     setBusy('share');
     const res = await postShareLocation(activeJourney.id);
@@ -99,6 +116,21 @@ export function JourneyActive() {
     emitTelemetry({ category: 'journey', event: 'share_location', journeyId: activeJourney.id });
   };
 
+  const onShareClick = () => {
+    if (!shareLocationPrimerAcknowledged) {
+      emitTelemetry({ category: 'journey', event: 'share_location_primer_shown', journeyId: activeJourney.id });
+      setSharePrimerOpen(true);
+      return;
+    }
+    void performShare();
+  };
+
+  const confirmShareAfterPrimer = () => {
+    setSharePrimerOpen(false);
+    setShareLocationPrimerAcknowledged(true);
+    void performShare();
+  };
+
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>Live tracking</h1>
@@ -109,9 +141,12 @@ export function JourneyActive() {
       <p style={{ fontWeight: 600, marginBottom: 4 }}>{activeJourney.label}</p>
       <p style={{ color: 'var(--aura-muted)', marginTop: 0 }}>To {activeJourney.destinationLabel}</p>
 
-      <p style={{ fontSize: 13, color: 'var(--aura-muted)' }}>
-        Double-tap the map for a silent SOS shortcut (demo gesture).
-      </p>
+      <div style={{ fontSize: 13, marginBottom: 0 }}>
+        <p style={{ margin: '0 0 6px', fontWeight: 600 }}>
+          Double-tap the map to open emergency options (silent path).
+        </p>
+        <p style={{ margin: 0, color: 'var(--aura-muted)' }}>Demo: gesture may vary by device.</p>
+      </div>
       <AuraMap
         features={visibleIntel}
         height={320}
@@ -158,19 +193,25 @@ export function JourneyActive() {
       ) : null}
 
       <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
+        <div>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={runSafe}
+            style={{ ...actionBtn, width: '100%' }}
+            aria-busy={busy === 'safe'}
+            aria-describedby="journey-im-safe-hint"
+          >
+            {busy === 'safe' ? 'Sending…' : "I'm safe"}
+          </button>
+          <p id="journey-im-safe-hint" style={{ fontSize: 13, color: 'var(--aura-muted)', margin: '8px 0 0' }}>
+            Sends a check-in to Aura when connected.
+          </p>
+        </div>
         <button
           type="button"
           disabled={busy !== null}
-          onClick={runSafe}
-          style={actionBtn}
-          aria-busy={busy === 'safe'}
-        >
-          {busy === 'safe' ? 'Sending…' : "I'm safe"}
-        </button>
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={runShare}
+          onClick={onShareClick}
           style={actionBtn}
           aria-busy={busy === 'share'}
         >
@@ -185,6 +226,58 @@ export function JourneyActive() {
           End journey
         </button>
       </div>
+
+      {sharePrimerOpen ? (
+        <div
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSharePrimerOpen(false);
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'grid',
+            placeItems: 'end center',
+            padding: 16,
+            zIndex: 60,
+          }}
+        >
+          <div
+            ref={sharePrimerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="journey-share-primer-title"
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              background: '#fff',
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 'calc(24px + var(--aura-safe-area-bottom))',
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <h2 id="journey-share-primer-title" style={{ marginTop: 0 }}>
+              Share live location
+            </h2>
+            <p style={{ color: 'var(--aura-muted)', lineHeight: 1.5 }}>
+              When Aura is connected, this notifies your trusted contacts with your journey&apos;s live location. You can
+              stop sharing by ending the journey.
+            </p>
+            <button
+              type="button"
+              style={{ ...actionBtn, marginTop: 8, background: '#fff' }}
+              onClick={() => setSharePrimerOpen(false)}
+            >
+              Cancel
+            </button>
+            <button type="button" style={{ ...actionBtn, marginTop: 12 }} onClick={confirmShareAfterPrimer}>
+              Share location
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {silentSheetOpen ? (
         <div

@@ -32,6 +32,8 @@ export type AuraContextValue = {
   setGlobalStatus: (s: GlobalStatus) => void;
   onboardingCompleted: boolean;
   setOnboardingCompleted: (completed: boolean) => void;
+  shareLocationPrimerAcknowledged: boolean;
+  setShareLocationPrimerAcknowledged: (acknowledged: boolean) => void;
 };
 
 export const AuraContext = createContext<AuraContextValue | null>(null);

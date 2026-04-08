@@ -5,7 +5,7 @@
 | `/welcome` | First-run onboarding (see [`web/docs/UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §2); outside shell |
 | `/` | Home hub |
 | `/journey/new` | Configure journey |
-| `/journey/active` | Live tracking, map, backend actions |
+| `/journey/active` | Live tracking, map, backend actions; first **Share live location** uses a one-time primer sheet (`shareLocationPrimerAcknowledged` in `aura:v1`); map hint copy splits primary vs demo note (see UX spec §3.4) |
 | `/emergency` | Full-screen SOS (outside shell) |
 | `/map` | Intel layers + map |
 | `/trusted` | Trusted network CRUD |

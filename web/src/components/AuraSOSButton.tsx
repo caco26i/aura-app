@@ -11,10 +11,12 @@ export function AuraSOSButton() {
 
   const bg = globalStatus === 'alert' ? 'var(--aura-status-alert)' : 'var(--aura-blush)';
 
+  const sosLabel = globalStatus === 'alert' ? 'Emergency SOS — alert active' : 'Emergency SOS';
+
   return (
     <button
       type="button"
-      aria-label="Emergency SOS"
+      aria-label={sosLabel}
       onClick={() => {
         emitTelemetry({ category: 'sos', event: 'fab_open' });
         navigate('/emergency');

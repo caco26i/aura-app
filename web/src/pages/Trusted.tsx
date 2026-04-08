@@ -36,7 +36,7 @@ export function Trusted() {
             marginBottom: 16,
           }}
         >
-          No contacts yet. Add someone you trust — data stays on this device until a backend is wired.
+          Contacts stay on this device until a live backend is connected. Add someone you trust to get started.
         </div>
         <ContactForm
           name={name}
@@ -167,6 +167,9 @@ function ContactForm(props: {
             </span>
           </label>
         ))}
+        <p style={{ fontSize: 13, color: 'var(--aura-muted)', margin: '12px 0 0', lineHeight: 1.45 }}>
+          Alerts can include SOS and journey notifications when connected.
+        </p>
       </fieldset>
       <button type="button" onClick={onAdd} style={{ padding: 14, borderRadius: 14, fontWeight: 800 }}>
         Add contact

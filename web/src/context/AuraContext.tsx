@@ -18,6 +18,7 @@ type Persisted = {
   settings: AuraSettings;
   globalStatus: GlobalStatus;
   onboardingCompleted: boolean;
+  shareLocationPrimerAcknowledged: boolean;
 };
 
 const defaultSettings: AuraSettings = {
@@ -44,6 +45,7 @@ function loadPersisted(): Persisted {
         settings: defaultSettings,
         globalStatus: 'calm',
         onboardingCompleted: false,
+        shareLocationPrimerAcknowledged: false,
       };
     }
     const parsed = JSON.parse(raw) as Partial<Persisted>;
@@ -51,6 +53,10 @@ function loadPersisted(): Persisted {
       typeof parsed.onboardingCompleted === 'boolean'
         ? parsed.onboardingCompleted
         : true;
+    const shareLocationPrimerAcknowledged =
+      typeof parsed.shareLocationPrimerAcknowledged === 'boolean'
+        ? parsed.shareLocationPrimerAcknowledged
+        : false;
     return {
       contacts: Array.isArray(parsed.contacts) ? parsed.contacts : [],
       activeJourney: parsed.activeJourney ?? null,
@@ -58,6 +64,7 @@ function loadPersisted(): Persisted {
       settings: { ...defaultSettings, ...parsed.settings },
       globalStatus: parsed.globalStatus === 'alert' ? 'alert' : 'calm',
       onboardingCompleted,
+      shareLocationPrimerAcknowledged,
     };
   } catch {
     return {
@@ -67,6 +74,7 @@ function loadPersisted(): Persisted {
       settings: defaultSettings,
       globalStatus: 'calm',
       onboardingCompleted: false,
+      shareLocationPrimerAcknowledged: false,
     };
   }
 }
@@ -84,6 +92,9 @@ export function AuraProvider({ children }: { children: ReactNode }) {
   const [onboardingCompleted, setOnboardingCompletedState] = useState(
     () => loadPersisted().onboardingCompleted,
   );
+  const [shareLocationPrimerAcknowledged, setShareLocationPrimerAcknowledgedState] = useState(
+    () => loadPersisted().shareLocationPrimerAcknowledged,
+  );
 
   useEffect(() => {
     const payload: Persisted = {
@@ -93,12 +104,25 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       settings,
       globalStatus,
       onboardingCompleted,
+      shareLocationPrimerAcknowledged,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [contacts, activeJourney, mapLayers, settings, globalStatus, onboardingCompleted]);
+  }, [
+    contacts,
+    activeJourney,
+    mapLayers,
+    settings,
+    globalStatus,
+    onboardingCompleted,
+    shareLocationPrimerAcknowledged,
+  ]);
 
   const setOnboardingCompleted = useCallback((completed: boolean) => {
     setOnboardingCompletedState(completed);
+  }, []);
+
+  const setShareLocationPrimerAcknowledged = useCallback((acknowledged: boolean) => {
+    setShareLocationPrimerAcknowledgedState(acknowledged);
   }, []);
 
   const addContact = useCallback((c: Omit<TrustedContact, 'id'>) => {
@@ -169,6 +193,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       setGlobalStatus,
       onboardingCompleted,
       setOnboardingCompleted,
+      shareLocationPrimerAcknowledged,
+      setShareLocationPrimerAcknowledged,
     }),
     [
       contacts,
@@ -187,6 +213,8 @@ export function AuraProvider({ children }: { children: ReactNode }) {
       setGlobalStatus,
       onboardingCompleted,
       setOnboardingCompleted,
+      shareLocationPrimerAcknowledged,
+      setShareLocationPrimerAcknowledged,
     ],
   );
 
