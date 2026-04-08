@@ -1,6 +1,6 @@
 /**
  * Aura authoritative API — validation, auth, rate limits, append-only audit trail.
- * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT
+ * Env: AURA_API_BEARER_TOKEN and/or AURA_API_BFF_JWT_SECRET, AURA_API_BEARER_TOKEN_ALT, PORT, AUDIT_LOG_PATH, CORS_ORIGIN, AURA_API_JSON_BODY_LIMIT, AURA_API_RATE_LIMIT_* (see README)
  */
 
 import cors from 'cors';
@@ -22,6 +22,23 @@ const BFF_JWT_AUDIENCE = process.env.AURA_API_BFF_JWT_AUDIENCE || '';
 const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '24kb';
 const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
+/** @param {string} name @param {number} defaultVal @param {number} [min] */
+function parsePositiveIntEnv(name, defaultVal, min = 1) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return defaultVal;
+  const n = Number.parseInt(String(raw), 10);
+  if (!Number.isFinite(n) || n < min) return defaultVal;
+  return n;
+}
+
+/** Sets `req.auraRateLimitRoute` for `audit.rate_limited` when minute-window limiters trip. */
+function setAuraRateLimitRoute(route) {
+  return function setAuraRateLimitRouteMw(req, _res, next) {
+    req.auraRateLimitRoute = route;
+    next();
+  };
+}
 
 const uuidSchema = z.string().uuid();
 
@@ -117,8 +134,12 @@ function actorKeyFromJwtSub(sub) {
 
 /** In-memory burst detector: anomaly signal only (still allows request if under hard rate limit). */
 const sosRecent = new Map();
-const SOS_BURST_WINDOW_MS = 10 * 60 * 1000;
-const SOS_BURST_THRESHOLD = 3;
+const SOS_BURST_WINDOW_MS = parsePositiveIntEnv(
+  'AURA_API_RATE_LIMIT_SOS_BURST_WINDOW_MS',
+  10 * 60 * 1000,
+  1000,
+);
+const SOS_BURST_THRESHOLD = parsePositiveIntEnv('AURA_API_RATE_LIMIT_SOS_BURST_THRESHOLD', 3, 1);
 
 function sosAnomalyFlags(actor) {
   const now = Date.now();
@@ -131,8 +152,16 @@ function sosAnomalyFlags(actor) {
 
 /** In-memory burst detector for location-share abuse signals. */
 const shareRecent = new Map();
-const SHARE_BURST_WINDOW_MS = 10 * 60 * 1000;
-const SHARE_BURST_THRESHOLD = 12;
+const SHARE_BURST_WINDOW_MS = parsePositiveIntEnv(
+  'AURA_API_RATE_LIMIT_LOCATION_SHARE_BURST_WINDOW_MS',
+  10 * 60 * 1000,
+  1000,
+);
+const SHARE_BURST_THRESHOLD = parsePositiveIntEnv(
+  'AURA_API_RATE_LIMIT_LOCATION_SHARE_BURST_THRESHOLD',
+  12,
+  1,
+);
 
 function shareAnomalyFlags(actor) {
   const now = Date.now();
@@ -255,25 +284,58 @@ function requireAuth(req, res, next) {
   next();
 }
 
+const GLOBAL_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_GLOBAL_WINDOW_MS', 60 * 1000, 1000);
+const GLOBAL_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_GLOBAL_MAX', 120, 1);
+const JOURNEY_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_JOURNEY_WINDOW_MS', 60 * 1000, 1000);
+const JOURNEY_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_JOURNEY_MAX', 40, 1);
+const SOS_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_SOS_WINDOW_MS', 60 * 60 * 1000, 1000);
+const SOS_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_SOS_MAX', 8, 1);
+const SHARE_WINDOW_MS = parsePositiveIntEnv(
+  'AURA_API_RATE_LIMIT_LOCATION_SHARE_WINDOW_MS',
+  60 * 60 * 1000,
+  1000,
+);
+const SHARE_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_LOCATION_SHARE_MAX', 48, 1);
+const IM_SAFE_WINDOW_MS = parsePositiveIntEnv('AURA_API_RATE_LIMIT_IM_SAFE_WINDOW_MS', 60 * 60 * 1000, 1000);
+const IM_SAFE_MAX = parsePositiveIntEnv('AURA_API_RATE_LIMIT_IM_SAFE_MAX', 36, 1);
+
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 120,
+  windowMs: GLOBAL_WINDOW_MS,
+  max: GLOBAL_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
+  message: {
+    ok: false,
+    error: 'rate_limited',
+    detail: 'Too many API requests in a short time; try again later.',
+  },
+  handler: (req, res, _next, options) => {
+    auditRateLimited(req.auraRateLimitRoute || 'unknown', req);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 const journeyLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 40,
+  windowMs: JOURNEY_WINDOW_MS,
+  max: JOURNEY_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
+  message: {
+    ok: false,
+    error: 'rate_limited',
+    detail: 'Too many journey operations in a short time; try again later.',
+  },
+  handler: (req, res, _next, options) => {
+    auditRateLimited(req.auraRateLimitRoute || 'unknown', req);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 const sosLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 8,
+  windowMs: SOS_WINDOW_MS,
+  max: SOS_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
@@ -286,8 +348,8 @@ const sosLimiter = rateLimit({
 
 /** Hourly cap on location shares (layered under journey + global limits). */
 const shareLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 48,
+  windowMs: SHARE_WINDOW_MS,
+  max: SHARE_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
@@ -300,8 +362,8 @@ const shareLimiter = rateLimit({
 
 /** Hourly cap on im-safe (abuse / accidental tap storms). */
 const imSafeLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 36,
+  windowMs: IM_SAFE_WINDOW_MS,
+  max: IM_SAFE_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `${req.ip}:${actorKey(req)}`,
@@ -357,7 +419,15 @@ app.get('/ready', (_req, res) => {
   });
 });
 
-app.post('/v1/journeys', globalLimiter, requireAuth, journeyLimiter, (req, res) => {
+// No separate hourly cap on journey creation: minute-window global + journey limits already bound abuse;
+// an hourly create cap would add false positives for legitimate multi-device / retry flows without clear product ask.
+app.post(
+  '/v1/journeys',
+  setAuraRateLimitRoute('journeys-create'),
+  globalLimiter,
+  requireAuth,
+  journeyLimiter,
+  (req, res) => {
   const parsed = emptyBodySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     appendAudit({
@@ -382,9 +452,16 @@ app.post('/v1/journeys', globalLimiter, requireAuth, journeyLimiter, (req, res) 
     ip: req.ip,
   });
   res.status(201).json({ ok: true, data: { journeyId } });
-});
+  },
+);
 
-app.post('/v1/emergency-alerts', globalLimiter, requireAuth, sosLimiter, (req, res) => {
+app.post(
+  '/v1/emergency-alerts',
+  setAuraRateLimitRoute('emergency-alerts'),
+  globalLimiter,
+  requireAuth,
+  sosLimiter,
+  (req, res) => {
   const parsed = emergencyBodySchema.safeParse(req.body);
   if (!parsed.success) {
     appendAudit({
@@ -422,10 +499,12 @@ app.post('/v1/emergency-alerts', globalLimiter, requireAuth, sosLimiter, (req, r
     res.setHeader('X-Aura-Anomaly', anomalyFlags.join(','));
   }
   res.status(201).json({ ok: true, data: { alertId } });
-});
+  },
+);
 
 app.post(
   '/v1/journeys/:journeyId/location-shares',
+  setAuraRateLimitRoute('location-shares'),
   globalLimiter,
   requireAuth,
   journeyLimiter,
@@ -496,7 +575,14 @@ app.post(
   },
 );
 
-app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, requireAuth, journeyLimiter, imSafeLimiter, (req, res) => {
+app.post(
+  '/v1/journeys/:journeyId/im-safe',
+  setAuraRateLimitRoute('im-safe'),
+  globalLimiter,
+  requireAuth,
+  journeyLimiter,
+  imSafeLimiter,
+  (req, res) => {
   const jid = uuidSchema.safeParse(req.params.journeyId);
   if (!jid.success) {
     appendAudit({
@@ -536,7 +622,8 @@ app.post('/v1/journeys/:journeyId/im-safe', globalLimiter, requireAuth, journeyL
     ip: req.ip,
   });
   res.status(201).json({ ok: true, data: { receivedAt } });
-});
+  },
+);
 
 app.use((_req, res) => {
   res.status(404).json({ ok: false, error: 'not_found' });

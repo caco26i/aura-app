@@ -23,7 +23,7 @@ npm run dev
 npm test
 ```
 
-Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of the file), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), and append-only audit writes (`test/api.integration.test.js`). They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
+Integration tests exercise auth (static bearer, **BFF JWT** `sub`-scoped journey ownership), Zod validation, wrong-method and CORS preflight, malformed JSON → **`400 invalid_json`**, SOS **`429 rate_limited`** (hourly cap; emergency tests grouped at the **end** of `api.integration.test.js`), **im-safe** hourly cap (`audit.rate_limited` route `im-safe`), **minute-window** journey limiter (`api.rate-limit-minute.integration.test.js`), and append-only audit writes. They use `AURA_API_SKIP_LISTEN=1` and a temp audit file via env.
 
 On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `server/` when `server/` or that workflow file changes.
 
@@ -40,6 +40,20 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 | `AUDIT_LOG_PATH` | no | Default `./data/audit.log` |
 | `CORS_ORIGIN` | no | `*` or comma-separated allowlist |
 | `AURA_API_JSON_BODY_LIMIT` | no | Express JSON body size (default `24kb`) |
+| `AURA_API_RATE_LIMIT_GLOBAL_WINDOW_MS` | no | Per-IP+actor minute window for **`globalLimiter`** on all mutating routes (default `60000`) |
+| `AURA_API_RATE_LIMIT_GLOBAL_MAX` | no | Max mutating requests per **`globalLimiter`** window (default `120`) |
+| `AURA_API_RATE_LIMIT_JOURNEY_WINDOW_MS` | no | Per-IP+actor minute window for **`journeyLimiter`** on journey routes (default `60000`) |
+| `AURA_API_RATE_LIMIT_JOURNEY_MAX` | no | Max requests per **`journeyLimiter`** window (default `40`) |
+| `AURA_API_RATE_LIMIT_SOS_WINDOW_MS` | no | Window for **`sosLimiter`** on `POST /v1/emergency-alerts` (default `3600000`, one hour) |
+| `AURA_API_RATE_LIMIT_SOS_MAX` | no | Max SOS posts per SOS window (default `8`) |
+| `AURA_API_RATE_LIMIT_LOCATION_SHARE_WINDOW_MS` | no | Window for hourly location-share cap (default `3600000`) |
+| `AURA_API_RATE_LIMIT_LOCATION_SHARE_MAX` | no | Max location shares per share window (default `48`) |
+| `AURA_API_RATE_LIMIT_IM_SAFE_WINDOW_MS` | no | Window for hourly im-safe cap (default `3600000`) |
+| `AURA_API_RATE_LIMIT_IM_SAFE_MAX` | no | Max im-safe posts per im-safe window (default `36`) |
+| `AURA_API_RATE_LIMIT_SOS_BURST_WINDOW_MS` | no | Rolling window for SOS burst anomaly scoring only (default `600000`, ten minutes) |
+| `AURA_API_RATE_LIMIT_SOS_BURST_THRESHOLD` | no | SOS posts in burst window before `X-Aura-Anomaly: burst_sos` on success (default `3`) |
+| `AURA_API_RATE_LIMIT_LOCATION_SHARE_BURST_WINDOW_MS` | no | Rolling window for location-share burst anomaly (default `600000`) |
+| `AURA_API_RATE_LIMIT_LOCATION_SHARE_BURST_THRESHOLD` | no | Shares in burst window before `burst_location_share` anomaly header (default `12`) |
 
 ## Routes
 
