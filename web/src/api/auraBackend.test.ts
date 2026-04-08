@@ -47,4 +47,35 @@ describe('auraBackend remote fetch', () => {
     >;
     expect(first['X-Request-Id']).not.toBe(second['X-Request-Id']);
   });
+
+  it('surfaces server X-Request-Id echo on success for audit correlation', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'x-request-id' ? 'echoed-from-server' : null),
+      },
+      json: async () => ({ ok: true, data: { journeyId: 'journey-test' } }),
+    })) as unknown as typeof fetch;
+    const r = await postCreateJourney();
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.requestId).toBe('echoed-from-server');
+  });
+
+  it('surfaces server X-Request-Id echo on API error responses', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      ok: false,
+      status: 429,
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'x-request-id' ? 'rate-limit-req' : null),
+      },
+      json: async () => ({ ok: false, error: 'rate_limited' }),
+    })) as unknown as typeof fetch;
+    const r = await postCreateJourney();
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.requestId).toBe('rate-limit-req');
+      expect(r.error).toBe('rate_limited');
+    }
+  });
 });
