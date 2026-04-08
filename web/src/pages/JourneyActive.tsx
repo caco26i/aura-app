@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { postImSafe, postShareLocation } from '../api/auraBackend';
 import { emitTelemetry } from '../observability/auraTelemetry';
@@ -13,6 +13,36 @@ export function JourneyActive() {
   const [busy, setBusy] = useState<'safe' | 'share' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [silentSheetOpen, setSilentSheetOpen] = useState(false);
+  const [endJourneyConfirmOpen, setEndJourneyConfirmOpen] = useState(false);
+  const endJourneyDialogRef = useRef<HTMLDivElement>(null);
+  const silentSheetRef = useRef<HTMLDivElement>(null);
+
+  const overlayOpen = silentSheetOpen || endJourneyConfirmOpen;
+
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSilentSheetOpen(false);
+        setEndJourneyConfirmOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [overlayOpen]);
+
+  useEffect(() => {
+    if (endJourneyConfirmOpen) {
+      endJourneyDialogRef.current?.querySelector<HTMLButtonElement>('button[type="button"]')?.focus();
+    }
+  }, [endJourneyConfirmOpen]);
+
+  useEffect(() => {
+    if (silentSheetOpen) {
+      silentSheetRef.current?.querySelector<HTMLButtonElement>('button[type="button"]')?.focus();
+    }
+  }, [silentSheetOpen]);
 
   if (!activeJourney) {
     return (
@@ -148,10 +178,8 @@ export function JourneyActive() {
         </button>
         <button
           type="button"
-          onClick={() => {
-            emitTelemetry({ category: 'journey', event: 'ended', journeyId: activeJourney.id });
-            endJourney();
-          }}
+          disabled={busy !== null || overlayOpen}
+          onClick={() => setEndJourneyConfirmOpen(true)}
           style={{ ...actionBtn, background: '#fff' }}
         >
           End journey
@@ -160,9 +188,10 @@ export function JourneyActive() {
 
       {silentSheetOpen ? (
         <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Silent alert options"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSilentSheetOpen(false);
+          }}
           style={{
             position: 'fixed',
             inset: 0,
@@ -174,6 +203,10 @@ export function JourneyActive() {
           }}
         >
           <div
+            ref={silentSheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="journey-silent-sheet-title"
             style={{
               width: '100%',
               maxWidth: 420,
@@ -182,9 +215,19 @@ export function JourneyActive() {
               padding: 16,
               marginBottom: 'calc(24px + var(--aura-safe-area-bottom))',
             }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            <h2 style={{ marginTop: 0 }}>Silent alert</h2>
-            <p style={{ color: 'var(--aura-muted)' }}>Open emergency flow in silent mode (fewer visible cues).</p>
+            <h2 id="journey-silent-sheet-title" style={{ marginTop: 0 }}>
+              Silent alert
+            </h2>
+            <p style={{ color: 'var(--aura-muted)' }}>Open emergency options in silent mode (fewer visible cues).</p>
+            <button
+              type="button"
+              style={{ ...actionBtn, marginTop: 8, background: '#fff' }}
+              onClick={() => setSilentSheetOpen(false)}
+            >
+              Cancel
+            </button>
             <button
               type="button"
               style={{ ...actionBtn, marginTop: 12 }}
@@ -193,15 +236,71 @@ export function JourneyActive() {
                 navigate('/emergency', { state: { mode: 'silent' as const } });
               }}
             >
-              Continue to emergency
+              Open emergency options
             </button>
-            <button
-              type="button"
-              style={{ ...actionBtn, marginTop: 8, background: '#fff' }}
-              onClick={() => setSilentSheetOpen(false)}
-            >
-              Cancel
-            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {endJourneyConfirmOpen ? (
+        <div
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setEndJourneyConfirmOpen(false);
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: 20,
+            zIndex: 70,
+          }}
+        >
+          <div
+            ref={endJourneyDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="end-journey-title"
+            aria-describedby="end-journey-desc"
+            style={{
+              width: '100%',
+              maxWidth: 400,
+              background: '#fff',
+              borderRadius: 16,
+              padding: 20,
+              boxShadow: 'var(--aura-shadow)',
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <h2 id="end-journey-title" style={{ marginTop: 0 }}>
+              End journey on this device?
+            </h2>
+            <p id="end-journey-desc" style={{ color: 'var(--aura-muted)', lineHeight: 1.5, marginBottom: 0 }}>
+              Live tracking stops on this device. You can start a new journey anytime from the journey screen.
+            </p>
+            <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
+              <button type="button" onClick={() => setEndJourneyConfirmOpen(false)} style={{ ...actionBtn, background: '#fff' }}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  emitTelemetry({ category: 'journey', event: 'ended', journeyId: activeJourney.id });
+                  setEndJourneyConfirmOpen(false);
+                  endJourney();
+                }}
+                style={{
+                  ...actionBtn,
+                  background: 'var(--aura-status-alert)',
+                  color: '#fff',
+                  borderColor: 'var(--aura-status-alert)',
+                }}
+              >
+                End journey
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

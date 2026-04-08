@@ -54,14 +54,14 @@
 |--------|---------|----------------|
 | Page title | `Emergency` | Keep — scannable. |
 | Silent path explainer | Mentions future build + demo | Keep honesty; when silent UX ships, replace with concrete behavior (what is hidden / haptics). |
-| Primary actions | Visible first, then silent | **Spec:** For panic UX, consider **explicit confirmation sheet** before network call (e.g. “Send alert to your trusted contacts?”) to reduce mis-taps — product call. If added, **silent** path should require **longer press** or **second step** (document in release notes). |
+| Primary actions | Visible first, then silent | **Shipped:** Visible alert uses a confirmation sheet before any SOS network call. Silent alert uses **two confirmation steps** before send so it is strictly harder to trigger than visible (no one-tap silent send). |
 | `Go back` | OK | Ensure focus returns to SOS FAB trigger when returning (focus management — eng). |
 | Error + emergency services | Covered in `auraApiMessages.ts` for SOS | **Do not** soften SOS offline copy; keep emergency services line. |
 
 **Silent sheet (JourneyActive)**
 
 - Title *“Silent alert”* + body OK.  
-- **Spec:** Primary button *“Continue to emergency”* is correct; consider *“Open emergency options”* if testers confuse with immediate send.
+- **Shipped:** Primary button label *“Open emergency options”* (avoids implying an immediate network send from the sheet).
 
 **SOS FAB**
 
@@ -70,7 +70,7 @@
 
 **End journey**
 
-- Destructive-ish but not irreversible. **Spec:** Optional confirm modal (*“End journey on this device?”*) if user feedback shows accidental taps.
+- Destructive-ish but not irreversible. **Shipped:** Confirm modal *“End journey on this device?”* with cancel vs destructive primary; body notes journeys can be restarted.
 
 ### 2.4 API copy (`auraApiMessages.ts`)
 
