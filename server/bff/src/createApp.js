@@ -46,6 +46,7 @@ export function createApp(overrides = {}) {
   const JWT_AUDIENCE = process.env.AURA_BFF_JWT_AUDIENCE || process.env.AURA_API_BFF_JWT_AUDIENCE || '';
   const JWT_TTL_SECONDS = Math.max(60, Number(process.env.AURA_BFF_JWT_TTL_SECONDS || 900));
   const CORS_RAW = process.env.AURA_BFF_CORS_ORIGIN || '';
+  const JSON_BODY_LIMIT = process.env.AURA_BFF_JSON_BODY_LIMIT || '32kb';
   const NODE_ENV = process.env.NODE_ENV || 'development';
   const IS_PROD = NODE_ENV === 'production';
 
@@ -71,7 +72,7 @@ export function createApp(overrides = {}) {
 
   const app = express();
   app.set('trust proxy', 1);
-  app.use(express.json({ limit: '32kb' }));
+  app.use(express.json({ limit: JSON_BODY_LIMIT }));
 
   const allowlist = parseCorsOrigins();
   app.use(

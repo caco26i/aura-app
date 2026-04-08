@@ -7,7 +7,7 @@ const mockVerifyOk = async () => ({
   getPayload: () => ({ sub: 'google-sub-integration-test' }),
 });
 
-describe('BFF HTTP (session + auth)', () => {
+describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
   test('GET /session returns 401 when no session cookie', async () => {
     const app = createApp({ verifyIdToken: mockVerifyOk });
     const res = await request(app).get('/session').expect(401);
@@ -21,6 +21,22 @@ describe('BFF HTTP (session + auth)', () => {
     await agent.post('/logout').expect(200);
     const res = await agent.get('/session').expect(401);
     assert.equal(res.body.error, 'not_authenticated');
+  });
+
+  test('POST /auth/google returns 413 when JSON body exceeds AURA_BFF_JSON_BODY_LIMIT', async () => {
+    const prev = process.env.AURA_BFF_JSON_BODY_LIMIT;
+    process.env.AURA_BFF_JSON_BODY_LIMIT = '200b';
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      const res = await request(app)
+        .post('/auth/google')
+        .send({ pad: 'x'.repeat(5000) });
+      assert.equal(res.status, 413);
+      assert.match(String(res.text), /too large/i);
+    } finally {
+      if (prev === undefined) delete process.env.AURA_BFF_JSON_BODY_LIMIT;
+      else process.env.AURA_BFF_JSON_BODY_LIMIT = prev;
+    }
   });
 
   test('POST /auth/google returns 400 when idToken is missing', async () => {

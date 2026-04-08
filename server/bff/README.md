@@ -25,6 +25,7 @@ Small **backend-for-frontend** that turns **Google sign-in** into **short-lived 
 | `AURA_BFF_PUBLIC_URL` | redirect only | Public base URL of this BFF (no trailing slash) |
 | `AURA_BFF_JWT_TTL_SECONDS` | no | Access JWT lifetime (default `900`) |
 | `AURA_BFF_JWT_ISSUER` / `AURA_BFF_JWT_AUDIENCE` | no | If set, must match API `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE` |
+| `AURA_BFF_JSON_BODY_LIMIT` | no | Max JSON body size for `express.json` (default `32kb`; mirrors API `AURA_API_JSON_BODY_LIMIT`) |
 | `PORT` | no | Default `8790` |
 
 Aliases: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` are accepted.
