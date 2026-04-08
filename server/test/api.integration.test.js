@@ -163,6 +163,20 @@ describe('Aura API', () => {
     assert.ok(ok.body.data.alertId);
   });
 
+  test('emergency-alerts returns rate_limited after SOS hourly cap', async () => {
+    // SOS limiter max=8 counts every POST to this route (including the prior test’s invalid-body attempt).
+    // Prior test: 1×400 + 1×201 → 2 requests. Six more successes → 8 total allowed; 9th is 429.
+    for (let i = 0; i < 6; i += 1) {
+      await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'visible' }).expect(201);
+    }
+    const limited = await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'visible' }).expect(429);
+    assert.equal(limited.body.ok, false);
+    assert.equal(limited.body.error, 'rate_limited');
+    const log = fs.readFileSync(auditPath, 'utf8');
+    assert.match(log, /"type":"audit\.rate_limited"/);
+    assert.match(log, /"route":"emergency-alerts"/);
+  });
+
   test('append-only audit log receives journey.created', async () => {
     const beforeLen = fs.existsSync(auditPath) ? fs.readFileSync(auditPath, 'utf8').length : 0;
     await request(app).post('/v1/journeys').set(bearer).send({}).expect(201);
