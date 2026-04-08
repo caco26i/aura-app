@@ -58,11 +58,13 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 
 ### Open product questions (not engineering blockers)
 
-1. **IA vs PDR MVP table** — PDR §3.1 lists Home, Journey, Map, Trusted, Settings as hub areas. The **primary bottom nav** foregrounds Cita / Transport / Check-in; Map, Trusted, Settings, and Journey are **secondary** (Home links). Confirm with product whether this IA is intentional for launch or whether nav should be realigned to the MVP table.
+_None at present._
 
 ### Resolved / aligned
 
-1. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
+1. **G-IA-01 — IA vs PDR MVP table** — **Resolved / confirmed.** CEO decision [AURA-74](/AURA/issues/AURA-74): **Journey stays off** the primary bottom nav for launch. Primary chrome remains **Home, Cita, Transport, Check-in, SOS**; **Journey**, Map, Trusted, and Settings stay **secondary** (Home hero / feature grid / deep links / stack). PDR §3.1 hub areas are **capability buckets** traced in this file and [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md); they are not required to mirror every bottom-bar slot.
+
+2. **SOS FAB vs bottom nav** — [`design/AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) now records **bottom-nav SOS** + Home / journey entry points as current chrome; **`AuraSOSButton`** remains in repo as an optional future FAB (not mounted). No further code change required for PDR §4.1 parity on this point.
 
 ### Nice-to-have (polish)
 
@@ -90,3 +92,4 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): server integration tests for unknown-path `not_found` (404); API_CONTRACT regression line updated. |
 | 2026-04-08 | [AURA-59](/AURA/issues/AURA-59): skip-to-main link + `#main-content` landmark on shell, welcome, and emergency (PDR §5 / WCAG 2.4.1). |
 | 2026-04-08 | [AURA-60](/AURA/issues/AURA-60): integration tests for GET-on-POST-only `not_found` + OPTIONS CORS preflight headers. |
+| 2026-04-08 | [AURA-75](/AURA/issues/AURA-75): **G-IA-01** closed — IA vs PDR §3.1 confirmed per [AURA-74](/AURA/issues/AURA-74); open-questions section cleared. |
