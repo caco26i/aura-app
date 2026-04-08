@@ -313,6 +313,30 @@ jobs:
           fi
           echo "compose-bff-smoke POST .../im-safe ok: HTTP ${code}, receivedAt=$(jq -r '.data.receivedAt' /tmp/aura_bff_compose_im_safe.json)"
 
+          code="$(curl -sS -o /tmp/aura_bff_compose_emergency_alert.json -w "%{http_code}" -X POST "http://127.0.0.1:8080/v1/emergency-alerts" \
+            -H "Authorization: Bearer ${api_jwt}" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"silent"}')"
+          if [ "${code}" != "201" ] && [ "${code}" != "200" ]; then
+            echo "::error::compose-bff-smoke POST /v1/emergency-alerts: HTTP ${code}, expected 200 or 201 (see web/docs/API_CONTRACT.md)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            echo "::group::docker compose logs (tail)"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            echo "::endgroup::"
+            exit 1
+          fi
+          if ! jq -e '.ok == true and (.data.alertId | type == "string") and (.data.alertId | test("^[0-9a-fA-F-]{36}$"))' /tmp/aura_bff_compose_emergency_alert.json >/dev/null; then
+            echo "::error::compose-bff-smoke: POST /v1/emergency-alerts JSON missing ok=true and data.alertId (UUID)"
+            echo "::group::response body"
+            cat /tmp/aura_bff_compose_emergency_alert.json || true
+            echo "::endgroup::"
+            docker compose -f docker-compose.yml -f docker-compose.bff.yml logs --tail=120
+            exit 1
+          fi
+          echo "compose-bff-smoke POST /v1/emergency-alerts ok: HTTP ${code}, alertId=$(jq -r '.data.alertId' /tmp/aura_bff_compose_emergency_alert.json)"
+
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.bff.yml down -v --remove-orphans
