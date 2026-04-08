@@ -29,3 +29,5 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run lint` | ESLint |
+
+On GitHub, the **Web lint & build** workflow runs `npm ci`, `npm run lint`, and `npm run build` in `web/` when `web/**` or that workflow file changes.
