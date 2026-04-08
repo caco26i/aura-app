@@ -6,7 +6,7 @@
 
 **Tone:** Calm, plain language, no alarmism. Pair every sensitive action with *what happens*, *who may see data*, and *how to undo or pause* where applicable.
 
-**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`). **Clear-local modal:** acceptance criteria and Playwright handoff are in **§4.3** ([AURA-218](/AURA/issues/AURA-218)); implementation of the dedicated spec remains with engineering.
+**Verification:** [AURA-205](/AURA/issues/AURA-205) (Apr 2026) — current `web/` implements §2–§4 and §6 telemetry; residual nits are optional copy tightening only. **Regression:** [AURA-209](/AURA/issues/AURA-209) (Apr 2026) — Playwright **PASS** (`welcome-onboarding`, `emergency-pre-onboarding`, `smoke`). **Clear-local modal:** [AURA-220](/AURA/issues/AURA-220) — `settings-clear-local.spec.ts` covers §4.3 **A/B**; §4.3 documents **`AuraContext`** re-persist after clear (e2e asserts cold-start JSON, not `localStorage` null).
 
 ---
 
@@ -164,8 +164,9 @@
 
 #### Post-confirm behavior (assertable)
 
-- `localStorage` key `aura:v1` is removed, then `window.location.reload()` runs.
-- After reload, persisted onboarding is absent → `RequireOnboarding` sends the user to `/welcome` (same as first visit).
+- `clearLocalAuraData` removes `localStorage` key `aura:v1`, then `window.location.reload()` runs.
+- After reload, **`AuraContext`** immediately re-persists a **default** `aura:v1` payload (so the key is often **non-null** right after load). User-visible outcome matches first visit: **`RequireOnboarding` → `/welcome`** with `onboardingCompleted: false`.
+- **E2e:** assert URL + welcome heading + parsed `aura:v1` **cold-start shape** (`onboardingCompleted === false`, empty `contacts`, etc.) — not `localStorage === null` ([AURA-220](/AURA/issues/AURA-220), `web/e2e/settings-clear-local.spec.ts`).
 
 #### Playwright scenario outline (for `web/e2e/` — mirror [AURA-209](/AURA/issues/AURA-209) style)
 
@@ -185,12 +186,12 @@ Reuse the **`aura:v1` bootstrap** pattern from [`smoke.spec.ts`](https://github.
 1. Same bootstrap + `/settings`.
 2. Open dialog → click **Clear data** inside `dialog`.
 3. Wait for navigation after reload (e.g. `await page.waitForURL(/\/welcome/)` or `Promise.all([page.waitForURL(...), dialog.getByRole('button', { name: 'Clear data' }).click()])` — pick a pattern consistent with other specs).
-4. Assert `localStorage.getItem('aura:v1')` is `null` **after** reload settles.
-5. Assert welcome entry visible (e.g. **Welcome to Aura** `h1`/`h2` per [`welcome-onboarding.spec.ts`](https://github.com/caco26i/aura-app/blob/main/web/e2e/welcome-onboarding.spec.ts)).
+4. After reload settles, assert `localStorage.getItem('aura:v1')` parses to **cold-start** data (e.g. `onboardingCompleted === false`, `contacts` empty) — see **Post-confirm behavior** above if the key is re-populated by `AuraContext`.
+5. Assert welcome entry visible (e.g. **Welcome to Aura** `h1` per [`welcome-onboarding.spec.ts`](https://github.com/caco26i/aura-app/blob/main/web/e2e/welcome-onboarding.spec.ts)).
 
 **Selectors:** prefer **`getByRole`** (matches `smoke.spec.ts` / emergency dialog). No `data-testid` is required today; add stable test ids only if role queries become ambiguous.
 
-**Out of scope for UX doc:** implementing the spec file — assign to [CTO](/AURA/agents/cto) or IC as a small follow-up task.
+**Shipped:** [`web/e2e/settings-clear-local.spec.ts`](https://github.com/caco26i/aura-app/blob/main/web/e2e/settings-clear-local.spec.ts) — [AURA-220](/AURA/issues/AURA-220).
 
 ---
 
@@ -221,7 +222,11 @@ Do not duplicate full tables here; implement alongside onboarding/trust work whe
 
 ### Automated regression ([AURA-209](/AURA/issues/AURA-209))
 
-Playwright (Chromium, `web/` dev server): **19 passed** — `/welcome` flow, `/emergency` before onboarding, share primer + SOS + settings privacy deep link in `smoke`. **Clear-local modal:** implement scenarios **A/B** from **§4.3** when adding coverage ([AURA-218](/AURA/issues/AURA-218) handoff).
+Playwright (Chromium, `web/` dev server): **19 passed** — `/welcome` flow, `/emergency` before onboarding, share primer + SOS + settings privacy deep link in `smoke`.
+
+### Clear-local modal ([AURA-220](/AURA/issues/AURA-220))
+
+Dedicated **`settings-clear-local.spec.ts`**: **2 passed** — §4.3 **Scenario A** + **B** (cancel focus, confirm clear → `/welcome`, cold-start `aura:v1` assertions).
 
 ---
 
