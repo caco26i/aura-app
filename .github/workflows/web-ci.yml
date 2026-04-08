@@ -31,6 +31,12 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Production build must reject BFF URL + static token together
+        run: |
+          if VITE_AURA_BFF_URL=/aura-bff VITE_AURA_API_TOKEN=ci-forbidden-static-token npm run build; then
+            echo "::error::BFF-first guardrail missing: build should fail when VITE_AURA_BFF_URL and VITE_AURA_API_TOKEN are both set (see web/vite.config.ts, web/docs/DEPLOY.md)."
+            exit 1
+          fi
       - run: npm run test:e2e
         env:
           CI: true
