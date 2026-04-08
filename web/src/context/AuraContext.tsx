@@ -23,6 +23,7 @@ type Persisted = {
 };
 
 const defaultSettings: AuraSettings = {
+  displayName: '',
   voiceKeyword: 'Aura help',
   silentTriggerMs: 800,
   timerDefaultMinutes: 15,

@@ -26,6 +26,8 @@ export type MapLayers = {
 };
 
 export type AuraSettings = {
+  /** Shown on the home header (M3 prototype). */
+  displayName: string;
   voiceKeyword: string;
   silentTriggerMs: number;
   timerDefaultMinutes: number;

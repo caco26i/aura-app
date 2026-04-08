@@ -11,7 +11,11 @@ import { MapPage } from './pages/MapPage';
 import { Trusted } from './pages/Trusted';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
+import { ModoCita } from './pages/ModoCita';
+import { ModoTransporte } from './pages/ModoTransporte';
+import { CheckinInteligente } from './pages/CheckinInteligente';
 import './theme.css';
+import './styles/aura-m3.css';
 
 export default function App() {
   return (
@@ -29,6 +33,9 @@ export default function App() {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/trusted" element={<Trusted />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/cita" element={<ModoCita />} />
+                <Route path="/transport" element={<ModoTransporte />} />
+                <Route path="/checkin" element={<CheckinInteligente />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

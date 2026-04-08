@@ -43,6 +43,18 @@ export function Settings() {
         </h2>
 
         <label style={label}>
+          Display name (home header)
+          <input
+            value={settings.displayName}
+            onChange={(e) => updateSettings({ displayName: e.target.value })}
+            aria-label="Display name shown on home"
+            placeholder="e.g. Sofia García"
+            style={field}
+            autoComplete="name"
+          />
+        </label>
+
+        <label style={label}>
           Voice keyword phrase
           <input
             value={settings.voiceKeyword}
