@@ -211,6 +211,33 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
+  test('Map intel: demo route shows polite status region with Demo only copy, no page/console errors', async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/map');
+    await expect(page.getByRole('heading', { name: 'Map intel', level: 1 })).toBeVisible();
+
+    // Accessible name is `aria-label` on MapPage (visible text is "Find safest route (demo)").
+    await page
+      .getByRole('button', { name: /Find safest route — demo only; shows a placeholder message/i })
+      .click();
+    const demoStatus = page.locator('#map-demo-route-status');
+    await expect(demoStatus).toBeVisible();
+    await expect(demoStatus).toHaveAttribute('role', 'status');
+    await expect(demoStatus).toHaveAttribute('aria-live', 'polite');
+    await expect(demoStatus).toContainText(/Demo only/i);
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
   test('Modo Cita shell from home grid: h1 and no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
