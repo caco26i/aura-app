@@ -25,6 +25,15 @@ function createAuraApiRequestId(): string {
   return crypto.randomUUID();
 }
 
+/** Prefer server-echoed `X-Request-Id` for audit correlation (see `web/docs/API_CONTRACT.md`). */
+function effectiveRequestIdAfterResponse(sentId: string, res: Response): string {
+  const echoed = res.headers.get('X-Request-Id')?.trim();
+  if (echoed && echoed.length > 0 && echoed.length <= 128) {
+    return echoed;
+  }
+  return sentId;
+}
+
 type RemotePostTelemetry =
   | { operation: 'im_safe'; journeyId: string }
   | { operation: 'share_location'; journeyId: string }
@@ -98,10 +107,11 @@ async function remotePost<T>(
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
+    const correlatedId = effectiveRequestIdAfterResponse(requestId, res);
     const anomaly = res.headers.get('X-Aura-Anomaly');
     const json = (await res.json().catch(() => null)) as
       | { ok: true; data: T }
-      | { ok: false; error?: string; detail?: string }
+      | { ok: false; error?: string; detail?: unknown }
       | null;
     if (!res.ok) {
       const technical =
@@ -112,7 +122,7 @@ async function remotePost<T>(
         ok: false,
         error: technical,
         userMessage: userMessageForHttpFailure(res.status, json, surface),
-        requestId,
+        requestId: correlatedId,
       };
     }
     if (json && typeof json === 'object' && 'ok' in json && json.ok === true && 'data' in json) {
@@ -121,7 +131,7 @@ async function remotePost<T>(
       return {
         ok: true,
         data: (json as { data: T }).data,
-        requestId,
+        requestId: correlatedId,
         ...(notice ? { notice } : {}),
         ...(trimmedAnomaly ? { anomalyHeader: trimmedAnomaly } : {}),
       };
@@ -130,7 +140,7 @@ async function remotePost<T>(
       ok: false,
       error: 'Invalid response',
       userMessage: 'We got an unexpected reply from Aura. Try again.',
-      requestId,
+      requestId: correlatedId,
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Network error';

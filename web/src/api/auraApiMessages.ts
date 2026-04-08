@@ -49,6 +49,8 @@ function messageForJsonError(code: string | undefined, surface: ApiSurface): str
       return surface === 'sos' ? SOS_RATE : JOURNEY_RATE;
     case 'validation_failed':
       return 'Something in the request did not look right. Check your details and try again.';
+    case 'invalid_json':
+      return 'The request could not be read as JSON. Refresh the page and try again.';
     case 'payload_too_large':
       return 'The request was too large for the server to accept. Try again with less data or refresh and start over.';
     case 'invalid_journey_id':
@@ -66,6 +68,8 @@ function messageForJsonError(code: string | undefined, surface: ApiSurface): str
       return "We couldn't find that resource. Refresh the page or start again.";
     case 'server_misconfigured':
       return "Aura's live service isn't fully configured yet. Try again later or use demo mode without API keys.";
+    case 'not_ready':
+      return "Aura's live service isn't ready to accept traffic yet. Try again in a few minutes.";
     default:
       return undefined;
   }
