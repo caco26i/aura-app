@@ -21,6 +21,8 @@ const AURA_STORAGE_BOOTSTRAP = JSON.stringify({
     safetyKeyword: '',
     meetingLocalValue: '',
     checkInIntervalMinutes: 15,
+    encuentroLastLocalCheckInAckMs: null,
+    encuentroBrowserNotifyWanted: false,
   },
 });
 
@@ -109,6 +111,56 @@ test.describe('shell smoke', () => {
     await page.getByRole('link', { name: /Modo Cita/i }).click();
     await expect(page).toHaveURL(/\/cita$/);
     await expect(page.getByRole('heading', { name: 'Modo Cita', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Modo Cita: check-in nudge appears when interval passed; dismiss hides it', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.addInitScript(() => {
+      const meeting = new Date(Date.now() + 86_400_000);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const meetingVal = `${meeting.getFullYear()}-${pad(meeting.getMonth() + 1)}-${pad(meeting.getDate())}T${pad(meeting.getHours())}:${pad(meeting.getMinutes())}`;
+      window.localStorage.setItem(
+        'aura:v1',
+        JSON.stringify({
+          contacts: [],
+          activeJourney: null,
+          mapLayers: { risk: true, safePoints: true, activity: false },
+          settings: {
+            displayName: 'Smoke',
+            voiceKeyword: 'Aura help',
+            silentTriggerMs: 800,
+            timerDefaultMinutes: 15,
+            locationPrecision: 'approximate',
+          },
+          globalStatus: 'calm',
+          onboardingCompleted: true,
+          shareLocationPrimerAcknowledged: false,
+          encuentroDraft: {
+            contactName: '',
+            place: '',
+            safetyKeyword: '',
+            meetingLocalValue: meetingVal,
+            checkInIntervalMinutes: 1,
+            encuentroLastLocalCheckInAckMs: Date.now() - 120_000,
+            encuentroBrowserNotifyWanted: false,
+          },
+        }),
+      );
+    });
+
+    await page.goto('/cita');
+    await expect(page.getByTestId('cita-checkin-nudge')).toBeVisible();
+    await page.getByRole('button', { name: /Listo, seguir/i }).click();
+    await expect(page.getByTestId('cita-checkin-nudge')).toBeHidden();
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);

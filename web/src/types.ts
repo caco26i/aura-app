@@ -44,6 +44,10 @@ export type EncuentroDraft = {
   /** Value for `<input type="datetime-local">` (local, no timezone suffix). */
   meetingLocalValue: string;
   checkInIntervalMinutes: number;
+  /** Last time the user acknowledged a local check-in nudge (`Date.now()`), or null until first future meeting is active. */
+  encuentroLastLocalCheckInAckMs: number | null;
+  /** User opted in to try Web Notifications for check-in nudges (still requires browser permission). */
+  encuentroBrowserNotifyWanted: boolean;
 };
 
 export function defaultEncuentroDraft(): EncuentroDraft {
@@ -53,5 +57,7 @@ export function defaultEncuentroDraft(): EncuentroDraft {
     safetyKeyword: '',
     meetingLocalValue: '',
     checkInIntervalMinutes: 15,
+    encuentroLastLocalCheckInAckMs: null,
+    encuentroBrowserNotifyWanted: false,
   };
 }

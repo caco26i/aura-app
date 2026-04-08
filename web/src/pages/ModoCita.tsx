@@ -1,12 +1,9 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAura } from '../context/useAura';
+import { isEncuentroCheckInNudgeDue, parseMeetingLocalMs } from './modoCitaCheckIn';
 
-function parseMeetingLocalMs(value: string): number | null {
-  if (!value.trim()) return null;
-  const t = new Date(value).getTime();
-  return Number.isFinite(t) ? t : null;
-}
+const TITLE_PULSE_PREFIX = '• Check-in · ';
 
 function formatDurationEs(ms: number): string {
   if (ms <= 0) return '0 min';
@@ -37,16 +34,30 @@ function checkInShellCopy(
   });
   return `Encuentro programado: ${meetingStr}. Falta ${formatDurationEs(
     untilMeeting,
-  )}. Próximo recordatorio local sugerido en ${formatDurationEs(nextTick)} (sin alertas automáticas aún).`;
+  )}. Próximo recordatorio local sugerido en ${formatDurationEs(nextTick)}. Puedes usar el aviso en pantalla o las notificaciones del navegador (opcional).`;
 }
 
 export function ModoCita() {
   const { encuentroDraft, updateEncuentroDraft } = useAura();
   const [tick, setTick] = useState(0);
+  const [tabVisible, setTabVisible] = useState(
+    () => typeof document !== 'undefined' && document.visibilityState === 'visible',
+  );
+  const prevMeetingMsRef = useRef<number | null | undefined>(undefined);
+  const notifiedHiddenRef = useRef(false);
+  const titleBaseRef = useRef<string | null>(null);
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((n) => n + 1), 30_000);
     return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const onVis = () => {
+      setTabVisible(document.visibilityState === 'visible');
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
   const meetingMs = useMemo(
@@ -54,11 +65,111 @@ export function ModoCita() {
     [encuentroDraft.meetingLocalValue],
   );
 
+  useEffect(() => {
+    if (prevMeetingMsRef.current === undefined) {
+      prevMeetingMsRef.current = meetingMs;
+      return;
+    }
+    if (prevMeetingMsRef.current !== meetingMs) {
+      prevMeetingMsRef.current = meetingMs;
+      if (meetingMs !== null && meetingMs > Date.now()) {
+        updateEncuentroDraft({ encuentroLastLocalCheckInAckMs: Date.now() });
+      }
+    }
+  }, [meetingMs, updateEncuentroDraft]);
+
+  useEffect(() => {
+    if (meetingMs === null || meetingMs <= Date.now()) return;
+    if (encuentroDraft.encuentroLastLocalCheckInAckMs != null) return;
+    updateEncuentroDraft({ encuentroLastLocalCheckInAckMs: Date.now() });
+  }, [meetingMs, encuentroDraft.encuentroLastLocalCheckInAckMs, updateEncuentroDraft]);
+
+  const now = Date.now();
+  void tick;
+  const nudgeDue = isEncuentroCheckInNudgeDue(
+    now,
+    meetingMs,
+    encuentroDraft.encuentroLastLocalCheckInAckMs,
+    encuentroDraft.checkInIntervalMinutes,
+  );
+
+  useEffect(() => {
+    if (!nudgeDue) {
+      notifiedHiddenRef.current = false;
+    }
+  }, [nudgeDue]);
+
+  useEffect(() => {
+    if (!nudgeDue) return;
+    if (!encuentroDraft.encuentroBrowserNotifyWanted) return;
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+    if (document.visibilityState === 'visible') return;
+    if (notifiedHiddenRef.current) return;
+    notifiedHiddenRef.current = true;
+    try {
+      new Notification('Aura — Modo Cita', {
+        body: 'Es momento de un check-in local antes del encuentro.',
+        tag: 'aura-cita-checkin',
+      });
+    } catch {
+      /* ignore */
+    }
+  }, [nudgeDue, encuentroDraft.encuentroBrowserNotifyWanted]);
+
+  useEffect(() => {
+    if (!nudgeDue || !tabVisible) {
+      if (titleBaseRef.current !== null) {
+        document.title = titleBaseRef.current;
+        titleBaseRef.current = null;
+      }
+      return;
+    }
+    if (titleBaseRef.current === null) {
+      const t = document.title;
+      titleBaseRef.current = t.startsWith(TITLE_PULSE_PREFIX) ? t.slice(TITLE_PULSE_PREFIX.length) : t;
+    }
+    const base = titleBaseRef.current;
+    let pulseOn = false;
+    const id = window.setInterval(() => {
+      document.title = pulseOn ? base : `${TITLE_PULSE_PREFIX}${base}`;
+      pulseOn = !pulseOn;
+    }, 2000);
+    return () => {
+      window.clearInterval(id);
+      if (titleBaseRef.current !== null) {
+        document.title = titleBaseRef.current;
+        titleBaseRef.current = null;
+      }
+    };
+  }, [nudgeDue, tabVisible]);
+
   const liveStatus = useMemo(() => {
-    const now = Date.now();
-    void tick;
-    return checkInShellCopy(now, meetingMs, encuentroDraft.checkInIntervalMinutes);
+    return checkInShellCopy(Date.now(), meetingMs, encuentroDraft.checkInIntervalMinutes);
   }, [meetingMs, encuentroDraft.checkInIntervalMinutes, tick]);
+
+  const notificationSupported = typeof Notification !== 'undefined';
+  const permissionLabel = !notificationSupported
+    ? 'Tu navegador no muestra notificaciones de escritorio.'
+    : Notification.permission === 'granted'
+      ? 'Permiso concedido: te avisaremos solo si esta pestaña está en segundo plano cuando toque el check-in.'
+      : Notification.permission === 'denied'
+        ? 'Los avisos del navegador están bloqueados; puedes cambiarlo en la configuración del sitio.'
+        : 'Puedes permitir notificaciones para un recordatorio cuando no estés mirando esta pestaña.';
+
+  async function requestNotificationPermission() {
+    if (!notificationSupported) return;
+    updateEncuentroDraft({ encuentroBrowserNotifyWanted: true });
+    try {
+      await Notification.requestPermission();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function acknowledgeNudge() {
+    updateEncuentroDraft({ encuentroLastLocalCheckInAckMs: Date.now() });
+  }
 
   return (
     <div>
@@ -95,6 +206,23 @@ export function ModoCita() {
         Flujo alineado al prototipo M3: palabra de seguridad, datos del encuentro y check-ins antes de reunirte con
         alguien. Los datos se guardan solo en este navegador; alertas y API vendrán en otro ticket.
       </p>
+
+      {nudgeDue ? (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="cita-checkin-nudge"
+          style={nudgeBanner}
+        >
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Check-in sugerido</div>
+          <p style={{ margin: '0 0 12px', lineHeight: 1.45 }}>
+            Tómate un momento para confirmar que sigues bien y que el plan sigue siendo seguro antes del encuentro.
+          </p>
+          <button type="button" className="ibtn" onClick={acknowledgeNudge} style={nudgeBtn}>
+            Listo, seguir
+          </button>
+        </div>
+      ) : null}
 
       <section aria-labelledby="cita-encuentro-heading" style={section}>
         <h2 id="cita-encuentro-heading" style={h2}>
@@ -155,7 +283,7 @@ export function ModoCita() {
           Check-in antes del encuentro
         </h2>
         <p className="m3-muted" style={{ marginTop: 0 }}>
-          Recordatorios visuales en pantalla. Sin SMS, push ni backend todavía.
+          Recordatorios visuales en pantalla. Sin SMS ni backend todavía.
         </p>
 
         <label htmlFor="cita-meeting-time" style={label}>
@@ -186,6 +314,28 @@ export function ModoCita() {
             style={field}
           />
         </label>
+
+        <div style={notifyBox}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Notificaciones del navegador (opcional)</div>
+          <p className="m3-muted" style={{ margin: '0 0 10px', lineHeight: 1.45 }}>
+            {permissionLabel}
+          </p>
+          {notificationSupported && Notification.permission !== 'denied' ? (
+            <button
+              type="button"
+              className="ibtn"
+              onClick={() => void requestNotificationPermission()}
+              disabled={Notification.permission === 'granted'}
+              aria-label={
+                Notification.permission === 'granted'
+                  ? 'Permiso de notificaciones ya concedido'
+                  : 'Solicitar permiso para notificaciones del navegador'
+              }
+            >
+              {Notification.permission === 'granted' ? 'Notificaciones activadas' : 'Permitir avisos del navegador'}
+            </button>
+          ) : null}
+        </div>
 
         <div
           role="region"
@@ -223,4 +373,19 @@ const liveRegion: CSSProperties = {
   border: '1px solid var(--aura-border)',
   background: 'rgba(255,255,255,0.55)',
   outline: 'none',
+};
+const nudgeBanner: CSSProperties = {
+  marginTop: 16,
+  padding: 14,
+  borderRadius: 12,
+  border: '1px solid rgba(180, 120, 40, 0.45)',
+  background: 'rgba(255, 248, 220, 0.85)',
+};
+const nudgeBtn: CSSProperties = { fontWeight: 600 };
+const notifyBox: CSSProperties = {
+  marginTop: 16,
+  padding: 14,
+  borderRadius: 12,
+  border: '1px solid var(--aura-border)',
+  background: 'rgba(255,255,255,0.4)',
 };

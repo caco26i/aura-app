@@ -33,12 +33,22 @@ function normalizeEncuentroDraft(raw: unknown): EncuentroDraft {
     typeof o.checkInIntervalMinutes === 'number' && Number.isFinite(o.checkInIntervalMinutes)
       ? Math.min(120, Math.max(1, Math.round(o.checkInIntervalMinutes)))
       : d.checkInIntervalMinutes;
+  const lastAck =
+    typeof o.encuentroLastLocalCheckInAckMs === 'number' && Number.isFinite(o.encuentroLastLocalCheckInAckMs)
+      ? o.encuentroLastLocalCheckInAckMs
+      : d.encuentroLastLocalCheckInAckMs;
+  const notifyWanted =
+    typeof o.encuentroBrowserNotifyWanted === 'boolean'
+      ? o.encuentroBrowserNotifyWanted
+      : d.encuentroBrowserNotifyWanted;
   return {
     contactName: typeof o.contactName === 'string' ? o.contactName : d.contactName,
     place: typeof o.place === 'string' ? o.place : d.place,
     safetyKeyword: typeof o.safetyKeyword === 'string' ? o.safetyKeyword : d.safetyKeyword,
     meetingLocalValue: typeof o.meetingLocalValue === 'string' ? o.meetingLocalValue : d.meetingLocalValue,
     checkInIntervalMinutes: interval,
+    encuentroLastLocalCheckInAckMs: lastAck,
+    encuentroBrowserNotifyWanted: notifyWanted,
   };
 }
 
