@@ -49,6 +49,8 @@ function messageForJsonError(code: string | undefined, surface: ApiSurface): str
       return surface === 'sos' ? SOS_RATE : JOURNEY_RATE;
     case 'validation_failed':
       return 'Something in the request did not look right. Check your details and try again.';
+    case 'payload_too_large':
+      return 'The request was too large for the server to accept. Try again with less data or refresh and start over.';
     case 'invalid_journey_id':
       if (surface === 'journey') {
         return "We couldn't use this journey on your current session. Start a new journey from home, then try again.";

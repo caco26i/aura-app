@@ -20,7 +20,7 @@ const BEARER_ALT = process.env.AURA_API_BEARER_TOKEN_ALT || '';
 const BFF_JWT_SECRET = process.env.AURA_API_BFF_JWT_SECRET || '';
 const BFF_JWT_ISSUER = process.env.AURA_API_BFF_JWT_ISSUER || '';
 const BFF_JWT_AUDIENCE = process.env.AURA_API_BFF_JWT_AUDIENCE || '';
-const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '24kb';
+const JSON_BODY_LIMIT = process.env.AURA_API_JSON_BODY_LIMIT || '32kb';
 const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || path.join(process.cwd(), 'data', 'audit.log');
 const JOURNEY_SQLITE_PATH =
   process.env.AURA_API_JOURNEY_STORE_SQLITE_PATH ||
@@ -412,6 +412,14 @@ app.use(express.json({ limit: JSON_BODY_LIMIT }));
 app.use((err, req, res, next) => {
   if (err.status === 400 && err.type === 'entity.parse.failed') {
     res.status(400).json({ ok: false, error: 'invalid_json', detail: 'Malformed JSON request body' });
+    return;
+  }
+  if (err.status === 413 && err.type === 'entity.too.large') {
+    res.status(413).json({
+      ok: false,
+      error: 'payload_too_large',
+      detail: 'JSON request body exceeds configured limit',
+    });
     return;
   }
   next(err);

@@ -119,6 +119,18 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'invalid_json');
   });
 
+  test('JSON body over default express.json limit returns payload_too_large', async () => {
+    const pad = 'x'.repeat(40 * 1024);
+    const res = await request(app)
+      .post('/v1/journeys')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ pad }))
+      .expect(413);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'payload_too_large');
+  });
+
   test('mutating routes require bearer token', async () => {
     await request(app).post('/v1/journeys').send({}).expect(401);
   });

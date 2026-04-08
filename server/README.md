@@ -69,7 +69,7 @@ On GitHub, the **Server API tests** workflow runs `npm ci` + `npm test` in `serv
 | `AURA_API_JOURNEY_STORE_JSONL_PATH` | no | Append-only **JSONL** fallback (default `./data/journeys.jsonl`): used when SQLite cannot be opened, or when `AURA_API_JOURNEY_STORE=jsonl`. Each append **fsync**s. Legacy alias: `AURA_API_JOURNEY_JSONL_PATH`. |
 | `AURA_API_JOURNEY_STORE` | no | `auto` (default): SQLite then JSONL fallback. `sqlite` / `jsonl` / `memory`: force backend (`memory` = in-process `Map`, for fast tests). Legacy alias: `AURA_API_JOURNEY_BACKEND`. |
 | `CORS_ORIGIN` | no | `*` or comma-separated allowlist |
-| `AURA_API_JSON_BODY_LIMIT` | no | Express JSON body size (default `24kb`) |
+| `AURA_API_JSON_BODY_LIMIT` | no | Express JSON body size (default `32kb`, same as BFF `express.json` limit) |
 | `AURA_API_RATE_LIMIT_GLOBAL_WINDOW_MS` | no | Per-IP+actor minute window for **`globalLimiter`** on all mutating routes (default `60000`) |
 | `AURA_API_RATE_LIMIT_GLOBAL_MAX` | no | Max mutating requests per **`globalLimiter`** window (default `120`) |
 | `AURA_API_RATE_LIMIT_JOURNEY_WINDOW_MS` | no | Per-IP+actor minute window for **`journeyLimiter`** on journey routes (default `60000`) |
