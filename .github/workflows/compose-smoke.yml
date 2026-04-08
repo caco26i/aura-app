@@ -1,0 +1,46 @@
+# Full-stack wiring check: nginx (aura-web) → aura-api. Does not run on push/PR
+# (keeps PR CI fast). Trigger manually; add `schedule:` here if you want nightly/weekly.
+name: Compose stack smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ephemeral API token for compose (.env)
+        run: |
+          echo "AURA_API_BEARER_TOKEN=$(openssl rand -hex 24)" > .env
+
+      - name: Build and start stack
+        run: docker compose up -d --build
+
+      - name: Wait for /health and /ready via aura-web (proxied)
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8080/health" >/dev/null 2>&1; then
+              echo "health ok (attempt $i)"
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "::group::compose ps + logs"
+              docker compose ps
+              docker compose logs --tail=120
+              echo "::endgroup::"
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS "http://127.0.0.1:8080/health"
+          echo
+          curl -fsS "http://127.0.0.1:8080/ready"
+          echo
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v --remove-orphans
