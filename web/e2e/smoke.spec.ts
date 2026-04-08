@@ -57,4 +57,58 @@ test.describe('shell smoke', () => {
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
+
+  test('Trusted: open from bootstrapped shell, h1 and no page/console errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Network', exact: true }).click();
+    await expect(page).toHaveURL(/\/trusted$/);
+    await expect(page.getByRole('heading', { name: 'Trusted network', level: 1 })).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('Emergency: SOS nav opens shell, visible confirm cancel — no SOS POST', async ({ page }) => {
+    const pageErrors: string[] = [];
+    let emergencyAlertPosts = 0;
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('request', (req) => {
+      if (req.method() === 'POST' && req.url().includes('emergency-alert')) emergencyAlertPosts += 1;
+    });
+
+    await page.goto('/');
+    await page.getByRole('navigation', { name: /navegación principal/i }).getByRole('link', { name: 'SOS' }).click();
+    await expect(page).toHaveURL(/\/emergency$/);
+    await expect(page.getByRole('heading', { name: 'Emergency', level: 1 })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Send visible alert' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Send alert to trusted contacts?' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(dialog).toBeHidden();
+
+    expect(emergencyAlertPosts, 'cancel must not call POST /v1/emergency-alerts').toBe(0);
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+
+  test('unknown path replace-navigates to home without redirect loop', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/aura-smoke-no-such-route-7c4e');
+    await expect(page).toHaveURL(/\/$/);
+    await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+
+    await page.waitForTimeout(400);
+    await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
 });
