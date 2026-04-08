@@ -359,9 +359,10 @@ jobs:
       - name: Build and start stack (telemetry stub override)
         run: docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up -d --build
 
-      - name: Wait for /health via aura-web (proxied)
+      - name: Wait for /health and /ready via aura-web (proxied)
         run: |
           set -euo pipefail
+          COMPOSE_FILES=(-f docker-compose.yml -f docker-compose.telemetry-smoke.yml)
           for i in $(seq 1 60); do
             if curl -fsS "http://127.0.0.1:8080/health" >/dev/null 2>&1; then
               echo "health ok (attempt $i)"
@@ -369,13 +370,23 @@ jobs:
             fi
             if [ "$i" -eq 60 ]; then
               echo "::group::compose ps + logs"
-              docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml ps
-              docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml logs --tail=200
+              docker compose "${COMPOSE_FILES[@]}" ps
+              docker compose "${COMPOSE_FILES[@]}" logs --tail=200
               echo "::endgroup::"
               exit 1
             fi
             sleep 2
           done
+          health_json="$(curl -fsS "http://127.0.0.1:8080/health")"
+          echo "${health_json}"
+          echo "${health_json}" | jq -e --arg sha "${GITHUB_SHA:0:7}" '.gitSha == $sha' >/dev/null
+          echo "${health_json}" | jq -e '.deployVersion == "compose-smoke"' >/dev/null
+          ready_json="$(curl -fsS "http://127.0.0.1:8080/ready")"
+          echo "${ready_json}"
+          echo "${ready_json}" | jq -e '.ok == true and .ready == true and .service == "aura-api"' >/dev/null
+          echo "${ready_json}" | jq -e --arg sha "${GITHUB_SHA:0:7}" '.gitSha == $sha' >/dev/null
+          echo "${ready_json}" | jq -e '.deployVersion == "compose-smoke"' >/dev/null
+          echo
 
       - name: Assert nginx serves SPA index shell at /
         run: |
