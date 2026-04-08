@@ -1,5 +1,9 @@
 # Full-stack wiring check: nginx (aura-web) → aura-api. Does not run on push/PR
 # (keeps PR CI fast). Trigger manually; add `schedule:` here if you want nightly/weekly.
+#
+# Assumes root docker-compose.yml defaults: host WEB_PORT 8080 → aura-web:80, API_PORT 8787.
+# Ephemeral jobs create .env with AURA_API_BEARER_TOKEN (static-bearer stack) or BFF secrets.
+# BFF / merged jobs use setup-node@v4 (Node 20) only for inline `node -e` JWT minting — not pnpm.
 name: Compose stack smoke
 
 on:
