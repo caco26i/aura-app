@@ -64,6 +64,19 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 ---
 
+## Publication log (paste LinkedIn permalinks after each post)
+
+| # | Target date | Post URL |
+| --- | --- | --- |
+| 1 | 2026-04-09 | |
+| 2 | 2026-04-11 | |
+| 3 | 2026-04-14 | |
+| 4 | 2026-04-16 | |
+| 5 | 2026-04-18 | |
+| 6 | 2026-04-21 | |
+
+---
+
 ## Completion checklist
 
 - [ ] Schedule published in-repo (this file) **before** first post.
