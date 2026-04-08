@@ -24,6 +24,13 @@ Scope: current **Vite + React** client with optional Google OAuth stub, `localSt
 
 - `localStorage` is readable by same-origin scripts and XSS. Sanitize all rendered user content; use strict CSP and dependency updates to reduce XSS risk.
 
+## Content-Security-Policy (production)
+
+- **Where:** Production bundles only — a CSP meta tag is emitted at build time (`web/vite-plugin-production-csp.ts`); the Vite dev server does not add it.
+- **`style-src 'unsafe-inline'`:** Required today because Leaflet injects inline styles for map positioning. Prefer removing this later (e.g. nonced styles) if the map stack allows.
+- **Third-party loads:** `img-src` allows OSM tile hosts (`*.tile.openstreetmap.org`), default Leaflet marker assets on `unpkg.com`, and Google Fonts as referenced from `index.html`. Revisit if you change tile or icon hosting.
+- **OAuth:** Google-related directives are compiled in only when `VITE_GOOGLE_CLIENT_ID` is set for that build; see [DEPLOY.md](./DEPLOY.md) for build-time `connect-src` notes.
+
 ## Related docs
 
 - [AUTH.md](./AUTH.md)
