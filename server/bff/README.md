@@ -2,6 +2,10 @@
 
 Small **backend-for-frontend** that turns **Google sign-in** into **short-lived HS256 JWTs** the Aura API accepts (`AURA_API_BFF_JWT_SECRET` — same verification as [`../README.md`](../README.md)).
 
+## Rate limiting
+
+`express-rate-limit` applies **separate per-IP** caps to `POST /auth/google`, `GET /session`, and `POST /logout` (see env table). On exceed: **429** with `{ ok: false, error: "rate_limited", detail }` (same `error` code as the authoritative API in [`../../web/docs/API_CONTRACT.md`](../../web/docs/API_CONTRACT.md)). Standard rate-limit response headers are enabled. At the edge, a WAF or CDN should still enforce broader abuse controls; these knobs protect the BFF process when traffic reaches origin.
+
 ## Threat model (SPA + `GET /session`)
 
 - The access token is returned as JSON and held in **memory** in the browser for API `Authorization: Bearer …`. Any **XSS** can exfiltrate it; mitigate with CSP, dependency hygiene, and short TTL (`AURA_BFF_JWT_TTL_SECONDS`, default 900).
@@ -26,6 +30,9 @@ Small **backend-for-frontend** that turns **Google sign-in** into **short-lived 
 | `AURA_BFF_JWT_TTL_SECONDS` | no | Access JWT lifetime (default `900`) |
 | `AURA_BFF_JWT_ISSUER` / `AURA_BFF_JWT_AUDIENCE` | no | If set, must match API `AURA_API_BFF_JWT_ISSUER` / `AURA_API_BFF_JWT_AUDIENCE` |
 | `AURA_BFF_JSON_BODY_LIMIT` | no | Max JSON body size for `express.json` (default `32kb`; mirrors API `AURA_API_JSON_BODY_LIMIT`) |
+| `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX` | no | Per-IP window + max requests for `POST /auth/google` (defaults `60000` / `5000` — permissive for dev/CI; **lower in production**, e.g. `900000` / `30` for a 15‑minute brute-force throttle) |
+| `AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_SESSION_MAX` | no | Per-IP limits for `GET /session` (defaults `60000` / `10000`) |
+| `AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS` / `AURA_BFF_RATE_LIMIT_LOGOUT_MAX` | no | Per-IP limits for `POST /logout` (defaults `60000` / `2000`) |
 | `PORT` | no | Default `8790` |
 
 Aliases: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` are accepted.

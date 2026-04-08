@@ -4,9 +4,46 @@
 
 import cors from 'cors';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import { OAuth2Client } from 'google-auth-library';
 import { mintAccessJwt } from './mintAccessJwt.js';
+
+/**
+ * @param {string} name
+ * @param {number} fallback
+ * @param {number} min
+ */
+function parsePositiveIntEnv(name, fallback, min) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < min) return fallback;
+  return Math.floor(n);
+}
+
+/**
+ * Per-IP limiters for auth/session routes (trust proxy must be set for req.ip).
+ * Defaults are permissive so local dev and parallel `npm test` stay stable; tighten in prod via env.
+ *
+ * @param {object} opts
+ * @param {number} opts.windowMs
+ * @param {number} opts.max
+ * @param {string} opts.detail
+ */
+function createBffIpLimiter({ windowMs, max, detail }) {
+  return rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => req.ip || 'unknown',
+    message: { ok: false, error: 'rate_limited', detail },
+    handler: (req, res, _next, options) => {
+      res.status(options.statusCode).json(options.message);
+    },
+  });
+}
 
 /**
  * @returns {string[]}
@@ -49,6 +86,29 @@ export function createApp(overrides = {}) {
   const JSON_BODY_LIMIT = process.env.AURA_BFF_JSON_BODY_LIMIT || '32kb';
   const NODE_ENV = process.env.NODE_ENV || 'development';
   const IS_PROD = NODE_ENV === 'production';
+
+  const authGoogleWindowMs = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS', 60_000, 1000);
+  const authGoogleMax = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX', 5000, 1);
+  const sessionWindowMs = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS', 60_000, 1000);
+  const sessionMax = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_SESSION_MAX', 10_000, 1);
+  const logoutWindowMs = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS', 60_000, 1000);
+  const logoutMax = parsePositiveIntEnv('AURA_BFF_RATE_LIMIT_LOGOUT_MAX', 2000, 1);
+
+  const authGoogleLimiter = createBffIpLimiter({
+    windowMs: authGoogleWindowMs,
+    max: authGoogleMax,
+    detail: 'Too many sign-in attempts; try again later.',
+  });
+  const sessionLimiter = createBffIpLimiter({
+    windowMs: sessionWindowMs,
+    max: sessionMax,
+    detail: 'Too many session requests; try again later.',
+  });
+  const logoutLimiter = createBffIpLimiter({
+    windowMs: logoutWindowMs,
+    max: logoutMax,
+    detail: 'Too many logout requests; try again later.',
+  });
 
   const oauthRedirectUri = BFF_PUBLIC_URL ? `${BFF_PUBLIC_URL}/auth/google/callback` : undefined;
   const oauthClient = GOOGLE_CLIENT_ID
@@ -107,7 +167,7 @@ export function createApp(overrides = {}) {
     res.json({ ok: true, service: 'aura-bff' });
   });
 
-  app.post('/auth/google', async (req, res) => {
+  app.post('/auth/google', authGoogleLimiter, async (req, res) => {
     const errors = readBffConfigErrors();
     if (errors.length) {
       return res.status(503).json({ ok: false, error: 'bff_misconfigured', detail: errors[0] });
@@ -185,7 +245,7 @@ export function createApp(overrides = {}) {
     }
   });
 
-  app.get('/session', (req, res) => {
+  app.get('/session', sessionLimiter, (req, res) => {
     const errors = readBffConfigErrors();
     if (errors.length) {
       return res.status(503).json({ ok: false, error: 'bff_misconfigured', detail: errors[0] });
@@ -208,7 +268,7 @@ export function createApp(overrides = {}) {
     });
   });
 
-  app.post('/logout', (req, res) => {
+  app.post('/logout', logoutLimiter, (req, res) => {
     req.session.destroy((err) => {
       if (err) return res.status(500).json({ ok: false });
       res.json({ ok: true });

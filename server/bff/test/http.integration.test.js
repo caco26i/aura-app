@@ -88,4 +88,68 @@ describe('BFF HTTP (session + auth)', { concurrency: false }, () => {
     await agent.post('/logout').expect(200);
     await agent.get('/session').expect(401);
   });
+
+  test('POST /auth/google returns 429 rate_limited after burst when limit env is low', async () => {
+    const keys = [
+      'AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS',
+      'AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX',
+    ];
+    const prev = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    process.env.AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS = '60000';
+    process.env.AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX = '2';
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      await request(app).post('/auth/google').send({ idToken: 'a' }).expect(200);
+      await request(app).post('/auth/google').send({ idToken: 'b' }).expect(200);
+      const res = await request(app).post('/auth/google').send({ idToken: 'c' }).expect(429);
+      assert.equal(res.body.ok, false);
+      assert.equal(res.body.error, 'rate_limited');
+      assert.ok(typeof res.body.detail === 'string');
+    } finally {
+      for (const k of keys) {
+        if (prev[k] === undefined) delete process.env[k];
+        else process.env[k] = prev[k];
+      }
+    }
+  });
+
+  test('GET /session returns 429 rate_limited after burst when limit env is low', async () => {
+    const keys = ['AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS', 'AURA_BFF_RATE_LIMIT_SESSION_MAX'];
+    const prev = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    process.env.AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS = '60000';
+    process.env.AURA_BFF_RATE_LIMIT_SESSION_MAX = '2';
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      const agent = request.agent(app);
+      await agent.post('/auth/google').send({ idToken: 'sess.burst' }).expect(200);
+      await agent.get('/session').expect(200);
+      await agent.get('/session').expect(200);
+      const res = await agent.get('/session').expect(429);
+      assert.equal(res.body.error, 'rate_limited');
+    } finally {
+      for (const k of keys) {
+        if (prev[k] === undefined) delete process.env[k];
+        else process.env[k] = prev[k];
+      }
+    }
+  });
+
+  test('POST /logout returns 429 rate_limited after burst when limit env is low', async () => {
+    const keys = ['AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS', 'AURA_BFF_RATE_LIMIT_LOGOUT_MAX'];
+    const prev = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    process.env.AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS = '60000';
+    process.env.AURA_BFF_RATE_LIMIT_LOGOUT_MAX = '2';
+    try {
+      const app = createApp({ verifyIdToken: mockVerifyOk });
+      await request(app).post('/logout').expect(200);
+      await request(app).post('/logout').expect(200);
+      const res = await request(app).post('/logout').expect(429);
+      assert.equal(res.body.error, 'rate_limited');
+    } finally {
+      for (const k of keys) {
+        if (prev[k] === undefined) delete process.env[k];
+        else process.env[k] = prev[k];
+      }
+    }
+  });
 });
