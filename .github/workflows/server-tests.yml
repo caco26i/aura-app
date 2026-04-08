@@ -1,3 +1,5 @@
+# Toolchain: Node 20 + npm ci (server/ and server/bff/ package-lock.json). Matches
+# server/package.json and server/bff/package.json engines (>=20).
 name: Server API tests
 
 on:
@@ -6,11 +8,15 @@ on:
     paths:
       - 'server/**'
       - 'web/docs/API_CONTRACT.md'
+      - 'docker-compose.yml'
+      - 'docker-compose.bff.yml'
       - '.github/workflows/server-tests.yml'
   pull_request:
     paths:
       - 'server/**'
       - 'web/docs/API_CONTRACT.md'
+      - 'docker-compose.yml'
+      - 'docker-compose.bff.yml'
       - '.github/workflows/server-tests.yml'
 
 jobs:

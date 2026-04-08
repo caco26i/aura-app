@@ -41,12 +41,64 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
 
 ---
 
+## Primary nav: `/cita`, `/transport`, `/checkin` ([AURA-258](/AURA/issues/AURA-258), [AURA-269](/AURA/issues/AURA-269))
+
+**Entry:** Bottom nav in [`web/src/components/AppShell.tsx`](../web/src/components/AppShell.tsx) (**Cita**, **Transp.**, **Check-in**) and matching **Nuevo** feature tiles on Home ([`web/src/pages/Home.tsx`](../web/src/pages/Home.tsx)). Each screen’s top bar **back** control returns to **`/`** (hub).
+
+**Voice:** Spanish UI on these routes follows prototype intent: supportive, non-alarmist reminders and safety-adjacent copy — aligned with [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md) (calm first, no catastrophizing) and status patterns in [`web/docs/UX_EMPTY_LOADING_SAFETY.md`](../web/docs/UX_EMPTY_LOADING_SAFETY.md) (`role="status"` / polite live regions where noted).
+
+### `/cita` — Modo Cita (`ModoCita.tsx`)
+
+**Purpose:** Local-first **encuentro** prep: capture who / where / safety keyword, set meeting time, and receive **on-device** check-in nudges before the meeting. **No** SMS or backend in the current build (see muted explainer on screen).
+
+**Layout (top → bottom)**
+
+1. **Top bar** — Back to Home, title **Modo Cita**, **Nuevo** badge.
+2. **Mode banner** — **Modo Cita / Encuentro** · subtitle *Citas · Reuniones · Transacciones · Desconocidos*.
+3. **Explainer** — Data stays in this browser; future work for alerts/API.
+4. **Conditional — Check-in sugerido** — When interval logic says a nudge is due (`modoCitaCheckIn.ts`): soft panel with **`role="status"`** + **`aria-live="polite"`**, heading **Check-in sugerido**, short body asking the user to confirm they are still OK and the plan still feels safe, primary **Listo, seguir** to acknowledge (updates `encuentroLastLocalCheckInAckMs` in `aura:v1`).
+5. **Datos del encuentro** — Text fields: nombre o apodo del contacto, lugar, palabra de seguridad. **Foto de contexto:** file control **disabled**; hint explains upload is a design placeholder (not wired).
+6. **Check-in antes del encuentro** — Subcopy: visual reminders only. **`datetime-local`** for meeting time; interval **1–120** minutes (default **15**). **Notificaciones del navegador (opcional):** permission-aware copy (unsupported / denied / granted); button to request permission when allowed. **Estado del temporizador local:** **`role="region"`** + **`aria-live="polite"`** with dynamic strings (no meeting time → prompt to set time; past meeting → calm guidance to check surroundings and keep safety keyword ready; future meeting → countdown + next suggested local reminder). Optional **desktop Notification** when tab is hidden, permission granted, and user opted in (`Aura — Modo Cita`).
+
+**Happy path:** User fills encounter fields → sets meeting time and interval → optionally enables notifications → reads live status → at each due interval before the meeting, sees nudge (and optional notification) → taps **Listo, seguir**.
+
+**Edge / safety-adjacent copy:** Past or reached meeting time uses grounded language (entorno, palabra de seguridad), not panic framing. Notification denial is informational, not shaming.
+
+**Attention without alert:** While nudge is due and the tab is visible, `document.title` pulses with a **• Check-in ·** prefix on a timer — attention cue, **not** `role="alert"`.
+
+### `/transport` — Modo Transporte (`ModoTransporte.tsx`)
+
+**Shipped (wireframe, local-only):** Top bar, mode banner, muted explainer (no backend). **Estado del modo transporte** — single **`role="status"`** + **`aria-live="polite"`** (`data-testid="transport-status"`) summarizes empty vs active vs verified; copy stays grounded (no alarmism).
+
+**Layout (top → bottom)**
+
+1. **Empty — Aún sin viaje** — Calm lede; primary **Empezar verificación (demo)** moves to active state (session-only `useState`; refresh resets).
+2. **Active — Verificar vehículo y conductor** — Text fields for placa and conductor notes (local only); **Coincide, es mi viaje** → verified; **No soy yo / no es mi viaje** opens a **`role="dialog"`** `aria-modal` sheet with safety guidance + **Ir a SOS** (`Link` to `/emergency`).
+3. **Verified — Durante el trayecto** — **Reportar desvío de ruta (demo)** toggles a second **`role="status"`** + polite live region (`data-testid="transport-deviation"`) for deviation copy (local annotation only).
+4. **Reset** — **Volver a estado sin viaje** returns to empty.
+
+**Product target (with backend):** Same mental model — verify vehicle/driver → optional deviation signal → escalate via trusted/SOS when contracts exist. Photo capture and server validation remain **out of scope** for this wireframe.
+
+### `/checkin` — Check-in IA (`CheckinInteligente.tsx`)
+
+**Shipped (wireframe, local-only):** Top bar, mode banner, explainer. **Live feedback** — one **`role="status"`** + **`aria-live="polite"`** + **`aria-atomic="true"`** region (`data-testid="checkin-ia-announce"`) announces quick-reply taps; placeholder italic copy when idle.
+
+**Layout (top → bottom)**
+
+1. **Disparadores (wireframe)** — Six static list rows (labels + short hints) matching prototype breadth; no toggles wired.
+2. **Respuestas rápidas** — Chips **Todo bien**, **Llegué bien**, **Demoro 10 min**, **Necesito ayuda** append to local historial and refresh the status region (pattern aligned with map/Cita polite announcements).
+3. **Historial en este dispositivo** — `ul` (`data-testid="checkin-history"`) prepended on each reply; seed example row for first paint.
+
+**Product target (backlog):** Prioritized triggers, server-backed history, push/SMS — **TBD** with eng; copy remains calm per [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md).
+
+---
+
 ## PDR §3–4 alignment (checklist)
 
 | PDR | Spec / doc |
 |-----|------------|
 | §3.1 areas (onboarding, home, journey, SOS, map, trusted, settings) | Routes + UX docs above |
-| §4.1 Routing & shell | This file; shell inventory matches `web/src/App.tsx` + `AppShell.tsx` |
+| §4.1 Routing & shell | This file; shell inventory matches `web/src/App.tsx` + `AppShell.tsx` + primary-nav modo pages (§Primary nav) |
 | §4.2 Journey before share / I’m safe | [`web/docs/BETA_BACKEND.md`](../web/docs/BETA_BACKEND.md) (“Journey ownership”) |
 | §4.3 SOS confirm; `X-Aura-Anomaly` as `role="status"` | [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md) |
 | §4.4 Voice + centralized errors | [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md), `web/src/api/auraApiMessages.ts` |
