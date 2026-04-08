@@ -95,6 +95,76 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
+  test('journey active: Live tracking, I’m safe + share primer (API off)', async ({ page }) => {
+    const journeyId = 'c0ffee00-1111-4222-8333-444455556666';
+    const pageErrors: string[] = [];
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.addInitScript((id) => {
+      window.localStorage.setItem(
+        'aura:v1',
+        JSON.stringify({
+          contacts: [],
+          activeJourney: {
+            id,
+            label: 'Home',
+            destinationLabel: 'Work',
+            etaMinutes: 12,
+            trackState: 'on_track',
+            startedAt: new Date().toISOString(),
+          },
+          mapLayers: { risk: true, safePoints: true, activity: false },
+          settings: {
+            displayName: 'Smoke',
+            voiceKeyword: 'Aura help',
+            silentTriggerMs: 800,
+            timerDefaultMinutes: 15,
+            locationPrecision: 'approximate',
+          },
+          globalStatus: 'calm',
+          onboardingCompleted: true,
+          shareLocationPrimerAcknowledged: false,
+          encuentroDraft: {
+            contactName: '',
+            place: '',
+            safetyKeyword: '',
+            meetingLocalValue: '',
+            checkInIntervalMinutes: 15,
+            encuentroLastLocalCheckInAckMs: null,
+            encuentroBrowserNotifyWanted: false,
+          },
+        }),
+      );
+    }, journeyId);
+
+    await page.goto('/journey/active');
+    await expect(page.getByRole('heading', { name: 'Live tracking', level: 1 })).toBeVisible();
+
+    await expect(page.getByRole('button', { name: "I'm safe" })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Share live location' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'End journey' })).toBeVisible();
+
+    await page.getByRole('button', { name: "I'm safe" }).click();
+    await expect(page.getByRole('button', { name: 'Sending…' })).toBeVisible();
+    await expect(page.getByRole('button', { name: "I'm safe" })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('alert')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Share live location' }).click();
+    const sharePrimer = page.getByRole('dialog', { name: /Share live location/i });
+    await expect(sharePrimer.getByRole('heading', { name: 'Share live location', level: 2 })).toBeVisible();
+    await sharePrimer.getByRole('button', { name: 'Share location' }).click();
+    await expect(page.getByRole('button', { name: 'Sharing…' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Share live location' })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('alert')).toHaveCount(0);
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+    expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
+  });
+
   test('Map intel: layer toggle exposes switch role and aria-checked, no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
