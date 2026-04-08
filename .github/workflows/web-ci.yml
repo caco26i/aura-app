@@ -1,4 +1,4 @@
-name: Web lint & build
+name: Web CI (lint, unit, e2e, build)
 
 on:
   push:

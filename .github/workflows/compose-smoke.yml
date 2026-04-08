@@ -157,6 +157,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: JWT + BFF .env (no static bearer / no VITE token)
         run: |
           cat > .env <<EOF
@@ -420,6 +424,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Validate merged compose (BFF + telemetry stub)
         run: |
