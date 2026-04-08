@@ -1,3 +1,5 @@
+# Toolchain: Node 20 + npm ci (package-lock.json). Matches web/package.json engines and
+# docs/PUBLIC_BETA.md — this repo does not use pnpm at the package level.
 name: Web CI (lint, unit, e2e, build)
 
 on:
@@ -7,6 +9,7 @@ on:
       - 'web/**'
       - 'docker-compose.yml'
       - 'docker-compose.bff.yml'
+      - 'docker-compose.telemetry-smoke.yml'
       - '.env.example'
       - 'scripts/check-compose-env-example.mjs'
       - '.github/workflows/web-ci.yml'
@@ -15,6 +18,7 @@ on:
       - 'web/**'
       - 'docker-compose.yml'
       - 'docker-compose.bff.yml'
+      - 'docker-compose.telemetry-smoke.yml'
       - '.env.example'
       - 'scripts/check-compose-env-example.mjs'
       - '.github/workflows/web-ci.yml'
