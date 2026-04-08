@@ -166,16 +166,66 @@ describe('Aura API', () => {
     assert.equal(res.body.error, 'payload_too_large');
   });
 
+  test('malformed JSON on location-shares returns invalid_json', async () => {
+    const res = await request(app)
+      .post('/v1/journeys/00000000-0000-4000-8000-000000000099/location-shares')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send('{ not-json')
+      .expect(400);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'invalid_json');
+  });
+
+  test('malformed JSON on im-safe returns invalid_json', async () => {
+    const res = await request(app)
+      .post('/v1/journeys/00000000-0000-4000-8000-000000000098/im-safe')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send('{ not-json')
+      .expect(400);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'invalid_json');
+  });
+
+  test('JSON body over limit on location-shares returns payload_too_large', async () => {
+    const pad = 'x'.repeat(40 * 1024);
+    const res = await request(app)
+      .post('/v1/journeys/00000000-0000-4000-8000-000000000097/location-shares')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ pad }))
+      .expect(413);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'payload_too_large');
+  });
+
+  test('JSON body over limit on im-safe returns payload_too_large', async () => {
+    const pad = 'x'.repeat(40 * 1024);
+    const res = await request(app)
+      .post('/v1/journeys/00000000-0000-4000-8000-000000000096/im-safe')
+      .set(bearer)
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ pad }))
+      .expect(413);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'payload_too_large');
+  });
+
   test('mutating routes require bearer token', async () => {
-    await request(app).post('/v1/journeys').send({}).expect(401);
+    const res = await request(app).post('/v1/journeys').send({}).expect(401);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'unauthorized');
   });
 
   test('mutating routes reject wrong bearer', async () => {
-    await request(app)
+    const res = await request(app)
       .post('/v1/journeys')
       .set('Authorization', 'Bearer wrong')
       .send({})
       .expect(403);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'forbidden');
   });
 
   test('mutating routes reject non-Bearer authorization scheme', async () => {
@@ -225,6 +275,16 @@ describe('Aura API', () => {
       .set(bearer)
       .send({})
       .expect(404);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'journey_not_found');
+  });
+
+  test('im-safe returns journey_not_found for unknown id', async () => {
+    const res = await request(app)
+      .post('/v1/journeys/00000000-0000-4000-8000-000000000002/im-safe')
+      .set(bearer)
+      .expect(404);
+    assert.equal(res.body.ok, false);
     assert.equal(res.body.error, 'journey_not_found');
   });
 
@@ -345,7 +405,13 @@ describe('Aura API', () => {
   });
 
   test('emergency-alerts rejects invalid mode', async () => {
-    await request(app).post('/v1/emergency-alerts').set(bearer).send({ mode: 'invalid' }).expect(400);
+    const res = await request(app)
+      .post('/v1/emergency-alerts')
+      .set(bearer)
+      .send({ mode: 'invalid' })
+      .expect(400);
+    assert.equal(res.body.ok, false);
+    assert.equal(res.body.error, 'validation_failed');
   });
 
   test('emergency-alerts accepts silent mode', async () => {
