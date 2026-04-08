@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { registerSosOpenerReturnFocus } from '../a11y/sosReturnFocus';
 import { postImSafe, postShareLocation } from '../api/auraBackend';
 import { emitTelemetry } from '../observability/auraTelemetry';
 import { AuraMap } from '../components/AuraMap';
@@ -333,6 +334,10 @@ export function JourneyActive() {
               style={{ ...actionBtn, marginTop: 12 }}
               onClick={() => {
                 setSilentSheetOpen(false);
+                // Silent-sheet CTA unmounts when the sheet closes; `#main-content` is focusable (AppShell).
+                registerSosOpenerReturnFocus(() => {
+                  document.getElementById('main-content')?.focus();
+                });
                 navigate('/emergency', { state: { mode: 'silent' as const } });
               }}
             >

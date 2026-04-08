@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { registerSosOpenerReturnFocusFromEntry } from '../a11y/sosReturnFocus';
 import { useAura } from '../context/useAura';
 import { emitTelemetry } from '../observability/auraTelemetry';
 
@@ -17,8 +18,10 @@ export function AuraSOSButton() {
     <button
       type="button"
       aria-label={sosLabel}
+      data-aura-sos-entry="fab"
       onClick={() => {
         emitTelemetry({ category: 'sos', event: 'fab_open' });
+        registerSosOpenerReturnFocusFromEntry('fab');
         navigate('/emergency');
       }}
       style={{

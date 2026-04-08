@@ -264,6 +264,21 @@ test.describe('shell smoke', () => {
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
 
+  test('Emergency: Go back restores keyboard focus to bottom-nav SOS', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/');
+    const sosLink = page.getByRole('navigation', { name: /navegación principal/i }).getByRole('link', { name: 'SOS' });
+    await sosLink.click();
+    await expect(page).toHaveURL(/\/emergency$/);
+    await page.getByRole('button', { name: 'Go back' }).click();
+    await expect(page).toHaveURL(/\//);
+    await expect(sosLink).toBeFocused();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+
   test('unknown path replace-navigates to home without redirect loop', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));

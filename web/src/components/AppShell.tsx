@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { registerSosOpenerReturnFocusFromEntry } from '../a11y/sosReturnFocus';
 import { SkipToContent } from './SkipToContent';
 
 function NavItem({
@@ -22,6 +23,24 @@ function NavItem({
   );
 }
 
+function SosNavItem() {
+  return (
+    <NavLink
+      to="/emergency"
+      data-aura-sos-entry="nav"
+      className={({ isActive }) => `nbi${isActive ? ' on' : ''}`}
+      onClick={() => {
+        registerSosOpenerReturnFocusFromEntry('nav');
+      }}
+    >
+      <div className="nbi-ind" aria-hidden>
+        <span className="mi material-symbols-rounded">emergency</span>
+      </div>
+      <span className="nbi-l">SOS</span>
+    </NavLink>
+  );
+}
+
 export function AppShell() {
   return (
     <div className="aura-m3-app">
@@ -34,7 +53,7 @@ export function AppShell() {
         <NavItem to="/cita" label="Cita" icon="favorite" />
         <NavItem to="/transport" label="Transp." icon="directions_car" />
         <NavItem to="/checkin" label="Check-in" icon="check_circle" />
-        <NavItem to="/emergency" label="SOS" icon="emergency" />
+        <SosNavItem />
       </nav>
     </div>
   );

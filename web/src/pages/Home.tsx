@@ -1,5 +1,6 @@
 import { type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import { registerSosOpenerReturnFocusFromEntry } from '../a11y/sosReturnFocus';
 import { useAura } from '../context/useAura';
 
 function greetingLine(): string {
@@ -134,7 +135,14 @@ export function Home() {
           <span className="mi material-symbols-rounded s28 ft-ic">location_on</span>
           <span className="ft-l">Tracking</span>
         </Link>
-        <Link to="/emergency" className="feat-tile">
+        <Link
+          to="/emergency"
+          className="feat-tile"
+          data-aura-sos-entry="home-tile"
+          onClick={() => {
+            registerSosOpenerReturnFocusFromEntry('home-tile');
+          }}
+        >
           <span className="mi material-symbols-rounded s28" style={{ color: 'var(--danger)' }}>
             emergency
           </span>

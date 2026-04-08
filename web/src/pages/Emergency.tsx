@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { scheduleAfterNavFocusRestore, takeSosOpenerReturnFocus } from '../a11y/sosReturnFocus';
 import { postEmergencyAlert } from '../api/auraBackend';
 import { SkipToContent } from '../components/SkipToContent';
 import { useAura } from '../context/useAura';
@@ -80,6 +81,12 @@ export function Emergency() {
     navigate('/');
   };
 
+  const goBack = () => {
+    const restore = takeSosOpenerReturnFocus();
+    navigate(-1);
+    scheduleAfterNavFocusRestore(restore);
+  };
+
   return (
     <div
       style={{
@@ -140,7 +147,7 @@ export function Emergency() {
         <button
           type="button"
           disabled={busy || anyConfirmOpen}
-          onClick={() => navigate(-1)}
+          onClick={goBack}
           style={{ ...btn('transparent'), border: '1px solid rgba(255,255,255,0.35)' }}
         >
           Go back

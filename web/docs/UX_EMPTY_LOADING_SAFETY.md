@@ -51,7 +51,7 @@
 | Page title | `Emergency` | Keep — scannable. |
 | Silent path explainer | Mentions future build + demo | Keep honesty; when silent UX ships, replace with concrete behavior (what is hidden / haptics). |
 | Primary actions | Visible first, then silent | **Shipped:** Visible alert uses a confirmation sheet before any SOS network call. Silent alert uses **two confirmation steps** before send so it is strictly harder to trigger than visible (no one-tap silent send). |
-| `Go back` | OK | Ensure focus returns to the control that opened Emergency (bottom nav SOS, Home tile, or FAB if mounted) (focus management — eng). |
+| `Go back` | OK | **Shipped:** Focus returns via `web/src/a11y/sosReturnFocus.ts`: bottom-nav SOS and Home tile use stable `data-aura-sos-entry`; optional FAB same; journey silent path focuses `#main-content` because the sheet CTA unmounts when the sheet closes. |
 | Error + emergency services | Covered in `auraApiMessages.ts` for SOS | **Do not** soften SOS offline copy; keep emergency services line. |
 
 **Silent sheet (JourneyActive)**
@@ -72,7 +72,7 @@
 ### 2.4 API copy (`auraApiMessages.ts`)
 
 - Already strong for rate limit, offline, journey/SOS surfaces.  
-- **Minor:** `userMessageForMisconfiguration()` is dev-facing; if this string can surface in production builds, add *“If you’re a participant, contact your organizer.”* after the technical line.
+- **Minor:** `userMessageForMisconfiguration()` — **Shipped:** participant line *“If you’re a participant, contact your organizer.”* appended after the technical hint in `auraApiMessages.ts` (covers production when the backend is unset).
 
 ### 2.5 Global resilience
 
@@ -102,6 +102,7 @@
 
 - `web/src/pages/*.tsx` — screen copy and structure  
 - `web/src/api/auraApiMessages.ts` — API-facing user strings  
+- `web/src/a11y/sosReturnFocus.ts` — Emergency “Go back” focus restore  
 - `web/src/components/AuraMap.tsx` — map loading behavior  
 
 — UX Designer · AURA-28 handoff
