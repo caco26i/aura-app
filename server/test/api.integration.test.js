@@ -43,6 +43,14 @@ describe('Aura API', () => {
     assert.equal(res.headers['referrer-policy'], 'no-referrer');
   });
 
+  test('error JSON responses include baseline security headers', async () => {
+    const nf = await request(app).get('/v1/definitely-not-a-route').expect(404);
+    assert.equal(nf.headers['x-content-type-options'], 'nosniff');
+    assert.equal(nf.headers['x-frame-options'], 'DENY');
+    const ua = await request(app).post('/v1/journeys').send({}).expect(401);
+    assert.equal(ua.headers['referrer-policy'], 'no-referrer');
+  });
+
   test('GET /ready returns ready when bearer and audit path are ok', async () => {
     const res = await request(app).get('/ready').expect(200);
     assert.equal(res.body.ok, true);
