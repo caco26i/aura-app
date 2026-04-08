@@ -42,7 +42,7 @@ export function ModoTransporte() {
           </span>
         </Link>
         <h1 id="modo-transporte-title" className="m3-tbar-title" style={{ margin: 0 }}>
-          Modo Transporte
+          Modo transporte
         </h1>
         <span className="feat-badge">
           <span className="mi material-symbols-rounded s18" aria-hidden>
@@ -73,9 +73,12 @@ export function ModoTransporte() {
         role="status"
         aria-live="polite"
         aria-atomic="true"
+        aria-labelledby="transport-live-heading"
         style={liveRegion}
       >
-        <div style={{ fontWeight: 700, marginBottom: 6 }}>Estado del modo transporte</div>
+        <div id="transport-live-heading" style={{ fontWeight: 700, marginBottom: 6 }}>
+          Estado del modo transporte
+        </div>
         <p style={{ margin: 0, lineHeight: 1.45 }}>{liveMessage}</p>
       </div>
 
@@ -103,12 +106,12 @@ export function ModoTransporte() {
               Placa de ejemplo — en vivo vendrá del proveedor o foto OCR cuando exista API.
             </p>
             <div style={thumbRow}>
-              <div style={thumb}>
+              <div style={thumb} aria-label="Placeholder de foto de placa (demostración)">
                 <span className="m3-muted" style={{ fontSize: 12 }}>
                   Foto placa
                 </span>
               </div>
-              <div style={thumb}>
+              <div style={thumb} aria-label="Placeholder de foto del conductor (demostración)">
                 <span className="m3-muted" style={{ fontSize: 12 }}>
                   Foto conductor
                 </span>

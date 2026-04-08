@@ -329,7 +329,7 @@ test.describe('shell smoke', () => {
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);
   });
 
-  test('Modo Transporte shell from home grid: h1 and no page/console errors', async ({ page }) => {
+  test('Modo transporte shell from home grid: h1 and no page/console errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(err.message));
@@ -340,7 +340,7 @@ test.describe('shell smoke', () => {
     await page.goto('/');
     await page.getByRole('link', { name: /Transporte/i }).click();
     await expect(page).toHaveURL(/\/transport$/);
-    await expect(page.getByRole('heading', { name: 'Modo Transporte', level: 1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Modo transporte', level: 1 })).toBeVisible();
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
     expect(consoleErrors, `console.error: ${consoleErrors.join('; ')}`).toEqual([]);

@@ -27,7 +27,7 @@ function titleForPath(pathname: string): string {
     case '/cita':
       return `Modo Cita · ${APP_NAME}`;
     case '/transport':
-      return `Modo Transporte · ${APP_NAME}`;
+      return `Modo transporte · ${APP_NAME}`;
     case '/checkin':
       return `Check-in IA · ${APP_NAME}`;
     default:

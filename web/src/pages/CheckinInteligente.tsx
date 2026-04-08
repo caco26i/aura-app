@@ -67,13 +67,17 @@ export function CheckinInteligente() {
 
   const pickReply = (reply: string) => {
     if (!selected) return;
-    const item: HistoryItem = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      at: Date.now(),
-      trigger: selected.label,
-      reply,
-    };
-    setHistory((prev) => [item, ...prev].slice(0, 12));
+    const triggerLabel = selected.label;
+    setHistory((prev) => {
+      const now = Date.now();
+      const item: HistoryItem = {
+        id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
+        at: now,
+        trigger: triggerLabel,
+        reply,
+      };
+      return [item, ...prev].slice(0, 12);
+    });
   };
 
   const replies = selectedId ? QUICK_REPLIES[selectedId] ?? [] : [];
@@ -104,7 +108,7 @@ export function CheckinInteligente() {
           </span>
         </div>
         <div>
-          <div className="mb-title">Check-in inteligente</div>
+          <div className="mb-title">Check-in IA</div>
           <div className="mb-sub">Disparadores · Respuestas rápidas · Historial</div>
         </div>
       </div>
@@ -113,15 +117,19 @@ export function CheckinInteligente() {
         Wireframe local: los disparadores y respuestas son plantillas; la priorización con push/SMS queda para cuando exista contrato de API. Copy calmado y siguiente paso, sin culpar al usuario.
       </p>
 
-      <p
+      <div
         id="checkin-ia-status"
         role="status"
         aria-live="polite"
         aria-atomic="true"
+        aria-labelledby="checkin-ia-status-heading"
         style={statusLine}
       >
-        {statusMessage}
-      </p>
+        <div id="checkin-ia-status-heading" style={{ fontWeight: 700, marginBottom: 6 }}>
+          Estado del check-in IA
+        </div>
+        <p style={{ margin: 0, lineHeight: 1.45 }}>{statusMessage}</p>
+      </div>
 
       <section aria-labelledby="checkin-triggers-heading" style={section}>
         <h2 id="checkin-triggers-heading" style={h2}>
@@ -174,7 +182,7 @@ export function CheckinInteligente() {
 
       <section aria-labelledby="checkin-history-heading" style={section}>
         <h2 id="checkin-history-heading" style={h2}>
-          Historial (demostración)
+          Historial de demostración
         </h2>
         {history.length === 0 ? (
           <p className="m3-muted" role="status" style={{ marginTop: 0 }}>
