@@ -26,9 +26,8 @@ export function ModoTransporte() {
       </div>
 
       <p className="m3-muted">
-        Prototype sections cover Uber-style connect card, trip state, plate/face capture tiles, and deviation alerts.
-        This screen is a UX shell so navigation and hierarchy match the attachment; implement photo capture and backend
-        verification in a dedicated engineering ticket.
+        El HTML de referencia incluye tarjeta estilo Uber, estado de viaje, fotos de placa/conductor y alertas por
+        desvío. Aquí solo el shell de navegación; captura de fotos y verificación en backend van en otro ticket.
       </p>
     </div>
   );

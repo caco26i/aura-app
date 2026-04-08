@@ -26,13 +26,13 @@ export function ModoCita() {
       </div>
 
       <p className="m3-muted">
-        This flow matches the M3 prototype: safety word, encounter details, and timed check-ins before you meet
-        someone. Backend wiring and live alerts will ship in a follow-up; here you can validate layout and copy with
-        stakeholders.
+        Flujo alineado al prototipo M3: palabra de seguridad, datos del encuentro y check-ins antes de reunirte con
+        alguien. La capa viva (API, alertas) va en un ticket de ingeniería; esta pantalla sirve para validar jerarquía y
+        copy con producto.
       </p>
       <p className="m3-muted" style={{ marginTop: 12 }}>
-        Next engineering steps: persist encounter draft locally, hook check-in timers, and align with the form fields in
-        the reference HTML (name, place, keyword, photo slot).
+        Siguiente paso técnico: persistir borrador local, temporizadores de check-in y los campos del HTML de referencia
+        (nombre, lugar, keyword, foto).
       </p>
     </div>
   );

@@ -26,9 +26,8 @@ export function CheckinInteligente() {
       </div>
 
       <p className="m3-muted">
-        The reference lists six automatic triggers, quick-reply chips, and history. This route mirrors the prototype
-        entry point; product and eng should prioritize which triggers ship first and how they interact with push/SMS when
-        available.
+        El prototipo lista seis disparadores, respuestas rápidas e historial. Esta ruta copia el punto de entrada; producto
+        e ingeniería priorizan qué disparadores van primero y cómo se integran con push/SMS cuando existan.
       </p>
     </div>
   );
