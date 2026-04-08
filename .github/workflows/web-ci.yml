@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'web/**'
+      - 'docker-compose.yml'
       - '.github/workflows/web-ci.yml'
   pull_request:
     paths:
       - 'web/**'
+      - 'docker-compose.yml'
       - '.github/workflows/web-ci.yml'
 
 jobs:
@@ -27,3 +29,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - name: Docker build (web image smoke)
+        working-directory: ${{ github.workspace }}
+        run: docker build -f web/Dockerfile web

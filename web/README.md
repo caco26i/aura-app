@@ -31,3 +31,13 @@ npm run dev
 | `npm run lint` | ESLint |
 
 On GitHub, the **Web lint & build** workflow runs `npm ci`, `npm run lint`, and `npm run build` in `web/` when `web/**` or that workflow file changes.
+
+## Docker (static SPA)
+
+Production image: [`Dockerfile`](./Dockerfile) (Vite `dist/` + nginx, SPA fallback). For **web + API** together, use the repo root [`docker-compose.yml`](../docker-compose.yml) and [`docs/DEPLOY.md`](./docs/DEPLOY.md) (build-time `VITE_*`, token rotation, telemetry caveats).
+
+```bash
+# from repo root, with AURA_API_BEARER_TOKEN in .env
+docker compose build aura-web
+docker compose up
+```
