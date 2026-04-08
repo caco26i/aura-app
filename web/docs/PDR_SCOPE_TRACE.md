@@ -129,3 +129,4 @@ _None at present._
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): `RouteDocumentTitle` `/map` → **Map intel · Aura** (aligns with on-page `h1`). |
 | 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): §2.1 **MapIntel.tsx** naming clarified — canonical surface is `MapPage.tsx` (`/map`); CTO wake [52b19e31](/AURA/issues/AURA-61#comment-52b19e31-76cf-457a-8570-5cbab2bc1eed). |
 | 2026-04-08 | [AURA-91](/AURA/issues/AURA-91): BFF **HS256 JWT** auth (`sub` ownership) + **im-safe** hourly rate limit + `AURA_API_JSON_BODY_LIMIT`; audit **RUNBOOK_AUDIT.md**; Resolved/aligned row for API production auth path. |
+| 2026-04-08 | [AURA-61](/AURA/issues/AURA-61): Eng verified `Emergency.tsx` — `npm run lint` + targeted ESLint **clean** on `20be0fb` ([comment ca9f8b1d](/AURA/issues/AURA-61#comment-ca9f8b1d-6a36-4a32-a32a-0340ad77b8b6)); prior `react-hooks/set-state-in-effect` note closed as stale / config drift. |
