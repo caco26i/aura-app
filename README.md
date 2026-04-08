@@ -66,6 +66,22 @@ npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices -y
 
 That updates `.agents/skills/` and `skills-lock.json`. Commit both when the skill version changes. For day-to-day React work in this repo, prefer loading that skill when tasks touch components, data fetching, bundles, or render performance — see [`web/README.md`](./web/README.md).
 
+### Vercel coding agent plugin (Cursor)
+
+[Vercel’s agent plugin](https://vercel.com/docs/agent-resources/vercel-plugin) adds ecosystem context, skills, hooks, and slash commands for Cursor. Install from the **repo root** (Node 18+):
+
+```bash
+npx plugins add vercel/vercel-plugin
+```
+
+On machines where the Cursor binary is **not** on `PATH` (CI, remote agents, headless workspaces), target Cursor explicitly and use **project** scope so the install is tied to this checkout:
+
+```bash
+npx plugins add vercel/vercel-plugin --target cursor --scope project -y
+```
+
+Restart Cursor (or the agent session) after install so the plugin loads.
+
 ---
 
 ## Quick start (local)
