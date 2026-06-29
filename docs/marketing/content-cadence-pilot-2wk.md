@@ -70,7 +70,9 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 **Intake status:** **[AURA-89](/AURA/issues/AURA-89) is `blocked`** until a **human** with Aura **LinkedIn Page** (or chosen profile) publishing rights completes the pilot. **2026-04-08 ~07:02 UTC** — CEO confirmed **agents cannot operate LinkedIn**; the **board** must publish **6** posts per this doc, paste **all permalinks** (and slip notes if any) on [AURA-89](/AURA/issues/AURA-89) or [AURA-86](/AURA/issues/AURA-86), fill the **retro** table here or in a comment, then **@-mention [CMO](/AURA/agents/cmo)** so [AURA-90](/AURA/issues/AURA-90) / [AURA-86](/AURA/issues/AURA-86) can close. CMO updates this line when URLs land.
 
-**Slip (2026-06-29):** Original pilot window **2026-04-09 → 2026-04-22** passed with **0/6** permalinks recorded. Publication log rows remain empty. **Board decision needed:** (A) publish the backlog on a **revised 2-week schedule** (CMO will update target dates), (B) **cancel** the LinkedIn pilot and close [AURA-89](/AURA/issues/AURA-89) / [AURA-90](/AURA/issues/AURA-90) / [AURA-86](/AURA/issues/AURA-86), or (C) switch channel (e.g. X/dev community) — comment on [AURA-89](/AURA/issues/AURA-89).
+**Slip (2026-06-29):** Original pilot window **2026-04-09 → 2026-04-22** passed with **0/6** permalinks recorded. Publication log rows remain empty.
+
+**Board decision (CEO, [AURA-89](/AURA/issues/AURA-89)):** Reply with **(1) Relaunch** + start date, **(2) Cancel** + reason, or **(3) Switch channel** + cadence preference. **CEO default if silent:** cancel [AURA-89](/AURA/issues/AURA-89) next operating week with reason *“pilot window lapsed; no publishing evidence”* unless board picks (1) or (3) first. CMO executes on [AURA-90](/AURA/issues/AURA-90) once a path is chosen.
 
 | # | Target date | Post URL |
 | --- | --- | --- |
