@@ -42,7 +42,7 @@ docker compose up --build
 - **Liveness:** `GET /health` (Docker `HEALTHCHECK` and compose `healthcheck` use this).
 - **Readiness:** `GET /ready` — use from your orchestrator or load balancer once at least one of `AURA_API_BEARER_TOKEN` or `AURA_API_BFF_JWT_SECRET` is set and `/app/data` is writable (see route list above).
 
-Web deploy cross-links: [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md).
+Web deploy cross-links: [`web/docs/DEPLOY.md`](../web/docs/DEPLOY.md) (BFF-first matrix and [Root Compose: BFF stack operator checklist](../web/docs/DEPLOY.md#root-compose-bff-stack-operator-checklist)).
 
 ## Tests
 

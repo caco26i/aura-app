@@ -2,13 +2,16 @@
 #
 #   docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build
 #
-# Required in `.env` (example values):
+# Operator checklist: web/docs/DEPLOY.md#root-compose-bff-stack-operator-checklist
+#
+# Required in `.env`:
 #   AURA_API_BFF_JWT_SECRET=<hex 32+ chars, shared API + BFF>
 #   AURA_BFF_SESSION_SECRET=<hex 16+ chars>
 #   VITE_GOOGLE_CLIENT_ID=<Google OAuth client id, same as web>
-# Optional:
+# Optional (defaults in compose or .env.example):
 #   AURA_BFF_CORS_ORIGIN=http://127.0.0.1:8080  (comma-separated allowlist)
 #   AURA_TELEMETRY_PROXY_TARGET=https://collector.example/ingest/aura  (nginx proxies /ingest/aura)
+#   AURA_BFF_RATE_LIMIT_* — see .env.example and server/bff/README.md
 
 services:
   aura-bff:

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Ensures every ${VAR} substitution in root Compose files is documented in
- * .env.example so operator copy-paste drift is caught in CI (AURA-239).
+ * .env.example and web/docs/DEPLOY.md so operator copy-paste drift is caught
+ * in CI (AURA-239, AURA-282).
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -37,16 +38,35 @@ for (const file of composeFiles) {
 }
 
 const envExample = readFileSync(join(root, ".env.example"), "utf8");
-const missing = [...vars].filter((v) => !isDocumentedInEnvExample(envExample, v)).sort();
+const deployMd = readFileSync(join(root, "web/docs/DEPLOY.md"), "utf8");
 
-if (missing.length > 0) {
+const missingEnvExample = [...vars]
+  .filter((v) => !isDocumentedInEnvExample(envExample, v))
+  .sort();
+const missingDeploy = [...vars].filter((v) => !deployMd.includes(v)).sort();
+
+let failed = false;
+
+if (missingEnvExample.length > 0) {
+  failed = true;
   console.error(
     "check-compose-env-example: these Compose substitution vars are missing from .env.example:\n  " +
-      missing.join("\n  "),
+      missingEnvExample.join("\n  "),
   );
+}
+
+if (missingDeploy.length > 0) {
+  failed = true;
+  console.error(
+    "check-compose-env-example: these Compose substitution vars are missing from web/docs/DEPLOY.md:\n  " +
+      missingDeploy.join("\n  "),
+  );
+}
+
+if (failed) {
   process.exit(1);
 }
 
 console.log(
-  `check-compose-env-example: OK (${vars.size} vars across ${composeFiles.join(", ")})`,
+  `check-compose-env-example: OK (${vars.size} vars in .env.example + DEPLOY.md across ${composeFiles.join(", ")})`,
 );

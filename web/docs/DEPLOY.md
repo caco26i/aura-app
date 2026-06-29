@@ -34,11 +34,43 @@ Use this when the browser authenticates via **Google → BFF session → short-l
 | **BFF (runtime)** | `AURA_BFF_SESSION_SECRET` | Strong random (≥16 chars) | Same |
 | **BFF (runtime)** | `AURA_BFF_GOOGLE_CLIENT_ID` | **Same string** as `VITE_GOOGLE_CLIENT_ID` for that build | Same |
 | **BFF (runtime)** | `AURA_BFF_CORS_ORIGIN` | Comma-separated **browser origins** that load the SPA (required when SPA origin ≠ BFF origin) | Tight allowlist only |
-| **BFF (runtime)** | Rate limit envs | Optional; defaults are permissive — tighten (`server/bff/README.md`); variable names in [`.env.example`](../../.env.example) | Prefer stricter windows (e.g. 15‑minute throttle on `POST /auth/google`) |
+| **Compose (ports)** | `WEB_PORT` / `API_PORT` | Default `8080` / `8787` when unset | Same |
+| **Web (build-time)** | `VITE_AURA_TELEMETRY_ENDPOINT` | Optional; use `/ingest/aura` with **`AURA_TELEMETRY_PROXY_TARGET`** on `aura-web` | Same or absolute collector URL at build time |
+| **Web (build-time)** | `VITE_AURA_TELEMETRY_DEBUG` | Optional (`true` / `1`) for staging diagnostics | Omit in production |
+| **Web (runtime, nginx)** | `AURA_TELEMETRY_PROXY_TARGET` | Full collector URL when SPA uses relative `/ingest/aura` | Same |
+| **Web (compose-fixed)** | `AURA_NGINX_STACK` | Set to **`bff`** by [`docker-compose.bff.yml`](../../docker-compose.bff.yml) (not in `.env`) | Same |
+| **BFF (runtime)** | Rate limit envs | Optional — `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_WINDOW_MS`, `AURA_BFF_RATE_LIMIT_AUTH_GOOGLE_MAX`, `AURA_BFF_RATE_LIMIT_SESSION_WINDOW_MS`, `AURA_BFF_RATE_LIMIT_SESSION_MAX`, `AURA_BFF_RATE_LIMIT_LOGOUT_WINDOW_MS`, `AURA_BFF_RATE_LIMIT_LOGOUT_MAX` (defaults permissive; see [`.env.example`](../../.env.example)) | Prefer stricter windows (e.g. 15‑minute throttle on `POST /auth/google`) |
 | **API (runtime)** | `AURA_API_BFF_JWT_SECRET` | **Identical** to BFF | Identical |
-| **API (runtime)** | `AURA_API_BEARER_TOKEN` | Omit for JWT-only stacks | Omit for JWT-only stacks |
+| **API (runtime)** | `AURA_API_BEARER_TOKEN` | Omit for JWT-only stacks (compose override clears it) | Omit for JWT-only stacks |
+| **API (runtime)** | `AURA_API_DEPLOY_VERSION` / `AURA_API_GIT_SHA` | Optional; echoed on **`GET /health`** / **`GET /ready`** | Same |
 
 **Build guardrail:** `npm run build` (production mode) **fails** if both `VITE_AURA_BFF_URL` and `VITE_AURA_API_TOKEN` are non-empty, so CI cannot accidentally ship a static bearer alongside the BFF path. Clear the token build-arg / env when using BFF.
+
+### Root Compose: BFF stack operator checklist
+
+Single-host operators using the merged stack (same command as CI **`compose-bff-smoke`**):
+
+```bash
+cp .env.example .env
+# Edit .env — set the three required keys in the table below.
+docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build
+```
+
+| Category | Required in `.env` | Optional (defaults in compose / [`.env.example`](../../.env.example)) |
+| -------- | ------------------- | --------------------------------------------------------------------- |
+| **Secrets** | `AURA_API_BFF_JWT_SECRET`, `AURA_BFF_SESSION_SECRET`, `VITE_GOOGLE_CLIENT_ID` | — |
+| **CORS** | — | `AURA_BFF_CORS_ORIGIN` (default `http://127.0.0.1:8080`) |
+| **Ports** | — | `WEB_PORT` (`8080`), `API_PORT` (`8787`) |
+| **Deploy metadata** | — | `AURA_API_DEPLOY_VERSION`, `AURA_API_GIT_SHA` |
+| **Telemetry** | — | `VITE_AURA_TELEMETRY_ENDPOINT`, `AURA_TELEMETRY_PROXY_TARGET`, `VITE_AURA_TELEMETRY_DEBUG` |
+| **BFF rate limits** | — | Six `AURA_BFF_RATE_LIMIT_*` vars (auth/session/logout windows + max) |
+
+**Set by compose override (do not duplicate in `.env` unless you build outside Compose):**
+
+- `VITE_AURA_BFF_URL=/aura-bff` and **`AURA_NGINX_STACK=bff`** on `aura-web` → [`nginx-docker-bff.conf`](../nginx-docker-bff.conf)
+- `VITE_AURA_API_TOKEN=""` and `AURA_API_BEARER_TOKEN=""` → JWT-only stack (no static bearer in web bundle or API)
+
+**Smoke after `up`:** `GET http://127.0.0.1:${WEB_PORT:-8080}/health`, `/ready`, `/aura-bff/health`, `/aura-bff/ready` — see [Staging smoke: BFF JWT path](#staging-smoke-bff-jwt-path-no-static-web-token). BFF env details: [`server/bff/README.md`](../../server/bff/README.md); API persistence paths are fixed in root [`docker-compose.yml`](../../docker-compose.yml) (`AUDIT_LOG_PATH`, journey SQLite/JSONL under `/app/data`).
 
 ## Secrets handling
 
@@ -76,7 +108,7 @@ For the Node API container, you can set **`AURA_API_DEPLOY_VERSION`** (e.g. rele
 
 **Audit log (API operators):** `AUDIT_LOG_PATH` defaults to `./data/audit.log`; root Compose sets **`/app/data/audit.log`** with a named volume (see [`docker-compose.yml`](../../docker-compose.yml) comments). After deploy, confirm **`GET /ready`** returns **200** (writable audit dir). For **rotation**, use **logrotate** + **`SIGUSR2`** so the process reopens the file — full procedure: [`server/docs/RUNBOOK_AUDIT.md`](../../server/docs/RUNBOOK_AUDIT.md), example stanza: [`server/docs/examples/audit-logrotate.example.conf`](../../server/docs/examples/audit-logrotate.example.conf). Web-facing summary: [OBSERVABILITY.md](./OBSERVABILITY.md).
 
-**CI mirror — Compose stack smoke:** Staging operators can replay the same full-stack checks GitHub runs manually: open **[`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml)** (`workflow_dispatch` only — not on every PR). Jobs include **`compose-smoke`** (static bearer + nginx → API), **`compose-bff-smoke`** (`docker-compose.yml` + `docker-compose.bff.yml`, no static token in the web image), and merged **telemetry-proxy** variants — see the workflow steps for exact `docker compose` file lists and assertions (`/health`, `/ready`, BFF health, SPA shell, `POST /v1/journeys`, etc.). **`compose-telemetry-proxy-smoke`** gates on **`GET /ready`** through nginx (with deploy metadata **`jq`** checks matching **`compose-smoke`**) before SPA shell and **`POST /ingest/aura`**. On every PR that touches the web stack or root Compose, **[`.github/workflows/web-ci.yml`](../../.github/workflows/web-ci.yml)** runs **[`scripts/check-compose-env-example.mjs`](../../scripts/check-compose-env-example.mjs)** so any new `${VAR}` in **`docker-compose.yml`** / **`docker-compose.bff.yml`** must be reflected in **[`.env.example`](../../.env.example)**. Security / contract context: [SECURITY.md](./SECURITY.md), [API_CONTRACT.md](./API_CONTRACT.md).
+**CI mirror — Compose stack smoke:** Staging operators can replay the same full-stack checks GitHub runs manually: open **[`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml)** (`workflow_dispatch` only — not on every PR). Jobs include **`compose-smoke`** (static bearer + nginx → API), **`compose-bff-smoke`** (`docker-compose.yml` + `docker-compose.bff.yml`, no static token in the web image), and merged **telemetry-proxy** variants — see the workflow steps for exact `docker compose` file lists and assertions (`/health`, `/ready`, BFF health, SPA shell, `POST /v1/journeys`, etc.). **`compose-telemetry-proxy-smoke`** gates on **`GET /ready`** through nginx (with deploy metadata **`jq`** checks matching **`compose-smoke`**) before SPA shell and **`POST /ingest/aura`**. On every PR that touches the web stack or root Compose, **[`.github/workflows/web-ci.yml`](../../.github/workflows/web-ci.yml)** runs **[`scripts/check-compose-env-example.mjs`](../../scripts/check-compose-env-example.mjs)** so any new `${VAR}` in **`docker-compose.yml`** / **`docker-compose.bff.yml`** must be reflected in **[`.env.example`](../../.env.example)** and **`web/docs/DEPLOY.md`**. Security / contract context: [SECURITY.md](./SECURITY.md), [API_CONTRACT.md](./API_CONTRACT.md).
 
 ## Smoke checks after deploy
 
