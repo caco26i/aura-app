@@ -72,6 +72,43 @@ docker compose -f docker-compose.yml -f docker-compose.bff.yml up --build
 
 **Smoke after `up`:** `GET http://127.0.0.1:${WEB_PORT:-8080}/health`, `/ready`, `/aura-bff/health`, `/aura-bff/ready` — see [Staging smoke: BFF JWT path](#staging-smoke-bff-jwt-path-no-static-web-token). BFF env details: [`server/bff/README.md`](../../server/bff/README.md); API persistence paths are fixed in root [`docker-compose.yml`](../../docker-compose.yml) (`AUDIT_LOG_PATH`, journey SQLite/JSONL under `/app/data`).
 
+### Root Compose: telemetry proxy operator checklist
+
+Validate same-origin nginx → collector proxy without a production collector. Replay CI manually via **`compose-telemetry-proxy-smoke`** or **`compose-bff-telemetry-proxy-smoke`** in [`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml). Wiring overview: [OBSERVABILITY.md](./OBSERVABILITY.md#docker-compose-telemetry-proxy-smoke-operators--ci).
+
+**Static-bearer + local echo stub:**
+
+```bash
+cp .env.example .env
+# Edit .env — set AURA_API_BEARER_TOKEN and VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura
+docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up --build
+```
+
+| Category | Required in `.env` | Set by [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) |
+| -------- | ------------------- | ------------------------------------------------------------------------------------- |
+| **Secrets** | `AURA_API_BEARER_TOKEN` | — |
+| **Telemetry (build-time)** | `VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura` | — |
+| **Telemetry (runtime, nginx)** | — | `AURA_TELEMETRY_PROXY_TARGET=http://aura-telemetry-stub:8080/ingest/aura` on `aura-web` |
+| **Services** | — | `aura-telemetry-stub` (HTTP echo image) |
+
+**BFF + telemetry stub** (merge order: base → BFF → telemetry-smoke):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml up --build
+```
+
+| Category | Required in `.env` | Notes |
+| -------- | ------------------- | ----- |
+| **BFF secrets** | `AURA_API_BFF_JWT_SECRET`, `AURA_BFF_SESSION_SECRET`, `VITE_GOOGLE_CLIENT_ID` | Same as [BFF stack checklist](#root-compose-bff-stack-operator-checklist) |
+| **Telemetry (build-time)** | `VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura` | Required for SPA same-origin POST |
+| **Telemetry (runtime)** | Optional `AURA_TELEMETRY_PROXY_TARGET` | Override sets stub URL; CI job also documents it in `.env` |
+| **Deploy metadata** | — | Optional `AURA_API_DEPLOY_VERSION`, `AURA_API_GIT_SHA` |
+
+**Smoke after `up`:**
+
+1. `GET http://127.0.0.1:${WEB_PORT:-8080}/health` and `/ready` (BFF path: also `/aura-bff/health`, `/aura-bff/ready`).
+2. `POST http://127.0.0.1:${WEB_PORT:-8080}/ingest/aura` with JSON body — expect **HTTP 200** with the echo stub (production collectors may return other success codes).
+
 ## Secrets handling
 
 - **Google OAuth client ID** is public; keep **client secret** (if any server component) only on backend — not in this repo’s client env.
@@ -126,9 +163,9 @@ curl -sS -o /dev/null -w "%{http_code}" -X POST "http://127.0.0.1:${WEB_PORT:-80
   -H "Content-Type: application/json" -d "{}"
 ```
 
-Expect a non-`405` response from nginx (exact code depends on the collector). CI uses [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) with an echo stub.
+Expect a non-`405` response from nginx (exact code depends on the collector; **HTTP 200** with the [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) echo stub — same assertion as CI **`compose-telemetry-proxy-smoke`**).
 
-**BFF + telemetry proxy together:** merge `docker-compose.yml`, then [`docker-compose.bff.yml`](../../docker-compose.bff.yml), then [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) (that order). Set `.env` with BFF secrets, `VITE_GOOGLE_CLIENT_ID`, `VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`, and point `AURA_TELEMETRY_PROXY_TARGET` at your collector (the telemetry override sets the stub URL on `aura-web` when using the echo image). Current Compose merges `depends_on` so `aura-web` waits on `aura-api`, `aura-bff`, and `aura-telemetry-stub`. Manual CI job: `compose-bff-telemetry-proxy-smoke` in [`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml).
+**BFF + telemetry proxy together:** merge `docker-compose.yml`, then [`docker-compose.bff.yml`](../../docker-compose.bff.yml), then [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) (that order). Set `.env` with BFF secrets, `VITE_GOOGLE_CLIENT_ID`, and **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`**. The telemetry override sets **`AURA_TELEMETRY_PROXY_TARGET=http://aura-telemetry-stub:8080/ingest/aura`** on `aura-web` (CI job `compose-bff-telemetry-proxy-smoke` also documents this in `.env`). Merged `depends_on` requires `aura-web` to wait on `aura-api`, `aura-bff`, and `aura-telemetry-stub`. Operator checklist: [Root Compose: telemetry proxy operator checklist](#root-compose-telemetry-proxy-operator-checklist). Manual CI job: `compose-bff-telemetry-proxy-smoke` in [`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml).
 
 ### Staging smoke: BFF JWT path (no static web token)
 

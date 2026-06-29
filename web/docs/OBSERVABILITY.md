@@ -72,7 +72,30 @@ VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura
 
 Relative URLs do not add a second origin to CSP: `connect-src` already includes `'self'`, which covers this path.
 
-**Docker Compose (root `docker-compose.yml` / BFF merge):** set runtime env **`AURA_TELEMETRY_PROXY_TARGET`** on `aura-web` to the **full URL** nginx should use in `proxy_pass` (for example `https://collector.internal/ingest/aura`). Build with **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`**. If the proxy env is unset, nginx does not expose `/ingest/aura` — use a full `VITE_AURA_TELEMETRY_*` URL at build time instead. See [`DEPLOY.md`](./DEPLOY.md) hosting / telemetry sections.
+**Docker Compose (root `docker-compose.yml` / BFF merge):** set runtime env **`AURA_TELEMETRY_PROXY_TARGET`** on `aura-web` to the **full URL** nginx should use in `proxy_pass` (for example `https://collector.internal/ingest/aura`). Build with **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`**. If the proxy env is unset, nginx does not expose `/ingest/aura` — use a full `VITE_AURA_TELEMETRY_*` URL at build time instead. See [`DEPLOY.md`](./DEPLOY.md#root-compose-telemetry-proxy-operator-checklist) for operator checklists and [`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) for the local echo-stub override used in CI.
+
+### Docker Compose telemetry proxy smoke (operators / CI)
+
+Manual replay of GitHub Actions: [`.github/workflows/compose-smoke.yml`](../../.github/workflows/compose-smoke.yml) (`workflow_dispatch`) jobs **`compose-telemetry-proxy-smoke`** (static bearer) and **`compose-bff-telemetry-proxy-smoke`** (BFF + stub).
+
+**Static-bearer + echo stub** (no real collector):
+
+```bash
+echo "AURA_API_BEARER_TOKEN=$(openssl rand -hex 24)" > .env
+echo "VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura" >> .env
+docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up --build
+```
+
+[`docker-compose.telemetry-smoke.yml`](../../docker-compose.telemetry-smoke.yml) adds service **`aura-telemetry-stub`** (`mendhak/http-https-echo:35`) and sets **`AURA_TELEMETRY_PROXY_TARGET=http://aura-telemetry-stub:8080/ingest/aura`** on `aura-web`. You do **not** need `AURA_TELEMETRY_PROXY_TARGET` in `.env` for this override — only **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`** (build-time via `.env`).
+
+**Smoke assertions** (match CI):
+
+1. `GET http://127.0.0.1:${WEB_PORT:-8080}/health` and `/ready` through nginx (with optional `AURA_API_GIT_SHA` / `AURA_API_DEPLOY_VERSION` checks).
+2. `POST http://127.0.0.1:${WEB_PORT:-8080}/ingest/aura` with `Content-Type: application/json` — expect **HTTP 200** from the echo stub.
+
+**BFF + telemetry stub:** merge compose files in order **`docker-compose.yml`** → **`docker-compose.bff.yml`** → **`docker-compose.telemetry-smoke.yml`**. Required `.env`: BFF secrets (`AURA_API_BFF_JWT_SECRET`, `AURA_BFF_SESSION_SECRET`, `VITE_GOOGLE_CLIENT_ID`) plus **`VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura`**. The override sets the stub proxy URL on `aura-web`; CI also documents `AURA_TELEMETRY_PROXY_TARGET=http://aura-telemetry-stub:8080/ingest/aura` in `.env` (equivalent). Merged `depends_on` requires `aura-web` to wait on **`aura-api`**, **`aura-bff`**, and **`aura-telemetry-stub`**.
+
+Full env matrix: [`DEPLOY.md`](./DEPLOY.md#root-compose-telemetry-proxy-operator-checklist).
 
 ### Local development (`npm run dev`)
 

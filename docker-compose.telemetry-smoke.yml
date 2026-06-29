@@ -1,8 +1,16 @@
 # Optional override: exercise nginx → collector proxy for /ingest/aura (CI / manual smoke).
 #
+# Static-bearer stack:
 #   docker compose -f docker-compose.yml -f docker-compose.telemetry-smoke.yml up --build
 #
-# Build args should include VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura (default in .env for staging-style checks).
+# BFF stack (merge in this order):
+#   docker compose -f docker-compose.yml -f docker-compose.bff.yml -f docker-compose.telemetry-smoke.yml up --build
+#
+# Operator checklist: web/docs/DEPLOY.md#root-compose-telemetry-proxy-operator-checklist
+# Wiring details: web/docs/OBSERVABILITY.md
+#
+# Build-time (.env): VITE_AURA_TELEMETRY_ENDPOINT=/ingest/aura (required for same-origin SPA POST).
+# Runtime: this file sets AURA_TELEMETRY_PROXY_TARGET on aura-web → aura-telemetry-stub (echo image).
 
 services:
   aura-telemetry-stub:
