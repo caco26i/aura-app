@@ -18,6 +18,7 @@
 | **Trusted** | Zero contacts → dashed card (*stored on this device until the live backend…*) + form | N/A | N/A |
 | **Settings** | N/A | N/A | N/A |
 | **App / routing** | `*` → redirect home | N/A | **`AuraErrorBoundary`** wraps routes in `App.tsx` (fallback UI + reload) |
+| **Modo Cita** (`/cita`) | Sin hora de encuentro: copy guía en región viva; foto deshabilitada con hint | N/A | Banner check-in `role="status"` + `aria-live="polite"` cuando toca intervalo; región temporizador `role="region"` + `aria-labelledby="cita-checkin-live-label"` + `aria-live="polite"`; notificaciones navegador opcionales (sin `role="alert"`) |
 | **Modo transporte** (`/transport`) | Sin viaje: copy calmado + CTA demo; con demo: tarjeta verificación wireframe | N/A | Botones desvío / «no soy yo» solo actualizan UI local (sin `role="alert"`); guía dinámica en `#transport-live-status` `role="status"` + `aria-labelledby` + `aria-live="polite"` |
 | **Check-in IA** (`/checkin`) | Historial vacío: `role="status"` en cuerpo de sección | N/A | Bloque de estado `#checkin-ia-status` `role="status"` + `aria-labelledby` + `aria-live="polite"` al cambiar disparador o registrar respuesta rápida (demo local) |
 | **AuraMap** | N/A | **Shipped:** overlay + `aria-busy` + status line while tiles load | Tiles fail silently to user |
