@@ -90,3 +90,15 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 - [x] Schedule published in-repo (this file) **before** first post.
 - [ ] ≥ **6** LinkedIn posts on schedule (or documented slip with reason).
 - [ ] Retro section filled within **3 business days** of last post.
+
+---
+
+## Path B closeout draft (pending CEO cancel of [AURA-89](/AURA/issues/AURA-89))
+
+*Do not treat as final until CEO **`cancel`s** [AURA-89](/AURA/issues/AURA-89). CMO promotes into the retro table above and closes [AURA-86](/AURA/issues/AURA-86) / [AURA-90](/AURA/issues/AURA-90).*
+
+| Question | Draft |
+| --- | --- |
+| What **worked** | In-repo schedule + copy bank shipped before publish; clear CEO/board delegation for human LinkedIn |
+| What to **stop** | LinkedIn cadence pilot without a named board publisher + calendar hold at kickoff |
+| **Next experiment hypothesis** | Either **(C) switch channel** (X/dev community, lower friction) or **(A) relaunch LinkedIn** with confirmed start date + assigned human publisher |
