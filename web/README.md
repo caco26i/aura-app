@@ -31,10 +31,10 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run lint` | ESLint |
-| `npm run test:e2e` | Playwright (default dev server; skips BFF-stub-only spec) |
+| `npm run test:e2e` | Playwright default suite (`playwright.config.ts` ignores `settings-beta-bff.spec.ts` unless `PLAYWRIGHT_BFF_STUB=1`). Includes `e2e/smoke.spec.ts`, `a11y-transport-checkin.spec.ts` (axe on `/transport` + `/checkin`), welcome, emergency, settings, and map intel specs. |
 | `npm run test:e2e:bff-stub` | Playwright with `VITE_AURA_BFF_URL=/aura-bff` and a dead BFF proxy port — asserts **Settings → Beta API session** shows calm copy when `GET /session` cannot reach a BFF (see `e2e/settings-beta-bff.spec.ts`). |
 
-On GitHub, the **Web lint & build** workflow runs `npm ci`, `npm run lint`, and `npm run build` in `web/` when `web/**` or that workflow file changes.
+On GitHub, **[`.github/workflows/web-ci.yml`](../.github/workflows/web-ci.yml)** runs on changes to `web/**`, root compose files, `.env.example`, and the workflow itself: `npm ci`, lint, unit tests, production build, BFF guardrail check, **full default Playwright e2e** (including a11y axe specs), and a Docker web image smoke build.
 
 ## Docker (static SPA)
 

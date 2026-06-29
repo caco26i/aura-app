@@ -1,5 +1,13 @@
 # Toolchain: Node 20 + npm ci (package-lock.json). Matches web/package.json engines and
 # docs/PUBLIC_BETA.md — this repo does not use pnpm at the package level.
+#
+# Path filters: web/** (all e2e under web/e2e/, including a11y-transport-checkin.spec.ts),
+# root compose + .env.example drift check, and this workflow file.
+# PR/push skips when only server/ or unrelated paths change.
+#
+# Playwright: `npm run test:e2e` runs the default suite (testIgnore: settings-beta-bff.spec.ts).
+# Includes smoke, welcome, emergency, settings, map intel, and axe a11y on /transport + /checkin.
+# BFF-stub spec runs via `npm run test:e2e:bff-stub` locally — not in this workflow job.
 name: Web lint & build
 
 on:
@@ -50,6 +58,7 @@ jobs:
             echo "::error::BFF-first guardrail missing: build should fail when VITE_AURA_BFF_URL and VITE_AURA_API_TOKEN are both set (see web/vite.config.ts, web/docs/DEPLOY.md)."
             exit 1
           fi
+      # Full default Playwright suite (see playwright.config.ts testIgnore for BFF-stub-only spec).
       - run: npm run test:e2e
         env:
           CI: true
