@@ -28,7 +28,7 @@
 
 ### 2.1 Loading & perceived performance
 
-1. **Map (Leaflet)** — **Shipped** in `AuraMap.tsx`: overlay, `aria-busy`, timeout fallback, *Loading map…* `role="status"`. Optional later: explicit “retry tiles” if tile errors should be user-visible.
+1. **Map (Leaflet)** — **Shipped** in `AuraMap.tsx`: overlay, `aria-busy`, 15s timeout fallback, *Loading map…* `role="status"`. **`tileerror`** emits telemetry only (`map.tile_error`); no user-visible retry at launch ([AURA-289](/AURA/issues/AURA-289) product call). **Post-launch nice-to-have:** optional *Retry map* control if tile failure rates warrant it.
 
 2. **JourneyNew `postCreateJourney`** — **Shipped:** form wrapper + primary button `aria-busy`, inputs disabled while `starting`.
 
@@ -40,7 +40,7 @@
 
 2. **MapPage (all layers off)** — Good. **Optional:** If `visible.length === 0`, set focus or scroll not required; keep as-is.
 
-3. **Home — deep link to `/journey/active` with no journey** — User lands on Journey empty state via nav; OK. **Optional:** On Home card, if `!activeJourney`, microcopy could say *“Plan a route and start tracking”* (already close).
+3. **Home — no active journey** — **Closed ([AURA-289](/AURA/issues/AURA-289)):** Primary CTA *Start safe journey* (`Home.tsx`) plus Journey feature tile are sufficient; separate *Plan a route and start tracking* line not required. Deep link to `/journey/active` without a journey still lands on JourneyActive empty state — OK.
 
 4. **Trusted empty** — **Shipped:** *“Contacts are stored on this device until the live backend is connected.”* plus add-contact prompt (`Trusted.tsx`).
 
@@ -108,4 +108,4 @@
 - `web/src/a11y/sosReturnFocus.ts` — Emergency “Go back” focus restore  
 - `web/src/components/AuraMap.tsx` — map loading behavior  
 
-— UX Designer · AURA-28 handoff · [AURA-238](/AURA/issues/AURA-238) verification (2026-04-08): shipped vs optional rows re-checked against `web/`; doc nits above only.
+— UX Designer · AURA-28 handoff · [AURA-238](/AURA/issues/AURA-238) verification (2026-04-08): shipped vs optional rows re-checked against `web/`; doc nits above only. · [AURA-289](/AURA/issues/AURA-289) (2026-06-29): Home journey CTA + map tile-error product call recorded; no eng delta.

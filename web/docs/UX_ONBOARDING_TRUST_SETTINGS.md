@@ -105,8 +105,8 @@
 
 ### 3.6 Trusted network
 
-- Empty state: shorten to *Contacts stay on this device until a live backend is connected.* (aligns with [AURA-28](/AURA/issues/AURA-28) optional polish.)  
-- Permission presets: add one line under legend: *Alerts can include SOS and journey notifications when connected.*
+- Empty state (**shipped, canonical**): *Contacts are stored on this device until the live backend is connected.* (`Trusted.tsx`) — [AURA-289](/AURA/issues/AURA-289) closed the earlier *stay* vs *are stored* spec drift; no copy change required.  
+- Permission presets (**shipped**): hint under legend — *Alerts can include SOS and journey notifications when connected.* (`Trusted.tsx`, `#trusted-new-permission-hint`).
 
 ---
 
@@ -206,7 +206,7 @@ Cross-checked [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) and `
 | Error boundary | **Shipped** — `AuraErrorBoundary` in `App.tsx` |
 | Misconfiguration copy | **Shipped** — participant line in `userMessageForMisconfiguration()` |
 
-**Deferred (optional polish, non-blocking):** Trusted empty lede vs §3.6 example wording (*stay* vs *are stored* — current copy is clear); user-visible “retry map tiles” if tile errors should surface; Home journey card microcopy noted in [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §2.2.
+**Resolved ([AURA-289](/AURA/issues/AURA-289), 2026-06-29):** Trusted empty lede — §3.6 aligned to shipped *stored* wording; permission hint confirmed shipped. Map tile errors — launch uses telemetry-only (`AuraMap.tsx` `tileerror`); user retry deferred post-launch (see [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §2.1). Home journey card — *Start safe journey* CTA sufficient (§2.2 item 3 closed). **No eng delta; gap register unchanged.**
 
 Detail inventory: [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) — do not duplicate full tables here.
 
