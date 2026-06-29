@@ -17,7 +17,7 @@ Cross-check of [`design/AURA_PDR.md`](../../design/AURA_PDR.md) §7 table: each 
 | Copy / errors / SOS | [`design/AURA_LAUNCH_UX.md`](../../design/AURA_LAUNCH_UX.md) | Present |
 | Onboarding & settings UX | [`UX_ONBOARDING_TRUST_SETTINGS.md`](./UX_ONBOARDING_TRUST_SETTINGS.md) | Present |
 | PDR §3–4 trace & gap register | This file | Present |
-| Design tokens | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md) + `web/src/theme.css` | Present |
+| Design tokens | [`design/AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md) + `web/src/theme.css` + `web/src/styles/aura-m3.css` | Present |
 | API contract (beta) | [`server/README.md`](../../server/README.md), [`BETA_BACKEND.md`](./BETA_BACKEND.md) | Present |
 
 ---
@@ -159,4 +159,5 @@ _None at present._
 | 2026-06-29 | [AURA-289](/AURA/issues/AURA-289): Onboarding/trust optional polish — static cross-check of `Trusted.tsx`, `Home.tsx`, `AuraMap.tsx` vs [`UX_ONBOARDING_TRUST_SETTINGS.md`](./UX_ONBOARDING_TRUST_SETTINGS.md) §3.6/§5 and [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §2.1–§2.2; doc-only reconciliation (Trusted lede, permission hint shipped; Home CTA sufficient; map tile errors telemetry-only at launch). No CTO child. |
 | 2026-06-29 | [AURA-294](/AURA/issues/AURA-294): Modo Cita wireframe spec pass — **PASS** (static cross-check of [`ModoCita.tsx`](../src/pages/ModoCita.tsx) vs [`AURA_SCREEN_SPECS.md`](../../design/AURA_SCREEN_SPECS.md) wireframe subsection, [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §1, [`RouteDocumentTitle.tsx`](../src/components/RouteDocumentTitle.tsx) tab title **Modo Cita · Aura** + nudge title pulse); no drift requiring eng. Gap register unchanged. |
 | 2026-06-29 | [AURA-305](/AURA/issues/AURA-305): Design token drift audit — **PASS** (doc-only): [`AURA_DESIGN_SYSTEM.md`](../../design/AURA_DESIGN_SYSTEM.md) expanded with `aura-m3.css` M3 shell inventory + intentional exception table (`Emergency.tsx` dark shell, journey `#fff` surfaces, Settings destructive, JourneyNew gradient); `theme.css` base set unchanged. No CTO child. |
+| 2026-06-29 | [AURA-305](/AURA/issues/AURA-305): PDR §7 index — design tokens row now references `web/src/styles/aura-m3.css` alongside `theme.css` (closes token doc cross-link gap from audit). |
 | 2026-06-29 | [AURA-294](/AURA/issues/AURA-294): Lead UX sign-off prep — wireframe subsection expanded (five shipped surfaces: encuentro draft, `cita-checkin-nudge`, live timer/`checkInShellCopy`, browser notify block, tab-title pulse vs `RouteDocumentTitle` base); [`UX_EMPTY_LOADING_SAFETY.md`](./UX_EMPTY_LOADING_SAFETY.md) §1 + §4.1 trace row updated for [AURA-295](/AURA/issues/AURA-295) acceptance. |
