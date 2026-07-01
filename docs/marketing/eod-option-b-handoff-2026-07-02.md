@@ -27,6 +27,10 @@ Board may still override with a personal name/title on [AURA-338](/AURA/issues/A
 2. **Post approval** — comment on [AURA-338](/AURA/issues/AURA-338): `approve cold: W2-1`
 3. **Send email** — **CEO or board** sends W2-1 below (human send required; **CMO cannot send externally** — CMO logs + tracks after confirmation via [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md))
 
+### CEO fallback if board unavailable @ EOD
+
+If board cannot send by EOD Wed, **CEO sends directly** using the same package below, then pastes confirmation on [AURA-338](/AURA/issues/AURA-338). Use confirmation line: `… Option B default (CEO send).` Pending CEO confirm on [AURA-397](/AURA/issues/AURA-397).
+
 ---
 
 ## W2-1 — copy-paste send package
