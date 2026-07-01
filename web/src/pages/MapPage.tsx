@@ -50,7 +50,6 @@ export function MapPage() {
         type="button"
         role="switch"
         aria-checked={mapLayers[key]}
-        aria-pressed={mapLayers[key]}
         aria-label={`${label}: ${mapLayers[key] ? 'on' : 'off'}`}
         aria-describedby={`${idPrefix}-desc`}
         onClick={() => setMapLayer(key, !mapLayers[key])}
@@ -103,7 +102,7 @@ export function MapPage() {
             borderRadius: 14,
             border: 'none',
             background: 'var(--aura-status-ok)',
-            color: '#fff',
+            color: 'var(--aura-text)',
             fontWeight: 600,
             cursor: 'pointer',
             width: '100%',

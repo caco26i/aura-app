@@ -34,7 +34,7 @@ function formatViolations(violations: Result[]): string {
     .join('\n');
 }
 
-test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita (AURA-278, AURA-312, AURA-322)', () => {
+test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, trusted (AURA-278, AURA-312, AURA-322, AURA-337)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
       if (window.localStorage.getItem('aura:v1')) return;
@@ -100,6 +100,33 @@ test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita (AURA-27
 
     await page.goto('/cita');
     await expect(page.getByRole('heading', { name: 'Modo Cita', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/map: axe clean + Map intel h1 + layer switch', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/map');
+    await expect(page.getByRole('heading', { name: 'Map intel', level: 1 })).toBeVisible();
+    await expect(page.getByRole('switch').first()).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/trusted: axe clean + Trusted network h1 (wireframe §7)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/trusted');
+    await expect(page.getByRole('heading', { name: 'Trusted network', level: 1 })).toBeVisible();
 
     const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
     expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
