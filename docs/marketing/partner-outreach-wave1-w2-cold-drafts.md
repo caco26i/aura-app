@@ -1,6 +1,7 @@
 # Partner outreach — wave 1 W2 cold-send drafts
 
 **Status:** Copy-paste ready — send only after board comments `approve cold: W2-N` on [AURA-338](/AURA/issues/AURA-338).  
+**Handoffs (preferred):** W2-1 [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) · W2-2 [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) · W2-3 [`partner-outreach-wave1-w2-3-handoff.md`](./partner-outreach-wave1-w2-3-handoff.md)  
 **Tracking:** [AURA-327](/AURA/issues/AURA-327) · **Log:** [`partner-outreach-wave1-log.md`](./partner-outreach-wave1-log.md)
 
 Use when warm intros for S1–S3 are unavailable. Each draft maps to a researched target in the wave-1 log.

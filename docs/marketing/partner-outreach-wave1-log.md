@@ -127,7 +127,8 @@ Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
 
 1. Board warm intro for **S2** (EAP broker) — highest ICP fit after C4SW
 2. Or board `approve cold: W2-2` — handoff: [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) (MantraCare → `clients@mantra.care`; **paste-send-ready**, CEO-approved sender)
-3. Or board names **S3** editor contact
+3. Or board `approve cold: W2-3` — handoff: [`partner-outreach-wave1-w2-3-handoff.md`](./partner-outreach-wave1-w2-3-handoff.md) (PFunc Pulse; board supplies editor email + name)
+4. Or board names **S3** editor contact (warm path preferred for S3)
 
 ---
 
