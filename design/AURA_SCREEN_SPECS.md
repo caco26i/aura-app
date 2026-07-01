@@ -21,6 +21,18 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
 | `/transport` | Modo transporte (inside shell; same note) |
 | `/checkin` | Check-in IA (inside shell; same note) |
 
+### Home hub (wireframe)
+
+- **`/` (`Home.tsx`)** — Primary hub inside shell; tab title **`Home · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Header** — Time-based greeting (*Good morning* / *Good afternoon* / *Good evening*); `displayName` from settings (fallback *You*); notifications control `aria-label="Notifications (coming soon)"` (non-functional placeholder); profile avatar (`aria-hidden` when showing initial letter).
+  2. **Global posture** — Decorative *Protected · Home area* line with status dot; hub headline `role="status"`, `aria-live="polite"`, `aria-atomic="true"`: *Safe.* vs *Alert active.* when `globalStatus === 'alert'`.
+  3. **Monitor line** — `monitorLine` clarifies device vs connected posture: zero contacts → *Trusted contacts stay on this device until Aura is connected…*; otherwise contact count + *tracking and alerts when connected* (aligns with §7 matrix below).
+  4. **Primary journey CTA** — Full-width button *Start safe journey* or *Continue safe journey* → `/journey/new` or `/journey/active` depending on `activeJourney`.
+  5. **Security feature grid** — Tiles: Journey (`/journey/new`), Tracking (`/journey/active`), **SOS** (`/emergency`, `data-aura-sos-entry="home-tile"`, `registerSosOpenerReturnFocusFromEntry` for return focus).
+  6. **New feature grid** — Modo Cita, Transporte, Check-in IA tiles with *NUEVO* badge → `/cita`, `/transport`, `/checkin`.
+  7. **Footer text links** — Safety map, Network, Settings → `/map`, `/trusted`, `/settings`.
+  8. **Accessibility** — Visually hidden `h1` *Home* for SR heading navigation (PDR §5); hub alert uses polite live region (not `role="alert"`).
+
 ### Modo Cita, Transporte & Check-in IA (wireframe)
 
 - **`/cita` (`ModoCita.tsx`)** — Local-only wireframe (primary bottom nav); borrador en `aura:v1`; sin SMS/API hasta contrato futuro. **Superficies expedidas (mirror transport/checkin):**

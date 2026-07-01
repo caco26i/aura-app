@@ -10,7 +10,7 @@
 
 | Surface | Empty / edge | Loading / busy | Errors / alerts |
 |--------|----------------|----------------|-----------------|
-| **Home** | N/A (cards always shown) | N/A | Global hub headline *Safe.* / *Alert active.* via `role="status"` + `aria-live="polite"` (not API errors) |
+| **Home** | N/A (cards always shown) | N/A | Global hub headline *Safe.* / *Alert active.* via `role="status"` + `aria-live="polite"` + `aria-atomic="true"`; `monitorLine` for device vs connected contacts posture; SOS tile `data-aura-sos-entry="home-tile"` |
 | **JourneyNew** | N/A | Button `Starting…` | `role="alert"` via `startError` |
 | **JourneyActive** | No journey: title + device clarifier (`role="status"`) + next-step line + link | `Sending…` / `Sharing…` on actions | `role="alert"` shared for API failures |
 | **Emergency** | N/A | Both buttons `Sending…` | `role="alert"` + optional `role="status"` notice |
