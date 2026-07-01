@@ -68,6 +68,14 @@ Partnerships, Aura
 W2-1 sent [DATE] to info@c4sw.org — cold, Option B default (board/CEO send).
 ```
 
+**EOD Wed example (copy-paste after send):**
+
+```text
+W2-1 sent 2026-07-02 to info@c4sw.org — cold, Option B default (CEO send).
+```
+
+CMO post-send runbook triggers on this format — replace date if send time differs.
+
 **CMO then:**
 
 - Logs T1 in [`partner-outreach-wave1-log.md`](./partner-outreach-wave1-log.md)
