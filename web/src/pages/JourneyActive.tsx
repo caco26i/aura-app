@@ -246,7 +246,7 @@ export function JourneyActive() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.45)',
+            background: 'var(--aura-overlay-scrim)',
             display: 'grid',
             placeItems: 'end center',
             padding: 16,
@@ -298,7 +298,7 @@ export function JourneyActive() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.45)',
+            background: 'var(--aura-overlay-scrim)',
             display: 'grid',
             placeItems: 'end center',
             padding: 16,
@@ -358,7 +358,7 @@ export function JourneyActive() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.45)',
+            background: 'var(--aura-overlay-scrim)',
             display: 'grid',
             placeItems: 'center',
             padding: 20,

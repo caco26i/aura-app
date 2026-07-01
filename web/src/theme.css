@@ -9,6 +9,7 @@
   --aura-surface-muted: rgba(255, 255, 255, 0.5);
   --aura-surface-faint: rgba(255, 255, 255, 0.4);
   --aura-surface-raised: rgba(255, 255, 255, 0.88);
+  --aura-overlay-scrim: rgba(0, 0, 0, 0.45);
   --aura-on-primary: #fff;
   --aura-border: rgba(28, 21, 48, 0.08);
   --aura-shadow: 0 12px 40px rgba(28, 21, 48, 0.12);

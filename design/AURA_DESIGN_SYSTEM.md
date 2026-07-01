@@ -18,6 +18,7 @@ Canonical tokens live in `web/src/theme.css` (CSS variables). **M3 shell / Home 
 | `--aura-surface-muted` | Lighter placeholder surfaces (wireframe thumbs) |
 | `--aura-surface-faint` | Subtle inset panels (notify blocks) |
 | `--aura-surface-raised` | Elevated auth / sign-in card surface |
+| `--aura-overlay-scrim` | Modal / action-sheet backdrop scrim |
 | `--aura-on-primary` | Text/icons on `--Pbg` / primary gradient |
 | `--aura-border` | Hairline borders |
 | `--aura-shadow` | Elevated cards |
@@ -66,9 +67,7 @@ Used by **Home**, **Modo Cita / Transporte / Check-in IA**, and shared M3 compon
 | **`Settings.tsx` destructive control** | `#b42318` fill | Matches `--aura-status-alert` family; inline for button specificity |
 | **`JourneyNew.tsx` primary CTA** | Gradient `#c9b8ff` → `#f4b8c5` | Uses blush/lavender family aligned to `--aura-blush` / `--Pbg` intent |
 
-**Journey action-sheet overlays:** [`JourneyActive.tsx`](../web/src/pages/JourneyActive.tsx) uses inline `rgba(0,0,0,0.45)` scrim (no shared overlay token yet). Sheet cards use `--aura-surface-raised`; secondary/cancel buttons use `--aura-card`; destructive confirm label uses `--aura-on-primary` ([AURA-364](/AURA/issues/AURA-364)).
-
-No eng change required for launch; document-only unless consolidating to CSS variables later.
+**Journey action-sheet overlays:** [`JourneyActive.tsx`](../web/src/pages/JourneyActive.tsx) share primer, silent alert sheet, and end-journey confirm use `--aura-overlay-scrim`; sheet cards use `--aura-surface-raised`; secondary/cancel buttons use `--aura-card`; destructive confirm label uses `--aura-on-primary` ([AURA-364](/AURA/issues/AURA-364), [AURA-384](/AURA/issues/AURA-384)).
 
 ---
 
