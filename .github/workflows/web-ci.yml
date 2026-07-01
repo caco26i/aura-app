@@ -7,7 +7,8 @@
 #
 # Playwright: `npm run test:e2e` runs the default suite (testIgnore: settings-beta-bff.spec.ts).
 # Includes smoke, welcome, emergency, settings, map intel, and axe a11y on /transport + /checkin.
-# BFF-stub spec runs via `npm run test:e2e:bff-stub` locally — not in this workflow job.
+# BFF-stub spec (`settings-beta-bff.spec.ts`: dead-proxy failure + mocked session success) runs via
+# `npm run test:e2e:bff-stub` locally — not in this workflow job. New files under web/e2e/ still match web/**.
 name: Web lint & build
 
 on:

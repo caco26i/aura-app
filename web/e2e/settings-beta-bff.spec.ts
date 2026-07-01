@@ -1,3 +1,11 @@
+/**
+ * BFF session e2e (`PLAYWRIGHT_BFF_STUB=1` only — excluded from default `npm run test:e2e` / web-ci).
+ *
+ * Partial coverage of [DEPLOY.md](../docs/DEPLOY.md) *Staging smoke: BFF JWT path*:
+ * - Checklist item 5 (mocked): credentialed `GET /session` → **200** with access token; Settings shows calm copy, no error status.
+ * - Checklist item 4 (gap): Google **Continue with Google** OAuth is **not** exercised in CI — requires a real
+ *   `VITE_GOOGLE_CLIENT_ID` and Google; use staging manual smoke or local dev with BFF + OAuth client.
+ */
 import { expect, test } from '@playwright/test';
 
 /** Same bootstrap as smoke so `RequireOnboarding` allows `/settings`. */
@@ -56,6 +64,55 @@ test.describe('settings beta BFF (stub path, unreachable proxy)', () => {
     await expect(
       betaApiSection.getByText(/for the button flow, or complete Google OAuth via your BFF redirect URL/i),
     ).toBeVisible();
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+});
+
+test.describe('settings beta BFF (stub path, mocked session success)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((payload) => {
+      if (window.localStorage.getItem('aura:v1')) return;
+      window.localStorage.setItem('aura:v1', payload);
+    }, AURA_STORAGE_BOOTSTRAP);
+  });
+
+  test('Beta API session calm copy when GET /session returns a token (no OAuth)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    const expiresAt = new Date(Date.now() + 3_600_000).toISOString();
+    const expSec = Math.floor(Date.now() / 1000) + 3600;
+    const payload = Buffer.from(JSON.stringify({ sub: 'e2e-bff-session', exp: expSec })).toString(
+      'base64url',
+    );
+    const accessToken = `e2e.${payload}.stub`;
+
+    await page.route('**/aura-bff/session', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, accessToken, expiresAt }),
+      });
+    });
+
+    await page.goto('/settings');
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+
+    const betaApiSection = page.locator('section[aria-labelledby="bff-api-heading"]');
+    await expect(betaApiSection.getByRole('heading', { name: 'Beta API session', level: 2 })).toBeVisible();
+    await expect(
+      betaApiSection.getByText(/This build talks to the live Aura API through a short-lived token/i),
+    ).toBeVisible();
+
+    await expect(betaApiSection.getByRole('status')).toHaveCount(0);
+    await expect(
+      betaApiSection.getByText(/Could not reach the sign-in service/i),
+    ).toHaveCount(0);
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
