@@ -33,6 +33,25 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
   7. **Footer text links** — Safety map, Network, Settings → `/map`, `/trusted`, `/settings`.
   8. **Accessibility** — Visually hidden `h1` *Home* for SR heading navigation (PDR §5); hub alert uses polite live region (not `role="alert"`).
 
+### Journey flow (wireframe)
+
+- **`/journey/new` (`JourneyNew.tsx`)** — Configure journey before live tracking; tab title **`New journey · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Heading + lede** — `h1` *New journey* (`#journey-new-heading`); lede *Details persist once you start — refresh mid-journey is safe.* (`#journey-new-lede`).
+  2. **Form fields** — Journey name (`#j-label`, default *Walk home*), destination (`#j-dest`, default *Home*), ETA minutes (`#j-eta`, defaults from `settings.timerDefaultMinutes`).
+  3. **Submit** — Primary *Start live tracking* → `postCreateJourney` then `startJourney` + navigate `/journey/active`; button `aria-busy` + *Starting…* while pending; form wrapper `aria-busy={starting}`; inputs disabled during submit.
+  4. **Errors** — `startError` in `role="alert"` (API failures via `auraApiMessages.ts`).
+  5. **Visual** — Primary button uses intentional gradient (documented in [`AURA_DESIGN_SYSTEM.md`](./AURA_DESIGN_SYSTEM.md) exception table).
+
+- **`/journey/active` (`JourneyActive.tsx`)** — Live tracking + backend actions; tab title **`Live tracking · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Empty state** (no `activeJourney`) — `h1` *No active journey*; `role="status"` block with device clarifier + next-step line; link to `/trusted` (zero contacts) or `/journey/new`.
+  2. **Active header** — `h1` *Live tracking*; `StatusPill` + ETA line; journey `label` + *To {destination}*.
+  3. **Map + silent SOS path** — Double-tap hint (primary line + demo note per UX §3.4); `AuraMap` `onDoubleTapHint` opens **silent alert sheet** (`role="dialog"`, *Open emergency options* → `/emergency` with `{ mode: 'silent' }`, return focus via `registerSosOpenerReturnFocus` → `#main-content`).
+  4. **Track state toggles** — *On track* / *Delay* / *Deviation* with `aria-pressed`.
+  5. **Backend actions** — *I'm safe* (`postImSafe`, `aria-busy`, hint *Sends a check-in to Aura when connected.*); *Share live location* (`postShareLocation`, first use shows **share primer sheet** until `shareLocationPrimerAcknowledged` in `aura:v1`, then direct share; hint *Notifies trusted contacts when Aura is connected…*).
+  6. **End journey** — Confirm dialog (`role="dialog"`, *End journey on this device?*) before `endJourney()`.
+  7. **Errors** — Shared `role="alert"` for API failures on I'm safe / share.
+  8. **Overlays** — Escape dismisses primer / silent / end-journey sheets; focus moves to first button on open.
+
 ### Modo Cita, Transporte & Check-in IA (wireframe)
 
 - **`/cita` (`ModoCita.tsx`)** — Local-only wireframe (primary bottom nav); borrador en `aura:v1`; sin SMS/API hasta contrato futuro. **Superficies expedidas (mirror transport/checkin):**
