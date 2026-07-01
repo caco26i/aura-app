@@ -36,6 +36,32 @@ function formatViolations(violations: Result[]): string {
 
 const ACTIVE_JOURNEY_ID = 'c0ffee00-1111-4222-8333-444455556666';
 
+/** Bootstrap for `/welcome` — onboarding not yet completed (outside AppShell). */
+const AURA_WELCOME_BOOTSTRAP = JSON.stringify({
+  contacts: [],
+  activeJourney: null,
+  mapLayers: { risk: true, safePoints: true, activity: false },
+  settings: {
+    displayName: '',
+    voiceKeyword: 'Aura help',
+    silentTriggerMs: 800,
+    timerDefaultMinutes: 15,
+    locationPrecision: 'approximate',
+  },
+  globalStatus: 'calm',
+  onboardingCompleted: false,
+  shareLocationPrimerAcknowledged: false,
+  encuentroDraft: {
+    contactName: '',
+    place: '',
+    safetyKeyword: '',
+    meetingLocalValue: '',
+    checkInIntervalMinutes: 15,
+    encuentroLastLocalCheckInAckMs: null,
+    encuentroBrowserNotifyWanted: false,
+  },
+});
+
 test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, trusted, journey, emergency, settings (AURA-278, AURA-312, AURA-322, AURA-337, AURA-349)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
@@ -218,6 +244,42 @@ test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, tr
 
     await page.goto('/settings');
     await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+});
+
+test.describe('a11y axe — /auth + /welcome (AURA-365)', () => {
+  test('/auth: axe clean + Aura account h1 + form labels', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/auth');
+    await expect(page.locator('#main-content')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aura account', level: 1 })).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(page.getByLabel('Password')).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/welcome: axe clean + Welcome to Aura h1 (onboarding step 0)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.addInitScript((payload) => {
+      window.localStorage.setItem('aura:v1', payload);
+    }, AURA_WELCOME_BOOTSTRAP);
+
+    await page.goto('/welcome');
+    await expect(page).toHaveURL(/\/welcome$/);
+    await expect(page.getByRole('heading', { name: 'Welcome to Aura', level: 1 })).toBeVisible();
 
     const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
     expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
