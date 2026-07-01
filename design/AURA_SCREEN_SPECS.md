@@ -52,6 +52,24 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
   7. **Errors** — Shared `role="alert"` for API failures on I'm safe / share.
   8. **Overlays** — Escape dismisses primer / silent / end-journey sheets; focus moves to first button on open.
 
+### Map intel (wireframe)
+
+- **`/map` (`MapPage.tsx`)** — Intel layers + curated POIs inside shell; tab title **`Map intel · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Heading + lede** — `h1` *Map intel* (`#map-intel-heading`); lede *Layers and POIs persist across reloads (local device).* (`#map-intel-lede`).
+  2. **Demo route CTA** — *Find safest route (demo)* with descriptive `aria-label`; tap shows `role="status"` + `aria-live="polite"` line *Demo only — live routing is not connected in this build.* (`#map-demo-route-status`, auto-clears after 5s).
+  3. **Layer toggles** — Three `role="switch"` rows: Risk signals, Safe points, Activity; each with `aria-describedby` helper copy; state persists via `mapLayers` in `aura:v1`.
+  4. **Map + POI list** — `AuraMap` renders filtered `MAP_INTEL_SEED` markers; list mirrors visible features with title, description, optional `curatedNote`.
+  5. **All layers off** — `role="status"` hint *All layers are off — enable at least one to see curated POIs.*
+  6. **Loading** — Delegated to `AuraMap`: overlay, `aria-busy`, *Loading map…* `role="status"` until tiles `load` (15s timeout fallback); `tileerror` → telemetry only (no user retry at launch).
+
+### Trusted network (wireframe)
+
+- **`/trusted` (`Trusted.tsx`)** — Trusted contact CRUD inside shell; tab title **`Trusted contacts · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Empty state** (zero contacts) — `h1` *Trusted network*; dashed `role="status"` card: *Contacts are stored on this device until the live backend is connected. Add someone you trust to get started.* (aligns with §7 matrix below).
+  2. **Add-contact form** — Name (`#trusted-new-name`), phone optional (`#trusted-new-phone`), group select (`#trusted-new-group`), permission preset fieldset (`legend` + radio group) with hint `#trusted-new-permission-hint`: *Alerts can include SOS and journey notifications when connected.*
+  3. **Saved contacts** — `h2` *Saved contacts*; per-contact group + permission `<select>` edits; *Remove* with `aria-label` including contact name.
+  4. **Permission legend** — Inline help under each preset (*Full — location + alerts + check-ins*, etc.) via `permissionHelp` map; matches §7 *permission legend for alerts when connected*.
+
 ### Modo Cita, Transporte & Check-in IA (wireframe)
 
 - **`/cita` (`ModoCita.tsx`)** — Local-only wireframe (primary bottom nav); borrador en `aura:v1`; sin SMS/API hasta contrato futuro. **Superficies expedidas (mirror transport/checkin):**
@@ -67,7 +85,7 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
 ### Deep links & unknown paths
 
 - **Canonical route list** — Only the paths in the table above are first-class Aura routes; the source of truth for the SPA is `web/src/App.tsx` (plus `RouteDocumentTitle` for tab titles). When adding a route, update this table and the trace row for §4.1 in [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md).
-- **Tab titles** — `RouteDocumentTitle` maps each shell route, `/welcome`, `/emergency`, and **`/auth`** (`Sign in · Aura`) to a dedicated `document.title` (including **`/cita`** → **Modo Cita · Aura**, **`/transport`** → **Modo transporte · Aura**, and **`/checkin`** → **Check-in IA · Aura**). **`/cita`** may additionally pulse **`• Check-in ·`** in `document.title` during an active local check-in nudge (`ModoCita.tsx`). Announcer copy for `/auth` is unchanged (only `/settings` hash paths are announced today).
+- **Tab titles** — `RouteDocumentTitle` maps each shell route, `/welcome`, `/emergency`, and **`/auth`** (`Sign in · Aura`) to a dedicated `document.title` (including **`/map`** → **Map intel · Aura**, **`/trusted`** → **Trusted contacts · Aura**, **`/cita`** → **Modo Cita · Aura**, **`/transport`** → **Modo transporte · Aura**, and **`/checkin`** → **Check-in IA · Aura**). **`/cita`** may additionally pulse **`• Check-in ·`** in `document.title` during an active local check-in nudge (`ModoCita.tsx`). Announcer copy for `/auth` is unchanged (only `/settings` hash paths are announced today).
 - **Unknown paths (`*`)** — Any pathname that does not match a declared `<Route>` is handled with `<Navigate to="/" replace />` (home). This is an intentional MVP choice: users land on the hub instead of a standalone 404 screen. It is **not** silent failure — the URL updates to `/` so bookmarks to typos recover predictably.
 - **Deep links vs onboarding** — `/welcome`, `/auth`, and `/emergency` are outside `RequireOnboarding`. All other routes in the table require `onboardingCompleted` in `aura:v1`; if false, the user is redirected to `/welcome` with `replace`, then returns to the shell after completion. Deep links to e.g. `/map` therefore work after onboarding, and cold-start deep links funnel through welcome first.
 - **Global render errors** — Uncaught React errors in the tree are handled by `AuraErrorBoundary` (see [`web/docs/PDR_SCOPE_TRACE.md`](../web/docs/PDR_SCOPE_TRACE.md) §“Resolved vs earlier gap register”); this is separate from unknown URL handling.
