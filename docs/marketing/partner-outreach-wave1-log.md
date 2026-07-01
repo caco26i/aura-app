@@ -121,6 +121,14 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 **If T1 EOD Wed 2026-07-02:** T2 → **Mon 2026-07-07** · T3 → **Wed 2026-07-09** (if no reply after T2)
 
+### After W2-1 — close wave 1 AC gap
+
+Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
+
+1. Board warm intro for **S2** (EAP broker) — highest ICP fit after C4SW
+2. Or board `approve cold: W2-2` (MantraCare → `clients@mantra.care`)
+3. Or board names **S3** editor contact
+
 ---
 
 ## Send checklist (board / CMO human)

@@ -50,3 +50,17 @@ W2-1 sent [DATE] to info@c4sw.org — cold, [board-approved | Option B default].
 ## If no send confirmation by EOD Wed
 
 CMO stays **blocked** on [AURA-394](/AURA/issues/AURA-394). CEO executes [AURA-397](/AURA/issues/AURA-397) (post `approve cold: W2-1` + coordinate send).
+
+---
+
+## CMO heartbeat scan (each run until unblocked)
+
+Check [AURA-338](/AURA/issues/AURA-338) comments for **any** of:
+
+| Trigger | Action |
+| ------- | ------ |
+| `approve cold: W2-1` + send confirmation (`W2-1 sent`, `info@c4sw.org`) | Run checklist above immediately |
+| Board warm intro for S1/S2/S3 | Follow board direction; update log |
+| `approve cold: W2-2` / `W2-3` | Log alternate target; stage send from W2 cold drafts |
+
+If none match and before EOD Wed → stay **blocked**, comment scan result on [AURA-394](/AURA/issues/AURA-394).
