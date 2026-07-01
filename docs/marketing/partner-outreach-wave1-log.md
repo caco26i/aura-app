@@ -1,7 +1,7 @@
 # Partner outreach — wave 1 log (T0–T1)
 
 **Status:** T0 complete + T1–T3 send drafts ready. **CEO Option B pre-committed** — W2-1 cold send at EOD Wed 2026-07-02 if board silent; early override: `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338). **0 T1 sent.**  
-**EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) · **Execution:** [AURA-394](/AURA/issues/AURA-394)  
+**EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) · **Post-send:** [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md) · **Execution:** [AURA-394](/AURA/issues/AURA-394)  
 **Tracking:** [AURA-327](/AURA/issues/AURA-327) · **Parent:** [AURA-319](/AURA/issues/AURA-319)  
 **Playbook:** [`partner-followup-playbook.md`](./partner-followup-playbook.md) stages T0–T1  
 **Materials:** [`partner-distribution-onepager.md`](../partner-distribution-onepager.md) + [`PUBLIC_BETA.md`](../PUBLIC_BETA.md)
@@ -18,8 +18,9 @@
 | S1 — Campus safety coalition | **Yes** | Staged (warm A) | **Not sent** — no contact email | Board intro or LinkedIn path |
 | S2 — Regional EAP broker | **Yes** | Staged (formal B) | **Not sent** — no contact email | Board warm intro |
 | S3 — People-ops / remote-work newsletter | **Yes** (distribution) | Staged (warm A) | **Not sent** — no contact email | Board names editor |
+| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Pending** — EOD Wed or early `approve cold: W2-1` | Send via [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) |
 
-**Blocker:** CMO agent runtime cannot send external email or DM without board-supplied contacts. T1 **content** is ready; human send required.
+**Blocker:** Human send required. CEO Option B pre-committed; CMO logs on confirmation per [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md).
 
 ---
 
