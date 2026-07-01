@@ -12,6 +12,22 @@ Aura Beta keeps **client-side persistence** (`localStorage` via `AuraContext`) w
 
 **Staging / production (BFF-first):** Follow the operator matrix in [DEPLOY.md — BFF-first env matrix](./DEPLOY.md#bff-first-env-matrix-staging--production): reverse-proxy the BFF under the same browser-visible base you set as `VITE_AURA_BFF_URL`, keep **`AURA_API_BFF_JWT_SECRET`** in lockstep on API + BFF, and set **`AURA_BFF_CORS_ORIGIN`** to your SPA origin(s). Production `vite build` rejects non-empty **`VITE_AURA_API_TOKEN`** when **`VITE_AURA_BFF_URL`** is set.
 
+## Local-only / wireframe routes (no `/v1/*` beta API)
+
+These shipped surfaces use **`AuraContext`** / in-page state only — they do **not** import `auraBackend.ts` or call `/v1/*`:
+
+| Route | Page |
+|-------|------|
+| `/` | [`Home.tsx`](../src/pages/Home.tsx) |
+| `/map` | [`MapPage.tsx`](../src/pages/MapPage.tsx) — map intel is seed data; basemap is OSM raster tiles via [`AuraMap.tsx`](../src/components/AuraMap.tsx) (third-party tiles, not the beta API) |
+| `/trusted` | [`Trusted.tsx`](../src/pages/Trusted.tsx) |
+| `/cita` | [`ModoCita.tsx`](../src/pages/ModoCita.tsx) |
+| `/transport` | [`ModoTransporte.tsx`](../src/pages/ModoTransporte.tsx) |
+| `/checkin` | [`CheckinInteligente.tsx`](../src/pages/CheckinInteligente.tsx) |
+| `/welcome` | [`Welcome.tsx`](../src/pages/Welcome.tsx) |
+
+**Routes with documented beta API:** `/journey/new` and `/journey/active` (`postCreateJourney`, `postShareLocation`, `postImSafe` in [`auraBackend.ts`](../src/api/auraBackend.ts)); `/emergency` (`postEmergencyAlert`); `/auth` and `/settings` (BFF session via [`auraBackendAuth.ts`](../src/api/auraBackendAuth.ts)). Shapes and error codes: [API_CONTRACT.md](./API_CONTRACT.md). Static sweep: [AURA-377](/AURA/issues/AURA-377).
+
 ## Swap path
 
 1. Implement real HTTP or SDK calls inside `auraBackend.ts` (or split per domain).
