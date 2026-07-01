@@ -42,7 +42,7 @@ W2-1 sent [DATE] to info@c4sw.org — cold, [board-approved | Option B default].
 **T0 fit:** Yes (proactive seed)  
 **T1 sent:** [DATE] via cold → info@c4sw.org (Option B / board-approved)  
 **Materials:** one-pager + PUBLIC_BETA links per handoff  
-**Next:** T2 nudge [DATE+3bd] if silent — draft in partner-outreach-wave1-t2-drafts.md
+**Next:** T2 nudge **Tue 2026-07-07** if silent (T1 EOD 2026-07-02) — draft: W2-1 section in [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md)
 ```
 
 ---
