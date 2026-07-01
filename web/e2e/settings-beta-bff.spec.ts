@@ -7,6 +7,9 @@
  *   session token and lands on `/journey/active` without auth failure copy.
  * - Checklist item 5 (mocked): on `/journey/active`, **I'm safe** issues authenticated `POST /v1/journeys/:id/im-safe`
  *   with the session token and completes without auth/ownership failure copy.
+ * - Checklist item 5 (mocked): on `/journey/active`, **Share live location** (primer → **Share location**) issues
+ *   authenticated `POST /v1/journeys/:id/location-shares` with the session token and completes without auth/ownership
+ *   failure copy.
  * - Checklist item 4 (gap): Google **Continue with Google** OAuth is **not** exercised in CI — requires a real
  *   `VITE_GOOGLE_CLIENT_ID` and Google; use staging manual smoke or local dev with BFF + OAuth client.
  */
@@ -130,7 +133,7 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     }, AURA_STORAGE_BOOTSTRAP);
   });
 
-  test('Start live tracking + I\'m safe issue authenticated POST /v1/journeys and POST im-safe', async ({
+  test('Start live tracking + share location + I\'m safe issue authenticated POST /v1/journeys, location-shares, im-safe', async ({
     page,
   }) => {
     const pageErrors: string[] = [];
@@ -145,6 +148,7 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     const journeyId = 'a1b2c3d4-e5f6-4789-a012-3456789abcde';
 
     let postJourneysAuth: string | null = null;
+    let postLocationShareAuth: string | null = null;
     let postImSafeAuth: string | null = null;
 
     await page.route('**/aura-bff/session', async (route) => {
@@ -173,6 +177,22 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
       });
     });
 
+    await page.route(`**/v1/journeys/${journeyId}/location-shares`, async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.continue();
+        return;
+      }
+      postLocationShareAuth = route.request().headers()['authorization'] ?? null;
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true,
+          data: { shareId: 'b2c3d4e5-f6a7-4890-b123-456789abcdef' },
+        }),
+      });
+    });
+
     await page.route(`**/v1/journeys/${journeyId}/im-safe`, async (route) => {
       if (route.request().method() !== 'POST') {
         await route.continue();
@@ -197,6 +217,17 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     await expect(page.getByRole('alert')).toHaveCount(0);
     await expect(page.getByText(/Sign in with Google/i)).toHaveCount(0);
     await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Share live location' }).click();
+    const sharePrimer = page.getByRole('dialog', { name: /Share live location/i });
+    await expect(sharePrimer.getByRole('heading', { name: 'Share live location', level: 2 })).toBeVisible();
+    await sharePrimer.getByRole('button', { name: 'Share location' }).click();
+    await expect(page.getByRole('button', { name: 'Share live location' })).toBeVisible({ timeout: 5_000 });
+
+    expect(postLocationShareAuth).toBe(`Bearer ${accessToken}`);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
+    await expect(page.getByText(/doesn't match your current session/i)).toHaveCount(0);
 
     await page.getByRole('button', { name: "I'm safe" }).click();
     await expect(page.getByRole('button', { name: "I'm safe" })).toBeVisible({ timeout: 5_000 });
