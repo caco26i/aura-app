@@ -58,3 +58,21 @@ W2-3 sent [DATE] to [EDITOR_EMAIL] — cold, board-approved.
 ```
 
 CMO logs T1 in wave-1 log + [AURA-327](/AURA/issues/AURA-327) comment.
+
+---
+
+## Board paste-ready comments ([AURA-338](/AURA/issues/AURA-338))
+
+**Step 1 — approve + supply editor email/name:**
+
+```text
+approve cold: W2-3
+EDITOR_EMAIL: [fill]
+CONTACT_NAME: [fill]
+```
+
+**Step 2 — after send:**
+
+```text
+W2-3 sent [DATE] to [EDITOR_EMAIL] — cold, board-approved.
+```
