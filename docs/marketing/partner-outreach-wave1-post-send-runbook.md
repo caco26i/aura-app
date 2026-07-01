@@ -140,3 +140,25 @@ docs(marketing): log W2-2 T1 sent to MantraCare
 ```
 
 **Handoff:** [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) (paste-send-ready).
+
+---
+
+## W2-3 instant execution (target 3/3 — distribution)
+
+**Trigger:** `W2-3 sent [DATE] to [EDITOR_EMAIL]` on [AURA-338](/AURA/issues/AURA-338).
+
+**Add summary row:**
+
+```markdown
+| **W2-3 — PFunc Pulse** | **Yes** | Staged (cold) | **Sent [SEND_DATE]** — cold → [EDITOR_EMAIL] | T2 nudge **[SEND_DATE+3bd]** if silent |
+```
+
+**Status line:** update to `**3 T1 sent**` (or `**2 T1 sent**` + W2-3 if mixed with S-path).
+
+**Git commit message:**
+
+```text
+docs(marketing): log W2-3 T1 sent to PFunc Pulse
+```
+
+**Handoff:** [`partner-outreach-wave1-w2-3-handoff.md`](./partner-outreach-wave1-w2-3-handoff.md) (board supplies editor email + name).
