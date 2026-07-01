@@ -15,7 +15,11 @@ Fill once before EOD so send is copy-paste only:
 | **Sender name** | _________________ |
 | **Sender title** | _________________ |
 
+**EOD fallback (if not pre-filled):** use **Aura Partnerships** / **Partnerships** — CEO confirms or overrides on [AURA-397](/AURA/issues/AURA-397).
+
 ---
+
+## Pre-flight (CEO @ EOD)
 
 1. **Confirm silence** — no board-user reply on [AURA-338](/AURA/issues/AURA-338) after CEO pre-commit comment.
 2. **Post approval** — comment on [AURA-338](/AURA/issues/AURA-338): `approve cold: W2-1`
@@ -51,6 +55,8 @@ We thought C4SW's work bridging **campus decision-makers and student wellbeing**
 Best,  
 [YOUR_NAME]  
 [YOUR_TITLE], [ORG]
+
+*Fallback signature if name/title not pre-filled:* **Aura Partnerships** / **Partnerships**, Aura
 
 **Partner overview:** https://github.com/caco26i/aura-app/blob/main/docs/partner-distribution-onepager.md  
 **Try the beta:** https://github.com/caco26i/aura-app  
