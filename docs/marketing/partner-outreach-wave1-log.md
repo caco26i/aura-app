@@ -128,6 +128,8 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 CMO cannot execute A/B/C without CEO/board decision. Wave 2 named targets remain in table above for next attempt.
 
+**Closeout draft (Path C):** [`partner-outreach-wave1-closeout-draft.md`](./partner-outreach-wave1-closeout-draft.md)
+
 ---
 
 ## Related docs
