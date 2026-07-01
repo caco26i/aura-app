@@ -7,8 +7,8 @@
 #
 # Playwright: `npm run test:e2e` runs the default suite (testIgnore: settings-beta-bff.spec.ts).
 # Includes smoke, welcome, emergency, settings, map intel, /auth shell, and axe a11y on / + /transport + /checkin + /cita + /map + /trusted.
-# BFF-stub spec (`settings-beta-bff.spec.ts`: dead-proxy failure, mocked session success, POST /v1/journeys) runs via
-# `npm run test:e2e:bff-stub` locally — not in this workflow job. New files under web/e2e/ still match web/**.
+# BFF-stub spec (`settings-beta-bff.spec.ts`: dead-proxy failure, mocked session success, POST /v1/journeys) runs next via
+# `npm run test:e2e:bff-stub` (mocked BFF only — no real BFF process, OAuth, or secrets). New files under web/e2e/ still match web/**.
 name: Web lint & build
 
 on:
@@ -61,6 +61,10 @@ jobs:
           fi
       # Full default Playwright suite (see playwright.config.ts testIgnore for BFF-stub-only spec).
       - run: npm run test:e2e
+        env:
+          CI: true
+      # BFF-stub Playwright slice (settings-beta-bff.spec.ts only; mocked session + POST /v1/journeys).
+      - run: npm run test:e2e:bff-stub
         env:
           CI: true
       - name: Docker build (web image smoke)

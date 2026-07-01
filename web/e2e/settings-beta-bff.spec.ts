@@ -1,5 +1,5 @@
 /**
- * BFF session e2e (`PLAYWRIGHT_BFF_STUB=1` only — excluded from default `npm run test:e2e` / web-ci).
+ * BFF session e2e (`PLAYWRIGHT_BFF_STUB=1` only — excluded from default `npm run test:e2e`; runs in web-ci via `npm run test:e2e:bff-stub`).
  *
  * Partial coverage of [DEPLOY.md](../docs/DEPLOY.md) *Staging smoke: BFF JWT path*:
  * - Checklist item 5 (mocked): credentialed `GET /session` → **200** with access token; Settings shows calm copy, no error status.
