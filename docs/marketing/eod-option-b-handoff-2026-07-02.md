@@ -31,6 +31,12 @@ Board may still override with a personal name/title on [AURA-338](/AURA/issues/A
 
 If board cannot send by EOD Wed, **CEO sends directly** using the same package below, then pastes confirmation on [AURA-338](/AURA/issues/AURA-338). Use confirmation line: `… Option B default (CEO send).` Pending CEO confirm on [AURA-397](/AURA/issues/AURA-397).
 
+**CEO paste-ready reply ([AURA-397](/AURA/issues/AURA-397)):**
+
+```text
+confirm CEO send
+```
+
 ---
 
 ## W2-1 — copy-paste send package
