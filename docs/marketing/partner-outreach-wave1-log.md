@@ -132,6 +132,34 @@ Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
 
 ---
 
+## W2-2 send log (promote on confirmation)
+
+*Fill when `W2-2 sent [DATE] to clients@mantra.care` on [AURA-338](/AURA/issues/AURA-338).*
+
+| Field | Value |
+| ----- | ----- |
+| **Target** | W2-2 — MantraCare (EAP/broker channel) |
+| **T0 fit** | Yes |
+| **T1 sent** | `[DATE]` via cold → `clients@mantra.care` |
+| **Materials** | One-pager + outcomes narrative per [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) |
+| **T2 nudge due** | `[DATE+3bd]` — draft: W2-2 section in [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) |
+
+---
+
+## W2-3 send log (promote on confirmation)
+
+*Fill when `W2-3 sent [DATE] to [EDITOR_EMAIL]` on [AURA-338](/AURA/issues/AURA-338).*
+
+| Field | Value |
+| ----- | ----- |
+| **Target** | W2-3 — People Function (*The PFunc Pulse*) |
+| **T0 fit** | Yes (distribution) |
+| **T1 sent** | `[DATE]` via cold → `[EDITOR_EMAIL]` |
+| **Materials** | Launch narrative hero + one-pager per [`partner-outreach-wave1-w2-3-handoff.md`](./partner-outreach-wave1-w2-3-handoff.md) |
+| **T2 nudge due** | `[DATE+3bd]` — draft: W2-3 section in [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) |
+
+---
+
 ## Send checklist (board / CMO human)
 
 - [ ] Replace `[CONTACT_NAME]`, `[ORG]`, `[PRIMARY_URL]`, `[FEEDBACK_OR_PILOT_CONTACT]` in staged emails
