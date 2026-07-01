@@ -34,7 +34,7 @@ function formatViolations(violations: Result[]): string {
     .join('\n');
 }
 
-test.describe('a11y axe — transport + check-in IA (AURA-278)', () => {
+test.describe('a11y axe — transport, check-in IA, Modo Cita (AURA-278, AURA-312)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
       if (window.localStorage.getItem('aura:v1')) return;
@@ -70,6 +70,19 @@ test.describe('a11y axe — transport + check-in IA (AURA-278)', () => {
     const status = page.locator('#checkin-ia-status');
     await expect(status).toBeVisible();
     await expect(status).toHaveAttribute('role', 'status');
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/cita: axe clean + Modo Cita h1', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/cita');
+    await expect(page.getByRole('heading', { name: 'Modo Cita', level: 1 })).toBeVisible();
 
     const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
     expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
