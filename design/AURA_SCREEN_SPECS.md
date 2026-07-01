@@ -70,6 +70,17 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
   3. **Saved contacts** — `h2` *Saved contacts*; per-contact group + permission `<select>` edits; *Remove* with `aria-label` including contact name.
   4. **Permission legend** — Inline help under each preset (*Full — location + alerts + check-ins*, etc.) via `permissionHelp` map; matches §7 *permission legend for alerts when connected*.
 
+### Settings (wireframe)
+
+- **`/settings` (`Settings.tsx`)** — Safety defaults + device data clarity inside shell; tab title **`Settings · Aura`** via `RouteDocumentTitle`. **Shipped surfaces:**
+  1. **Heading** — `h1` *Settings*.
+  2. **Your account** (when `linkedAccountEmail`) — Profile photo/initial, display name, email; hint that name/photo refresh via `/auth`.
+  3. **Your data on this device** — Bullet list of what persists locally; clarifier *Saved in this browser. Connect Aura for sync when available.* (aligns with §7 matrix below).
+  4. **Safety defaults** — Display name (`#settings-display-name`), voice keyword (`#settings-voice-keyword`), silent trigger range (`#settings-silent-trigger-ms`, `aria-valuemin`/`max`/`now`, live `role="status"` readout), default journey timer (`#settings-journey-timer-minutes`).
+  5. **Location precision** — Fieldset with approximate vs precise radios; nested **Privacy & visibility** `h2#settings-privacy-and-visibility` (`tabIndex={-1}`) with `role="note"` explainer + link to `/welcome?review=location`; deep link `#settings-privacy-and-visibility` scrolls + focuses heading (RouteAnnouncer path documented in PDR §5).
+  6. **Beta API session** (when `VITE_AURA_BFF_URL` configured) — BFF explainer; optional `bffHint` `role="status"`; Google sign-in via `GoogleLogin` or fallback env copy; link to `/auth` when Firebase configured.
+  7. **Reset** — *Clear local Aura data* opens native `<dialog>` (*Clear local Aura data?*); Cancel first in tab order; **Clear data** calls `clearLocalAuraData` (see [`UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §4.3).
+
 ### Modo Cita, Transporte & Check-in IA (wireframe)
 
 - **`/cita` (`ModoCita.tsx`)** — Local-only wireframe (primary bottom nav); borrador en `aura:v1`; sin SMS/API hasta contrato futuro. **Superficies expedidas (mirror transport/checkin):**
