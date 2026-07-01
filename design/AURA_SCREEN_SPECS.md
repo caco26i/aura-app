@@ -81,6 +81,30 @@ Authoritative for [`AURA_PDR.md`](./AURA_PDR.md) **§4.1** (routing & shell). Cr
   6. **Beta API session** (when `VITE_AURA_BFF_URL` configured) — BFF explainer; optional `bffHint` `role="status"`; Google sign-in via `GoogleLogin` or fallback env copy; link to `/auth` when Firebase configured.
   7. **Reset** — *Clear local Aura data* opens native `<dialog>` (*Clear local Aura data?*); Cancel first in tab order; **Clear data** calls `clearLocalAuraData` (see [`UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §4.3).
 
+### Outside-shell routes (wireframe)
+
+Routes **outside** `AppShell` / `RequireOnboarding` gate (see **Deep links** below). Authoritative copy for onboarding + SOS also in [`UX_ONBOARDING_TRUST_SETTINGS.md`](../web/docs/UX_ONBOARDING_TRUST_SETTINGS.md) §2 and [`AURA_LAUNCH_UX.md`](./AURA_LAUNCH_UX.md).
+
+- **`/welcome` (`Welcome.tsx`)** — First-run onboarding + location review; tab title **`Welcome · Aura`**. **Shipped surfaces:**
+  1. **Three-step carousel** (steps 0–2) — `aria-live="polite"` wrapper; focused `h1` per step (`#welcome-step-{n}-title`): *Welcome to Aura* → *Emergency (SOS)* bullet list → *Journeys and location*; **Continue** / **Get started** advances; step 0 **Skip for now** calls `finish('skip')`.
+  2. **Location review mode** — `?review=location` shows standalone *Journeys and location* explainer + **Back to settings** (reachable before onboarding completes).
+  3. **Completion** — `setOnboardingCompleted(true)` + telemetry `onboarding_completed` → navigate `/`.
+
+- **`/auth` (`Auth.tsx`)** — Firebase email auth + BFF session; tab title **`Sign in · Aura`**. **Shipped surfaces:**
+  1. **Card layout** — Brand logo, `h1` *Aura account*, M3 token shell (`--aura-surface-raised`, `--Pbg` CTA).
+  2. **Mode tabs** — `role="tablist"` Sign in / Create account; email + password form; submit *Working…* while busy.
+  3. **Config guards** — `role="alert"` when Firebase or BFF env missing; `role="status"` for auth errors via `mapFirebaseAuthError`.
+  4. **Success path** — Firebase sign-in/up → BFF token → `updateSettings` from profile → `/settings`.
+  5. **Footer links** — Back to app / Settings.
+
+- **`/emergency` (`Emergency.tsx`)** — Full-screen SOS; tab title **`Emergency · Aura`**; reachable before onboarding. **Shipped surfaces:**
+  1. **Dark shell** — Intentional gradient `#2a1530` → `#1a0d22` (see [`AURA_DESIGN_SYSTEM.md`](./AURA_DESIGN_SYSTEM.md) exception table); `SkipToContent` + `#main-content`.
+  2. **Mode lede** — Copy varies for silent path (`location.state.mode === 'silent'`) vs visible default.
+  3. **Primary actions** — *Send visible alert*, *Send silent alert*, *Go back* (`takeSosOpenerReturnFocus` + `navigate(-1)`).
+  4. **Visible confirm** — Single-step `role="dialog"` *Send alert to trusted contacts?* → `postEmergencyAlert('visible')`.
+  5. **Silent confirm** — Two-step dialog: step 1 *Silent alert* → **Continue**; step 2 *Send silent alert now?* with Back/Cancel → `postEmergencyAlert('silent')`.
+  6. **Feedback** — `role="alert"` errors; optional `role="status"` notice from `X-Aura-Anomaly`; `aria-busy` on send buttons; success sets `globalStatus('alert')` + navigate `/`.
+
 ### Modo Cita, Transporte & Check-in IA (wireframe)
 
 - **`/cita` (`ModoCita.tsx`)** — Local-only wireframe (primary bottom nav); borrador en `aura:v1`; sin SMS/API hasta contrato futuro. **Superficies expedidas (mirror transport/checkin):**

@@ -13,7 +13,9 @@
 | **Home** | N/A (cards always shown) | N/A | Global hub headline *Safe.* / *Alert active.* via `role="status"` + `aria-live="polite"` + `aria-atomic="true"`; `monitorLine` for device vs connected contacts posture; SOS tile `data-aura-sos-entry="home-tile"` |
 | **JourneyNew** | N/A | Button `Starting…`; form `aria-busy` | `role="alert"` via `startError` |
 | **JourneyActive** | No journey: `role="status"` device clarifier + next-step + link | `Sending…` / `Sharing…` on actions (`aria-busy`) | `role="alert"` for API failures; share **primer sheet** (first time); **silent alert sheet** (map double-tap); **end journey** confirm dialog |
-| **Emergency** | N/A | Both buttons `Sending…` | `role="alert"` + optional `role="status"` notice |
+| **Emergency** | N/A | Send buttons `Sending…` (`aria-busy`) | `role="alert"` + optional `role="status"` notice; visible + two-step silent confirm dialogs |
+| **Welcome** (`/welcome`) | Location review mode (`?review=location`) standalone page | N/A | N/A; step content in `aria-live="polite"` region |
+| **Auth** (`/auth`) | Config missing → `role="alert"` guards | Submit *Working…* | Firebase/BFF errors via `role="status"`; env misconfig `role="alert"` |
 | **MapPage** | All layers off → `role="status"` hint; demo route CTA shows polite status line (5s) | Via `AuraMap`: `aria-busy`, overlay, `role="status"` *Loading map…* until tiles `load` (15s timeout fallback); layer toggles `role="switch"` + `aria-describedby` | **None** (tile errors → telemetry only) |
 | **Trusted** | Zero contacts → dashed `role="status"` card (*stored on this device until the live backend…*) + add-contact form; saved list when contacts exist | N/A | N/A; permission fieldset hint *Alerts can include SOS and journey notifications when connected.* (`#trusted-new-permission-hint`) |
 | **Settings** | N/A | N/A | Clear-local `<dialog>` confirm (no `role="alert"`); BFF session hint `role="status"` when configured; silent trigger ms `role="status"` live readout |
