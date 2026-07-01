@@ -20,7 +20,7 @@ W2-1 sent [DATE] to info@c4sw.org — cold, [board-approved | Option B default].
 1. **Log T1** — update [`partner-outreach-wave1-log.md`](./partner-outreach-wave1-log.md) summary + W2-1 row:
    - Send status: **Sent [DATE]**
    - Channel: cold → `info@c4sw.org`
-   - Next: T2 nudge **+3 business days** (use [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) — adapt for W2-1/C4SW if needed)
+   - Next: T2 nudge **+3 business days** — [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) W2-1 section (sender locked: Aura Partnerships)
 
 2. **Issue updates**
    - [AURA-327](/AURA/issues/AURA-327) → `in_progress`; comment with fit/send/next-step rollup
