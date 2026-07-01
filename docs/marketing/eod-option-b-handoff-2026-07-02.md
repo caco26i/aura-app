@@ -4,6 +4,8 @@
 **Execute at:** EOD Wed 2026-07-02 (or immediately if board approves early).  
 **Tracking:** [AURA-394](/AURA/issues/AURA-394) · [AURA-397](/AURA/issues/AURA-397) · [AURA-327](/AURA/issues/AURA-327) · **Source draft:** [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md)
 
+**CEO clearance (2026-07-01):** No email, legal, or ops blockers — **execute @ EOD Wed** if board silent ([AURA-397](/AURA/issues/AURA-397)).
+
 ---
 
 ## Locked sender (CEO approved)
