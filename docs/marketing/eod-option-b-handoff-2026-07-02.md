@@ -29,13 +29,13 @@ Board may still override with a personal name/title on [AURA-338](/AURA/issues/A
 
 ### CEO fallback if board unavailable @ EOD
 
-If board cannot send by EOD Wed, **CEO sends directly** using the same package below, then pastes confirmation on [AURA-338](/AURA/issues/AURA-338). Use confirmation line: `… Option B default (CEO send).` Pending CEO confirm on [AURA-397](/AURA/issues/AURA-397).
-
-**CEO paste-ready reply ([AURA-397](/AURA/issues/AURA-397)):**
+**Confirmed 2026-07-01** — CEO **`confirm CEO send`** on [AURA-397](/AURA/issues/AURA-397). If board cannot send by EOD Wed, **CEO sends directly** using the same package below, then pastes confirmation on [AURA-338](/AURA/issues/AURA-338):
 
 ```text
-confirm CEO send
+W2-1 sent 2026-07-02 to info@c4sw.org — cold, Option B default (CEO send).
 ```
+
+**Primary path unchanged:** board sends if available after CEO posts `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338).
 
 ---
 
