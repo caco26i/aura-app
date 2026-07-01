@@ -66,6 +66,22 @@ Aura Partnerships
 
 ---
 
+## W2-2 — MantraCare cold (target 2/3)
+
+**Use:** +3 business days after T1 if no reply.  
+**Subject:** Re: Aura public beta — digital duty-of-care layer for broker partners
+
+Dear MantraCare partnerships team,
+
+Following up on my note regarding the Aura partner summary. If timing is tight, we can start with a **lightweight UI beta exploration** before any API integration discussion.
+
+Please let me know if you are the right contact, or who on your partnerships team I should reach.
+
+Sincerely,  
+Aura Partnerships
+
+---
+
 ## Post-nudge log template
 
 ```text
