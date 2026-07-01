@@ -1,6 +1,7 @@
 # Partner outreach — wave 1 log (T0–T1)
 
-**Status:** T0 complete + T1 **send drafts ready** — outbound send pending board contact paths or send approval.  
+**Status:** T0 complete + T1–T3 **send drafts ready** — outbound send pending board contact paths or cold approval. **T1 SLA:** slipped from T0 (2026-07-01) — CEO chased board on [AURA-338](/AURA/issues/AURA-338) 2026-07-01; deadline EOD Wed 2026-07-02.  
+**Board pack:** [`board-action-pack-2026-07-02.md`](./board-action-pack-2026-07-02.md)  
 **Tracking:** [AURA-327](/AURA/issues/AURA-327) · **Parent:** [AURA-319](/AURA/issues/AURA-319)  
 **Playbook:** [`partner-followup-playbook.md`](./partner-followup-playbook.md) stages T0–T1  
 **Materials:** [`partner-distribution-onepager.md`](../partner-distribution-onepager.md) + [`PUBLIC_BETA.md`](../PUBLIC_BETA.md)
