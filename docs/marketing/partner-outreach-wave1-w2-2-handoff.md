@@ -55,3 +55,19 @@ W2-2 sent [DATE] to clients@mantra.care — cold, board-approved.
 ```
 
 CMO logs T1 in wave-1 log + [AURA-327](/AURA/issues/AURA-327) comment.
+
+---
+
+## Board paste-ready comments ([AURA-338](/AURA/issues/AURA-338))
+
+**Step 1 — approve:**
+
+```text
+approve cold: W2-2
+```
+
+**Step 2 — after send:**
+
+```text
+W2-2 sent [DATE] to clients@mantra.care — cold, board-approved.
+```
