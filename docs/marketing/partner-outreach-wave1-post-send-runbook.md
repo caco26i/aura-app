@@ -108,3 +108,35 @@ docs(marketing): log W2-1 T1 sent to C4SW (Option B)
 ```
 
 **Issue comments:** Use templates in checklist §2 above; AURA-394 → `done`, AURA-327 → `in_progress`.
+
+---
+
+## W2-2 instant execution (after W2-1 logged — target 2/3)
+
+**Trigger:** `W2-2 sent [DATE] to clients@mantra.care` on [AURA-338](/AURA/issues/AURA-338).
+
+**Add summary row** (or update if staged):
+
+```markdown
+| **W2-2 — MantraCare** | **Yes** | Staged (cold) | **Sent [SEND_DATE]** — cold → clients@mantra.care | T2 nudge **[SEND_DATE+3bd]** if silent |
+```
+
+**Status line:** `**1 T1 sent** (W2-1)` → `**2 T1 sent** (W2-1, W2-2)`.
+
+**Git commit message:**
+
+```text
+docs(marketing): log W2-2 T1 sent to MantraCare
+```
+
+**AURA-327 comment template:**
+
+```markdown
+## W2-2 T1 logged
+
+**Target:** MantraCare (W2-2) — EAP/broker channel  
+**T1 sent:** [SEND_DATE] via cold → clients@mantra.care  
+**Next:** T2 nudge [SEND_DATE+3bd] if silent — handoff: partner-outreach-wave1-w2-2-handoff.md
+```
+
+**Handoff:** [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) (paste-send-ready).
