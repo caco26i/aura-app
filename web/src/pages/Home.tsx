@@ -61,7 +61,7 @@ export function Home() {
               justifyContent: 'center',
               fontFamily: 'var(--fd)',
               fontStyle: 'italic',
-              color: '#fff',
+              color: 'var(--aura-on-primary)',
               fontSize: 14,
             }}
             aria-hidden

@@ -146,8 +146,8 @@ export function CheckinInteligente() {
                   aria-pressed={isSel}
                   style={{
                     ...triggerBtn,
-                    borderColor: isSel ? 'var(--aura-status-ok, #3d9a6a)' : 'var(--aura-border)',
-                    background: isSel ? 'rgba(61, 154, 106, 0.12)' : 'var(--aura-card)',
+                    borderColor: isSel ? 'var(--safe)' : 'var(--aura-border)',
+                    background: isSel ? 'var(--safe-c)' : 'var(--aura-card)',
                   }}
                 >
                   <span style={{ fontWeight: 700 }}>{t.label}</span>
@@ -213,7 +213,7 @@ const statusLine: CSSProperties = {
   padding: 14,
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: 'rgba(255,255,255,0.55)',
+  background: 'var(--aura-surface-soft)',
   lineHeight: 1.45,
 };
 const triggerList: CSSProperties = { listStyle: 'none', padding: 0, margin: 0 };
@@ -222,7 +222,7 @@ const triggerBtn: CSSProperties = {
   width: '100%',
   textAlign: 'left',
   padding: '12px 14px',
-  borderRadius: 14,
+  borderRadius: 'var(--aura-radius-md)',
   border: '1px solid var(--aura-border)',
   cursor: 'pointer',
   font: 'inherit',

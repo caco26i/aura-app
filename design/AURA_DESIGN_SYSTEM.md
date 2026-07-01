@@ -14,6 +14,10 @@ Canonical tokens live in `web/src/theme.css` (CSS variables). **M3 shell / Home 
 | `--aura-text` | Primary text |
 | `--aura-muted` | Secondary text |
 | `--aura-card` | Glass / card surface |
+| `--aura-surface-soft` | Semi-transparent live-region / status panels (modo shells) |
+| `--aura-surface-muted` | Lighter placeholder surfaces (wireframe thumbs) |
+| `--aura-surface-faint` | Subtle inset panels (notify blocks) |
+| `--aura-on-primary` | Text/icons on `--Pbg` / primary gradient |
 | `--aura-border` | Hairline borders |
 | `--aura-shadow` | Elevated cards |
 | `--aura-radius-lg` | Large card radius (~20px) |

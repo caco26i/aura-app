@@ -382,7 +382,7 @@ const field: CSSProperties = {
   padding: '12px 14px',
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: '#fff',
+  background: 'var(--bg)',
   boxSizing: 'border-box',
 };
 const liveRegion: CSSProperties = {
@@ -390,15 +390,15 @@ const liveRegion: CSSProperties = {
   padding: 14,
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: 'rgba(255,255,255,0.55)',
+  background: 'var(--aura-surface-soft)',
   outline: 'none',
 };
 const nudgeBanner: CSSProperties = {
   marginTop: 16,
   padding: 14,
   borderRadius: 12,
-  border: '1px solid rgba(180, 120, 40, 0.45)',
-  background: 'rgba(255, 248, 220, 0.85)',
+  border: '1px solid var(--warn-br)',
+  background: 'var(--warn-c)',
 };
 const nudgeBtn: CSSProperties = { fontWeight: 600 };
 const notifyBox: CSSProperties = {
@@ -406,5 +406,5 @@ const notifyBox: CSSProperties = {
   padding: 14,
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: 'rgba(255,255,255,0.4)',
+  background: 'var(--aura-surface-faint)',
 };

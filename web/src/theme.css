@@ -5,6 +5,10 @@
   --aura-text: #1c1530;
   --aura-muted: #5c5470;
   --aura-card: rgba(255, 255, 255, 0.72);
+  --aura-surface-soft: rgba(255, 255, 255, 0.55);
+  --aura-surface-muted: rgba(255, 255, 255, 0.5);
+  --aura-surface-faint: rgba(255, 255, 255, 0.4);
+  --aura-on-primary: #fff;
   --aura-border: rgba(28, 21, 48, 0.08);
   --aura-shadow: 0 12px 40px rgba(28, 21, 48, 0.12);
   --aura-radius-lg: 20px;

@@ -173,12 +173,12 @@ const liveRegion: CSSProperties = {
   padding: 14,
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: 'rgba(255,255,255,0.55)',
+  background: 'var(--aura-surface-soft)',
 };
 const primaryBtn: CSSProperties = { fontWeight: 600, marginTop: 12 };
 const rideCard: CSSProperties = {
   padding: 16,
-  borderRadius: 14,
+  borderRadius: 'var(--aura-radius-md)',
   border: '1px solid var(--aura-border)',
   background: 'var(--aura-card)',
 };
@@ -191,7 +191,7 @@ const thumb: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: 'rgba(255,255,255,0.5)',
+  background: 'var(--aura-surface-muted)',
 };
 const actionRow: CSSProperties = {
   marginTop: 16,
