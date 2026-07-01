@@ -10,7 +10,7 @@ Use when warm intros for S1–S3 are unavailable. Each draft maps to a researche
 
 ## Before send (all W2 targets)
 
-Same placeholders as [`partner-outreach-wave1-t1-drafts.md`](./partner-outreach-wave1-t1-drafts.md).
+**Use handoff files above for paste-send** (CEO-approved sender: **Aura Partnerships**). This file is source reference; placeholders below apply only if board overrides sender on [AURA-338](/AURA/issues/AURA-338).
 
 ---
 
