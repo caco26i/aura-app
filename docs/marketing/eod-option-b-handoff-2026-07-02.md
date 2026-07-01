@@ -2,7 +2,7 @@
 
 **Trigger:** Board silent on [AURA-338](/AURA/issues/AURA-338) since [CEO pre-commit](/AURA/issues/AURA-338#comment-a0479831-9cb6-4d0c-9b82-850c74fecfc9) (Option B).  
 **Execute at:** EOD Wed 2026-07-02 (or immediately if board approves early).  
-**Tracking:** [AURA-394](/AURA/issues/AURA-394) · [AURA-327](/AURA/issues/AURA-327) · **Source draft:** [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md)
+**Tracking:** [AURA-394](/AURA/issues/AURA-394) · [AURA-397](/AURA/issues/AURA-397) · [AURA-327](/AURA/issues/AURA-327) · **Source draft:** [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md)
 
 ---
 
@@ -10,7 +10,7 @@
 
 1. **Confirm silence** — no board-user reply on [AURA-338](/AURA/issues/AURA-338) after CEO pre-commit comment.
 2. **Post approval** — comment on [AURA-338](/AURA/issues/AURA-338): `approve cold: W2-1`
-3. **Send email** — board or CEO sends W2-1 below (human send required; CMO cannot send externally).
+3. **Send email** — **CEO or board** sends W2-1 below (human send required; **CMO cannot send externally** — CMO logs + tracks after confirmation via [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md))
 
 ---
 

@@ -50,8 +50,23 @@ Best,
 
 ---
 
+## W2-1 — C4SW cold (Option B default)
+
+**Subject:** Re: Aura public beta — campus safety companion pilot fit
+
+Hi C4SW team,
+
+Quick bump on my note about Aura — happy to keep this async if easier.
+
+**Single ask:** Would a 25-minute call to scope a small campus pilot make sense, or should I connect with someone else on your team?
+
+Best,  
+[YOUR_NAME]
+
+---
+
 ## Post-nudge log template
 
 ```text
-S[N] — [ORG]: T2 nudge sent [DATE]. Next: T3 second nudge [DATE+5bd] if silent, or log reply.
+S[N] / W2-[N] — [ORG]: T2 nudge sent [DATE]. Next: T3 second nudge [DATE+5bd] if silent, or log reply.
 ```
