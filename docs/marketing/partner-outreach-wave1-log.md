@@ -150,7 +150,7 @@ Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
 | Option | Status |
 | ------ | ------ |
 | **A — Defer wave 1** | Not selected |
-| **B — CEO delegates cold** | **Pre-committed** — CEO posts `approve cold: W2-1` at EOD; send W2-1 from [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) |
+| **B — CEO delegates cold** | **Pre-committed** — CEO posts `approve cold: W2-1` at EOD; board sends if available, else **CEO sends** (`confirm CEO send` 2026-07-01); handoff: [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) |
 | **C — Close wave 1 incomplete** | Not selected — escalate to CEO if board opts out before EOD |
 
 **EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) (copy-paste W2-1 + post-send checklist).
@@ -167,6 +167,10 @@ Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
 | [`partner-outreach-wave1-t1-drafts.md`](./partner-outreach-wave1-t1-drafts.md) | Copy-paste T1 emails for S1–S3 |
 | [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) | T2 nudges (+3bd if silent) |
 | [`partner-outreach-wave1-t3-drafts.md`](./partner-outreach-wave1-t3-drafts.md) | T3 second nudge (+5bd after T2) |
-| [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md) | W2 cold T1 (after `approve cold: W2-N`) |
+| [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) | W2-1 EOD package + board/CEO paste comments |
+| [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) | W2-2 MantraCare — paste-send-ready |
+| [`partner-outreach-wave1-w2-3-handoff.md`](./partner-outreach-wave1-w2-3-handoff.md) | W2-3 PFunc Pulse — paste-send-ready (board fills editor) |
+| [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md) | CMO instant execution on send confirmation |
+| [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md) | W2 cold T1 source drafts (after `approve cold: W2-N`) |
 | [`partner-distribution-onepager.md`](../partner-distribution-onepager.md) | First-touch asset |
 | [`two-week-growth-experiments.md`](../two-week-growth-experiments.md) | Exp 3 — partner vs social cohort |
