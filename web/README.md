@@ -32,7 +32,7 @@ npm run dev
 | `npm run preview` | Preview production build |
 | `npm run lint` | ESLint |
 | `npm run test:e2e` | Playwright default suite (`playwright.config.ts` ignores `settings-beta-bff.spec.ts` unless `PLAYWRIGHT_BFF_STUB=1`). Includes `e2e/smoke.spec.ts`, `a11y-transport-checkin.spec.ts` (axe on `/transport` + `/checkin`), welcome, emergency, settings, and map intel specs. |
-| `npm run test:e2e:bff-stub` | Playwright with `VITE_AURA_BFF_URL=/aura-bff` — `e2e/settings-beta-bff.spec.ts` covers **failure** (dead BFF proxy) and **success** (mocked `GET /session` token); Google OAuth flow is manual-only (see spec header). |
+| `npm run test:e2e:bff-stub` | Playwright with `VITE_AURA_BFF_URL=/aura-bff` — `e2e/settings-beta-bff.spec.ts` covers **failure** (dead BFF proxy), **success** (mocked `GET /session` token), and **journey** (mocked `POST /v1/journeys` after session bootstrap); Google OAuth flow is manual-only (see spec header). |
 
 On GitHub, **[`.github/workflows/web-ci.yml`](../.github/workflows/web-ci.yml)** runs on changes to `web/**`, root compose files, `.env.example`, and the workflow itself: `npm ci`, lint, unit tests, production build, BFF guardrail check, **full default Playwright e2e** (including a11y axe specs), and a Docker web image smoke build.
 

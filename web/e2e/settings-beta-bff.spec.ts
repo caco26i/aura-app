@@ -3,6 +3,8 @@
  *
  * Partial coverage of [DEPLOY.md](../docs/DEPLOY.md) *Staging smoke: BFF JWT path*:
  * - Checklist item 5 (mocked): credentialed `GET /session` → **200** with access token; Settings shows calm copy, no error status.
+ * - Checklist item 5 (mocked): `/journey/new` → **Start live tracking** issues authenticated `POST /v1/journeys` with the
+ *   session token and lands on `/journey/active` without auth failure copy.
  * - Checklist item 4 (gap): Google **Continue with Google** OAuth is **not** exercised in CI — requires a real
  *   `VITE_GOOGLE_CLIENT_ID` and Google; use staging manual smoke or local dev with BFF + OAuth client.
  */
@@ -113,6 +115,71 @@ test.describe('settings beta BFF (stub path, mocked session success)', () => {
     await expect(
       betaApiSection.getByText(/Could not reach the sign-in service/i),
     ).toHaveCount(0);
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+});
+
+test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((payload) => {
+      if (window.localStorage.getItem('aura:v1')) return;
+      window.localStorage.setItem('aura:v1', payload);
+    }, AURA_STORAGE_BOOTSTRAP);
+  });
+
+  test('Start live tracking issues authenticated POST /v1/journeys and lands on /journey/active', async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    const expiresAt = new Date(Date.now() + 3_600_000).toISOString();
+    const expSec = Math.floor(Date.now() / 1000) + 3600;
+    const payload = Buffer.from(JSON.stringify({ sub: 'e2e-bff-journey', exp: expSec })).toString(
+      'base64url',
+    );
+    const accessToken = `e2e.${payload}.stub`;
+    const journeyId = 'a1b2c3d4-e5f6-4789-a012-3456789abcde';
+
+    let postJourneysAuth: string | null = null;
+
+    await page.route('**/aura-bff/session', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, accessToken, expiresAt }),
+      });
+    });
+
+    await page.route('**/v1/journeys', async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.continue();
+        return;
+      }
+      postJourneysAuth = route.request().headers()['authorization'] ?? null;
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, data: { journeyId } }),
+      });
+    });
+
+    await page.goto('/journey/new');
+    await expect(page.getByRole('heading', { name: 'New journey', level: 1 })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Start live tracking' }).click();
+    await expect(page).toHaveURL(/\/journey\/active$/);
+    await expect(page.getByRole('heading', { name: 'Live tracking', level: 1 })).toBeVisible();
+
+    expect(postJourneysAuth).toBe(`Bearer ${accessToken}`);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByText(/Sign in with Google/i)).toHaveCount(0);
+    await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
