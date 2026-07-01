@@ -164,7 +164,7 @@ const primaryBtn: CSSProperties = {
   borderRadius: 16,
   border: 'none',
   background: 'var(--aura-text)',
-  color: '#fff',
+  color: 'var(--aura-on-primary)',
   fontWeight: 800,
   cursor: 'pointer',
   fontSize: 16,

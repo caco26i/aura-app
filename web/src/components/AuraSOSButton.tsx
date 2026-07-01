@@ -33,7 +33,7 @@ export function AuraSOSButton() {
         borderRadius: '50%',
         border: 'none',
         background: bg,
-        color: '#fff',
+        color: 'var(--aura-on-primary)',
         fontWeight: 800,
         fontSize: 12,
         letterSpacing: 0.5,
