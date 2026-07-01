@@ -25,16 +25,16 @@ Aura Partnerships
 
 ## S2 / W2-2 — EAP broker (final bump)
 
-**Subject:** Re: Aura public beta — follow-up materials and pilot scoping
+**Subject:** Re: Aura public beta — digital duty-of-care layer for broker partners
 
-Dear [CONTACT_NAME],
+Dear MantraCare partnerships team,
 
 Closing the loop on my earlier note. If API integration or pilot scoping isn't timely, we can pause — the **UI beta** remains available for a lightweight evaluation whenever your partnerships calendar opens.
 
 If another contact should own this thread, please forward or reply with their name.
 
 Sincerely,  
-[YOUR_NAME]
+Aura Partnerships
 
 **Beta runbook:** https://github.com/caco26i/aura-app/blob/main/docs/PUBLIC_BETA.md
 
@@ -42,7 +42,7 @@ Sincerely,
 
 ## S3 / W2-3 — HR newsletter (final bump)
 
-**Subject:** Re: Following up — Aura pilot fit for [ORG]
+**Subject:** Re: Aura tools review — calm safety companion for remote-first teams
 
 Hi [CONTACT_NAME],
 
@@ -51,7 +51,7 @@ Final check-in — happy to send a **2-sentence tools blurb** for your backlog, 
 Thanks either way for considering it.
 
 Best,  
-[YOUR_NAME]
+Aura Partnerships
 
 ---
 
