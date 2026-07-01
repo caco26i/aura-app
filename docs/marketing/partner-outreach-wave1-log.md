@@ -1,6 +1,6 @@
 # Partner outreach — wave 1 log (T0–T1)
 
-**Status:** **Agent pipeline complete** (T0–T3 + W2 handoffs + EOD package). **Human send only** — CEO Option B @ EOD Wed 2026-07-02 or early `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338). **0 T1 sent.**  
+**Status:** **Agent pipeline complete** (T0–T3 + W2 handoffs + EOD package). **CEO cleared EOD send** (no blockers, 2026-07-01). **Human send only** — execute @ EOD Wed 2026-07-02 or early `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338). **0 T1 sent.**  
 **EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) · **Post-send:** [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md) · **Execution:** [AURA-394](/AURA/issues/AURA-394)  
 **Tracking:** [AURA-327](/AURA/issues/AURA-327) · **Parent:** [AURA-319](/AURA/issues/AURA-319)  
 **Playbook:** [`partner-followup-playbook.md`](./partner-followup-playbook.md) stages T0–T1  
