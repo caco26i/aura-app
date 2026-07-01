@@ -34,7 +34,9 @@ function formatViolations(violations: Result[]): string {
     .join('\n');
 }
 
-test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, trusted (AURA-278, AURA-312, AURA-322, AURA-337)', () => {
+const ACTIVE_JOURNEY_ID = 'c0ffee00-1111-4222-8333-444455556666';
+
+test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, trusted, journey, emergency, settings (AURA-278, AURA-312, AURA-322, AURA-337, AURA-349)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
       if (window.localStorage.getItem('aura:v1')) return;
@@ -127,6 +129,95 @@ test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita, map, tr
 
     await page.goto('/trusted');
     await expect(page.getByRole('heading', { name: 'Trusted network', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/journey/new: axe clean + New journey h1', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/journey/new');
+    await expect(page.getByRole('heading', { name: 'New journey', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/journey/active: axe clean + Live tracking h1 (activeJourney bootstrap)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.addInitScript((id) => {
+      window.localStorage.setItem(
+        'aura:v1',
+        JSON.stringify({
+          contacts: [],
+          activeJourney: {
+            id,
+            label: 'Home',
+            destinationLabel: 'Work',
+            etaMinutes: 12,
+            trackState: 'on_track',
+            startedAt: new Date().toISOString(),
+          },
+          mapLayers: { risk: true, safePoints: true, activity: false },
+          settings: {
+            displayName: 'A11y',
+            voiceKeyword: 'Aura help',
+            silentTriggerMs: 800,
+            timerDefaultMinutes: 15,
+            locationPrecision: 'approximate',
+          },
+          globalStatus: 'calm',
+          onboardingCompleted: true,
+          shareLocationPrimerAcknowledged: false,
+          encuentroDraft: {
+            contactName: '',
+            place: '',
+            safetyKeyword: '',
+            meetingLocalValue: '',
+            checkInIntervalMinutes: 15,
+            encuentroLastLocalCheckInAckMs: null,
+            encuentroBrowserNotifyWanted: false,
+          },
+        }),
+      );
+    }, ACTIVE_JOURNEY_ID);
+
+    await page.goto('/journey/active');
+    await expect(page.getByRole('heading', { name: 'Live tracking', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/emergency: axe clean + Emergency h1', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/emergency');
+    await expect(page.getByRole('heading', { name: 'Emergency', level: 1 })).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
+  });
+
+  test('/settings: axe clean + Settings h1', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/settings');
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
 
     const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
     expect(axe.violations, formatViolations(axe.violations)).toEqual([]);

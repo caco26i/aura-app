@@ -14,12 +14,15 @@
   --aura-shadow: 0 12px 40px rgba(28, 21, 48, 0.12);
   --aura-shadow-lg: 0 24px 48px rgba(26, 16, 40, 0.12);
   --aura-shadow-brand: 0 8px 24px rgba(133, 116, 204, 0.25);
-  --aura-map-activity: #5b6fd6;
+  --aura-map-activity: #5468c9;
   --aura-radius-lg: 20px;
   --aura-radius-md: 14px;
   --aura-status-ok: #3d9a6a;
+  --aura-status-ok-ink: #2d7d56;
   --aura-status-warn: #c98a2c;
-  --aura-status-alert: #c94c5c;
+  --aura-status-warn-ink: #9a6a1f;
+  --aura-status-alert: #c24757;
+  --aura-status-alert-ink: #c24757;
   --aura-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 

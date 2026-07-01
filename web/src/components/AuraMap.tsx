@@ -18,9 +18,9 @@ function FixResize() {
 }
 
 const MAP_INTEL_COLOR_FALLBACK: Record<MapIntelFeature['kind'], string> = {
-  risk: '#c94c5c',
+  risk: '#c24757',
   safe: '#3d9a6a',
-  activity: '#5b6fd6',
+  activity: '#5468c9',
 };
 
 function readMapIntelColors(): Record<MapIntelFeature['kind'], string> {

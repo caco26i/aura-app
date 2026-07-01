@@ -132,7 +132,7 @@ export function Emergency() {
           type="button"
           disabled={busy || anyConfirmOpen}
           onClick={() => setVisibleConfirmOpen(true)}
-          style={btn('#c94c5c')}
+          style={btn('var(--aura-status-alert)')}
         >
           Send visible alert
         </button>
@@ -140,7 +140,7 @@ export function Emergency() {
           type="button"
           disabled={busy || anyConfirmOpen}
           onClick={() => setSilentConfirmStep(1)}
-          style={btn('#5b6fd6')}
+          style={btn('var(--aura-map-activity)')}
         >
           Send silent alert
         </button>
@@ -195,7 +195,7 @@ export function Emergency() {
                 type="button"
                 disabled={busy}
                 onClick={() => send('visible')}
-                style={{ ...btn('#c94c5c'), width: '100%' }}
+                style={{ ...btn('var(--aura-status-alert)'), width: '100%' }}
                 aria-busy={busy}
               >
                 {busy ? 'Sending…' : 'Send alert'}
@@ -243,7 +243,7 @@ export function Emergency() {
                   >
                     Cancel
                   </button>
-                  <button type="button" onClick={() => setSilentConfirmStep(2)} style={{ ...btn('#5b6fd6'), width: '100%' }}>
+                  <button type="button" onClick={() => setSilentConfirmStep(2)} style={{ ...btn('var(--aura-map-activity)'), width: '100%' }}>
                     Continue
                   </button>
                 </div>
@@ -288,7 +288,7 @@ export function Emergency() {
                     type="button"
                     disabled={busy}
                     onClick={() => send('silent')}
-                    style={{ ...btn('#5b6fd6'), width: '100%' }}
+                    style={{ ...btn('var(--aura-map-activity)'), width: '100%' }}
                     aria-busy={busy}
                   >
                     {busy ? 'Sending…' : 'Send silent alert'}

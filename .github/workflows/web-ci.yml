@@ -6,7 +6,7 @@
 # PR/push skips when only server/ or unrelated paths change.
 #
 # Playwright: `npm run test:e2e` runs the default suite (testIgnore: settings-beta-bff.spec.ts).
-# Includes smoke, welcome, emergency, settings, map intel, /auth shell, and axe a11y on / + /transport + /checkin + /cita + /map + /trusted.
+# Includes smoke, welcome, emergency, settings, map intel, /auth shell, and axe a11y on / + /transport + /checkin + /cita + /map + /trusted + /journey/new + /journey/active + /emergency + /settings.
 # BFF-stub spec (`settings-beta-bff.spec.ts`: dead-proxy failure, mocked session success, POST /v1/journeys) runs next via
 # `npm run test:e2e:bff-stub` (mocked BFF only — no real BFF process, OAuth, or secrets). New files under web/e2e/ still match web/**.
 name: Web lint & build

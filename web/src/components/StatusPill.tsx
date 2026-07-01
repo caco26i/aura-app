@@ -13,6 +13,12 @@ export function StatusPill({ state }: { state: JourneyTrackState }) {
       : state === 'delay'
         ? 'var(--aura-status-warn)'
         : 'var(--aura-status-alert)';
+  const ink =
+    state === 'on_track'
+      ? 'var(--aura-status-ok-ink)'
+      : state === 'delay'
+        ? 'var(--aura-status-warn-ink)'
+        : 'var(--aura-status-alert-ink)';
 
   return (
     <span
@@ -26,7 +32,7 @@ export function StatusPill({ state }: { state: JourneyTrackState }) {
         borderRadius: 999,
         background: 'var(--aura-card)',
         border: `1px solid ${tone}`,
-        color: tone,
+        color: ink,
         fontSize: 13,
         fontWeight: 600,
       }}
