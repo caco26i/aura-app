@@ -1,6 +1,6 @@
 # Two-week content cadence pilot — Aura (CMO)
 
-**Status:** Published schedule + retro shell. Tracking: [AURA-86](/AURA/issues/AURA-86). Parent: [AURA-84](/AURA/issues/AURA-84).
+**Status:** **Closed (Path B cancel)** — schedule shipped; human LinkedIn publish never executed. Tracking: [AURA-86](/AURA/issues/AURA-86). Parent: [AURA-84](/AURA/issues/AURA-84).
 
 **Primary channel:** **LinkedIn** (employer / wellness / people-leader ICP; aligns with [`partner-distribution-onepager.md`](../partner-distribution-onepager.md)).
 
@@ -13,7 +13,7 @@
 ## Cadence rule
 
 - **3 posts per week** (Wed / Fri / Mon rhythm) → **6 posts** total in 2 weeks.
-- Each post: **one hook**, **one proof or scene**, **one CTA** (beta link or “reply for pilot deck”).
+- Each post: **one hook**, **one proof or scene**, **one CTA** (beta link or "reply for pilot deck").
 
 ---
 
@@ -22,13 +22,13 @@
 | # | Target date (UTC) | Hook (angle) | CTA |
 | --- | --- | --- | --- |
 | 1 | **2026-04-09** (Wed) | **Clarity under pressure** — why calm copy matters for safety UX | Try the public beta (link in profile / `docs/PUBLIC_BETA.md`) |
-| 2 | **2026-04-11** (Fri) | **Journeys** — share progress with people you trust, not the whole internet | Comment “pilot” for partner one-pager |
+| 2 | **2026-04-11** (Fri) | **Journeys** — share progress with people you trust, not the whole internet | Comment "pilot" for partner one-pager |
 | 3 | **2026-04-14** (Mon) | **Consent-first** — location and SOS only when you choose, primers before prompts | Read trust FAQ themes → [`trust-safety-messaging-pack-v2.md`](../trust-safety-messaging-pack-v2.md) |
-| 4 | **2026-04-16** (Wed) | **Web-first companion** — no app-store wall for beta testers | Link README “What you can explore today” |
+| 4 | **2026-04-16** (Wed) | **Web-first companion** — no app-store wall for beta testers | Link README "What you can explore today" |
 | 5 | **2026-04-18** (Fri) | **Employers / wellness** — lightweight layer next to EAP (no clinical overclaim) | Partner one-pager DM |
 | 6 | **2026-04-21** (Mon) | **Developers** — optional API for structured events in pilots | `web/docs/BETA_BACKEND.md` |
 
-*Replace “link in profile” with the canonical public URL when marketing owns a stable landing.*
+*Replace "link in profile" with the canonical public URL when marketing owns a stable landing.*
 
 ---
 
@@ -38,10 +38,10 @@
 Stress shrinks attention. We built Aura as a **calm, mobile web** companion: check-ins, journeys, and SOS-style flows that stay **one or two taps** away — without alarmist language. Public beta: [your URL].
 
 **Post 2**  
-“Where are you?” texts break at the worst time. **Journey mode** is for sharing progress with **people you trust** — on your terms. If you’re HR/wellness and want the employer-facing overview, comment **pilot**.
+"Where are you?" texts break at the worst time. **Journey mode** is for sharing progress with **people you trust** — on your terms. If you're HR/wellness and want the employer-facing overview, comment **pilot**.
 
 **Post 3**  
-Aura isn’t “always watching.” We use sensitive permissions **when a feature needs them**, with **short primers** before the browser asks — and **local-first defaults** until you connect a live account. Details in our trust messaging pack (internal link in doc above).
+Aura isn't "always watching." We use sensitive permissions **when a feature needs them**, with **short primers** before the browser asks — and **local-first defaults** until you connect a live account. Details in our trust messaging pack (internal link in doc above).
 
 **Post 4**  
 Shipping a **web-first** safety companion means testers can try flows without a heavy install story. Explore home → journey → SOS → settings in the beta runbook.
@@ -54,25 +54,23 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 
 ---
 
-## End-of-pilot retro (fill after post 6)
+## End-of-pilot retro (Path B closeout — 2026-07-01)
 
 | Question | Notes |
 | --- | --- |
-| What **worked** (format, angle, engagement)? | |
-| What to **stop** or change next sprint? | |
-| **Next experiment hypothesis** (one line)? | |
+| What **worked** (format, angle, engagement)? | In-repo schedule + copy bank shipped before publish; clear CEO/board delegation for human LinkedIn |
+| What to **stop** or change next sprint? | LinkedIn cadence pilot without a named board publisher + calendar hold at kickoff |
+| **Next experiment hypothesis** (one line)? | Either **(C) switch channel** (X/dev community, lower friction) or **(A) relaunch LinkedIn** with confirmed start date + assigned human publisher |
 
 ---
 
 ## Publication log (paste LinkedIn permalinks after each post)
 
-**Publishing owner:** Board / CEO on [AURA-89](/AURA/issues/AURA-89). After each live post, paste the **LinkedIn permalink** there *or* add it below; CMO ([AURA-90](/AURA/issues/AURA-90)) will keep this table as the doc source of truth.
+**Publishing owner:** Board / CEO — delegated via [AURA-89](/AURA/issues/AURA-89) (now **`cancelled`**).
 
-**Intake status:** **[AURA-89](/AURA/issues/AURA-89) is `blocked`** until a **human** with Aura **LinkedIn Page** (or chosen profile) publishing rights completes the pilot. **2026-04-08 ~07:02 UTC** — CEO confirmed **agents cannot operate LinkedIn**; the **board** must publish **6** posts per this doc, paste **all permalinks** (and slip notes if any) on [AURA-89](/AURA/issues/AURA-89) or [AURA-86](/AURA/issues/AURA-86), fill the **retro** table here or in a comment, then **@-mention [CMO](/AURA/agents/cmo)** so [AURA-90](/AURA/issues/AURA-90) / [AURA-86](/AURA/issues/AURA-86) can close. CMO updates this line when URLs land.
+**Outcome (2026-07-01):** Board silent on tri-choice after pilot window lapsed. CEO **`cancelled`** [AURA-89](/AURA/issues/AURA-89) per operating default — reason *pilot window lapsed; no publishing evidence*. **0/6** permalinks; publication log rows remain empty.
 
-**Slip (2026-06-29):** Original pilot window **2026-04-09 → 2026-04-22** passed with **0/6** permalinks recorded. Publication log rows remain empty.
-
-**Board decision (CEO, [AURA-89](/AURA/issues/AURA-89)):** Reply with **(1) Relaunch** + start date, **(2) Cancel** + reason, or **(3) Switch channel** + cadence preference. **CEO default if silent:** cancel [AURA-89](/AURA/issues/AURA-89) next operating week with reason *“pilot window lapsed; no publishing evidence”* unless board picks (1) or (3) first. CMO executes on [AURA-90](/AURA/issues/AURA-90) once a path is chosen.
+**Slip (2026-06-29):** Original pilot window **2026-04-09 → 2026-04-22** passed with **0/6** permalinks recorded.
 
 | # | Target date | Post URL |
 | --- | --- | --- |
@@ -88,17 +86,5 @@ For engineers supporting pilots: optional **authenticated beta API** + observabi
 ## Completion checklist
 
 - [x] Schedule published in-repo (this file) **before** first post.
-- [ ] ≥ **6** LinkedIn posts on schedule (or documented slip with reason).
-- [ ] Retro section filled within **3 business days** of last post.
-
----
-
-## Path B closeout draft (pending CEO cancel of [AURA-89](/AURA/issues/AURA-89))
-
-*Do not treat as final until CEO **`cancel`s** [AURA-89](/AURA/issues/AURA-89). CMO promotes into the retro table above and closes [AURA-86](/AURA/issues/AURA-86) / [AURA-90](/AURA/issues/AURA-90).*
-
-| Question | Draft |
-| --- | --- |
-| What **worked** | In-repo schedule + copy bank shipped before publish; clear CEO/board delegation for human LinkedIn |
-| What to **stop** | LinkedIn cadence pilot without a named board publisher + calendar hold at kickoff |
-| **Next experiment hypothesis** | Either **(C) switch channel** (X/dev community, lower friction) or **(A) relaunch LinkedIn** with confirmed start date + assigned human publisher |
+- [x] ≥ **6** LinkedIn posts on schedule — **waived (Path B cancel)**; slip documented above.
+- [x] Retro section filled (Path B closeout, 2026-07-01).
