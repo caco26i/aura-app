@@ -10,6 +10,9 @@
  * - Checklist item 5 (mocked): on `/journey/active`, **Share live location** (primer → **Share location**) issues
  *   authenticated `POST /v1/journeys/:id/location-shares` with the session token and completes without auth/ownership
  *   failure copy.
+ * - Checklist item 5 (mocked): near-expiry cached session triggers a fresh credentialed `GET /session` before the next
+ *   authenticated API call; the refreshed token is used on `POST /v1/journeys`.
+ * - Checklist item 5 (mocked): `401` on a protected route surfaces calm recovery copy (`role="alert"`) — no silent failure.
  * - Checklist item 4 (gap): Google **Continue with Google** OAuth is **not** exercised in CI — requires a real
  *   `VITE_GOOGLE_CLIENT_ID` and Google; use staging manual smoke or local dev with BFF + OAuth client.
  */
@@ -40,6 +43,12 @@ const AURA_STORAGE_BOOTSTRAP = JSON.stringify({
     encuentroBrowserNotifyWanted: false,
   },
 });
+
+function stubAccessToken(sub: string, expSecFromNow: number): string {
+  const expSec = Math.floor(Date.now() / 1000) + expSecFromNow;
+  const payload = Buffer.from(JSON.stringify({ sub, exp: expSec })).toString('base64url');
+  return `e2e.${payload}.stub`;
+}
 
 test.describe('settings beta BFF (stub path, unreachable proxy)', () => {
   test.beforeEach(async ({ page }) => {
@@ -236,6 +245,129 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     await expect(page.getByRole('alert')).toHaveCount(0);
     await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
     await expect(page.getByText(/doesn't match your current session/i)).toHaveCount(0);
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+});
+
+test.describe('settings beta BFF (stub path, session refresh)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((payload) => {
+      if (window.localStorage.getItem('aura:v1')) return;
+      window.localStorage.setItem('aura:v1', payload);
+    }, AURA_STORAGE_BOOTSTRAP);
+  });
+
+  test('near-expiry session cache refreshes before authenticated POST /v1/journeys', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    const tokenNearExpiry = stubAccessToken('e2e-bff-near-expiry', 30);
+    const tokenRefreshed = stubAccessToken('e2e-bff-refreshed', 3600);
+    const nearExpiresAt = new Date(Date.now() + 30_000).toISOString();
+    const refreshedExpiresAt = new Date(Date.now() + 3_600_000).toISOString();
+    const journeyId = 'c3d4e5f6-a7b8-4901-c234-567890abcdef';
+
+    let sessionGetCount = 0;
+    let postJourneysAuth: string | null = null;
+
+    await page.route('**/aura-bff/session', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
+      sessionGetCount += 1;
+      const isRefresh = sessionGetCount > 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true,
+          accessToken: isRefresh ? tokenRefreshed : tokenNearExpiry,
+          expiresAt: isRefresh ? refreshedExpiresAt : nearExpiresAt,
+        }),
+      });
+    });
+
+    await page.route('**/v1/journeys', async (route) => {
+      const url = new URL(route.request().url());
+      if (route.request().method() !== 'POST' || !url.pathname.endsWith('/v1/journeys')) {
+        await route.continue();
+        return;
+      }
+      postJourneysAuth = route.request().headers()['authorization'] ?? null;
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, data: { journeyId } }),
+      });
+    });
+
+    await page.goto('/settings');
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
+    expect(sessionGetCount).toBe(1);
+
+    await page.goto('/journey/new');
+    await expect(page.getByRole('heading', { name: 'New journey', level: 1 })).toBeVisible();
+    await page.getByRole('button', { name: 'Start live tracking' }).click();
+
+    await expect(page).toHaveURL(/\/journey\/active$/);
+    expect(sessionGetCount).toBeGreaterThanOrEqual(2);
+    expect(postJourneysAuth).toBe(`Bearer ${tokenRefreshed}`);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
+
+    expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
+  });
+});
+
+test.describe('settings beta BFF (stub path, protected-route error)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((payload) => {
+      if (window.localStorage.getItem('aura:v1')) return;
+      window.localStorage.setItem('aura:v1', payload);
+    }, AURA_STORAGE_BOOTSTRAP);
+  });
+
+  test('401 on POST /v1/journeys shows calm recovery copy (no silent failure)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    const accessToken = stubAccessToken('e2e-bff-401', 3600);
+    const expiresAt = new Date(Date.now() + 3_600_000).toISOString();
+
+    await page.route('**/aura-bff/session', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, accessToken, expiresAt }),
+      });
+    });
+
+    await page.route('**/v1/journeys', async (route) => {
+      const url = new URL(route.request().url());
+      if (route.request().method() !== 'POST' || !url.pathname.endsWith('/v1/journeys')) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, error: 'unauthorized' }),
+      });
+    });
+
+    await page.goto('/journey/new');
+    await expect(page.getByRole('heading', { name: 'New journey', level: 1 })).toBeVisible();
+    await page.getByRole('button', { name: 'Start live tracking' }).click();
+
+    await expect(page).toHaveURL(/\/journey\/new$/);
+    await expect(page.getByRole('alert')).toContainText(/Your session may have expired/i);
+    await expect(page.getByRole('button', { name: 'Start live tracking' })).toBeEnabled();
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
