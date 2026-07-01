@@ -7,16 +7,17 @@
 
 ## S1 / W2-1 — Campus safety (final bump)
 
-**Subject:** Re: Following up — Aura pilot fit for [ORG]
+**Use:** +5 business days after T2 if silent (e.g. T2 Mon 2026-07-07 → T3 **Mon 2026-07-14**).  
+**Subject:** Re: Aura public beta — campus safety companion pilot fit
 
-Hi [CONTACT_NAME],
+Hi C4SW team,
 
 Last note from me — if a campus pilot isn't the right fit now, no worries. If it might be later, we're happy to stay on your radar with the public beta link below.
 
 Otherwise, a quick pointer to whoever owns **student safety tech or wellness pilots** would be appreciated.
 
 Best,  
-[YOUR_NAME]
+Aura Partnerships
 
 **Try the beta:** https://github.com/caco26i/aura-app
 
