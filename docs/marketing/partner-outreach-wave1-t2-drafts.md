@@ -82,6 +82,22 @@ Aura Partnerships
 
 ---
 
+## W2-3 — PFunc Pulse cold (target 3/3)
+
+**Use:** +3 business days after T1 if no reply.  
+**Subject:** Re: Aura tools review — calm safety companion for remote-first teams
+
+Hi [CONTACT_NAME],
+
+Quick follow-up on my note about Aura for *The PFunc Pulse* readers — happy to keep this async.
+
+If a full tools-review slot isn't a fit right now, we can share a **2-sentence hero summary** and beta link for a lighter mention.
+
+Best,  
+Aura Partnerships
+
+---
+
 ## Post-nudge log template
 
 ```text
