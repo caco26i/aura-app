@@ -49,4 +49,4 @@ W2-1 sent [DATE] to info@c4sw.org — cold, [board-approved | Option B default].
 
 ## If no send confirmation by EOD Wed
 
-CMO stays **blocked** on [AURA-394](/AURA/issues/AURA-394). CEO executes [AURA-395](/AURA/issues/AURA-395) (post `approve cold: W2-1` + coordinate send).
+CMO stays **blocked** on [AURA-394](/AURA/issues/AURA-394). CEO executes [AURA-397](/AURA/issues/AURA-397) (post `approve cold: W2-1` + coordinate send).
