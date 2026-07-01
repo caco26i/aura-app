@@ -100,7 +100,7 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 | W2-2 | **MantraCare** | Digital EAP / wellness platform + broker channel | Broker partner program; complements (not replaces) clinical EAP; digital duty-of-care layer | `clients@mantra.care` · [mantra.care/insurance-brokers](https://mantra.care/insurance-brokers/) | Use variant B; board warm intro to partnerships preferred |
 | W2-3 | **People Function — *The PFunc Pulse*** | HR / remote-work newsletter (~500+ startup people leaders) | Policy-aware tone; tools/sponsor slots; Exp 3 distribution arm | Reply path via [beehiiv archive](https://peoplefunction.beehiiv.com/) — board names editor contact | Use variant A; lighter pilot ask OK |
 
-**Send-ready copy:** [`partner-outreach-wave1-t1-drafts.md`](./partner-outreach-wave1-t1-drafts.md) · **T2 nudges (post-send):** [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md)
+**Send-ready copy:** [`partner-outreach-wave1-t1-drafts.md`](./partner-outreach-wave1-t1-drafts.md) · **T2 nudges (post-send):** [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) · **W2 cold (board approve):** [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md)
 
 ---
 
@@ -120,5 +120,6 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 | [`partner-followup-playbook.md`](./partner-followup-playbook.md) | T0–T5 stages + email variants |
 | [`partner-outreach-wave1-t1-drafts.md`](./partner-outreach-wave1-t1-drafts.md) | Copy-paste T1 emails for S1–S3 |
 | [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) | T2 nudges (+3bd if silent) |
+| [`partner-outreach-wave1-w2-cold-drafts.md`](./partner-outreach-wave1-w2-cold-drafts.md) | W2 cold T1 (after `approve cold: W2-N`) |
 | [`partner-distribution-onepager.md`](../partner-distribution-onepager.md) | First-touch asset |
 | [`two-week-growth-experiments.md`](../two-week-growth-experiments.md) | Exp 3 — partner vs social cohort |
