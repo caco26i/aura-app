@@ -1,7 +1,7 @@
 # Partner outreach — wave 1 log (T0–T1)
 
-**Status:** T0 complete + T1–T3 **send drafts ready** — outbound send pending board contact paths or cold approval. **T1 SLA:** slipped from T0 (2026-07-01) — CEO chased board on [AURA-338](/AURA/issues/AURA-338) 2026-07-01; deadline EOD Wed 2026-07-02.  
-**Board pack:** [`board-action-pack-2026-07-02.md`](./board-action-pack-2026-07-02.md)  
+**Status:** T0 complete + T1–T3 send drafts ready. **CEO Option B pre-committed** — W2-1 cold send at EOD Wed 2026-07-02 if board silent; early override: `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338). **0 T1 sent.**  
+**EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) · **Execution:** [AURA-394](/AURA/issues/AURA-394)  
 **Tracking:** [AURA-327](/AURA/issues/AURA-327) · **Parent:** [AURA-319](/AURA/issues/AURA-319)  
 **Playbook:** [`partner-followup-playbook.md`](./partner-followup-playbook.md) stages T0–T1  
 **Materials:** [`partner-distribution-onepager.md`](../partner-distribution-onepager.md) + [`PUBLIC_BETA.md`](../PUBLIC_BETA.md)
@@ -97,7 +97,7 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 | # | Org | Archetype | Why fit | Public contact path | CMO note |
 | - | --- | --------- | ------- | ------------------- | -------- |
-| W2-1 | **Coalition for Student Wellbeing (C4SW)** | Campus safety / student wellness coalition | Student-led advocacy bridging campus decision-makers; trusted-contact + safety UX adjacency (not clinical crisis line positioning) | `info@c4sw.org`, `advocacy@c4sw.org` · [c4sw.org](https://c4sw.org/) | Prefer warm intro to executive director; cold inbox OK if board approves |
+| W2-1 | **Coalition for Student Wellbeing (C4SW)** | Campus safety / student wellness coalition | Student-led advocacy bridging campus decision-makers; trusted-contact + safety UX adjacency (not clinical crisis line positioning) | `info@c4sw.org`, `advocacy@c4sw.org` · [c4sw.org](https://c4sw.org/) | **Option B default** — cold send at EOD if board silent; handoff ready |
 | W2-2 | **MantraCare** | Digital EAP / wellness platform + broker channel | Broker partner program; complements (not replaces) clinical EAP; digital duty-of-care layer | `clients@mantra.care` · [mantra.care/insurance-brokers](https://mantra.care/insurance-brokers/) | Use variant B; board warm intro to partnerships preferred |
 | W2-3 | **People Function — *The PFunc Pulse*** | HR / remote-work newsletter (~500+ startup people leaders) | Policy-aware tone; tools/sponsor slots; Exp 3 distribution arm | Reply path via [beehiiv archive](https://peoplefunction.beehiiv.com/) — board names editor contact | Use variant A; lighter pilot ask OK |
 
@@ -116,17 +116,17 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 ## Contingency — if board silent EOD Wed 2026-07-02
 
-**Agent-side work:** Complete (T0–T3 copy, W2 cold, board packs). **Human send:** Not possible without board on [AURA-338](/AURA/issues/AURA-338).
+**CEO decision (2026-07-01):** **Option B — Delegate cold** pre-committed on [AURA-338](/AURA/issues/AURA-338). CMO execution ticket: [AURA-394](/AURA/issues/AURA-394).
 
-**Recommended CEO default (mirror LinkedIn Path B):**
+**Agent-side work:** Complete (T0–T3 copy, W2 cold, board packs, EOD handoff). **Human send:** Pending EOD or early board `approve cold: W2-1`.
 
-| Option | Action |
+| Option | Status |
 | ------ | ------ |
-| **A — Defer wave 1** | Keep docs on `main`; reopen when board provides contact path |
-| **B — CEO delegates cold** | CEO comments `approve cold: W2-1` on AURA-338; board or CEO sends C4SW email |
-| **C — Close wave 1 incomplete** | Mark [AURA-327](/AURA/issues/AURA-327) cancelled with retro: 0/3 T1, blocker = human send |
+| **A — Defer wave 1** | Not selected |
+| **B — CEO delegates cold** | **Pre-committed** — CEO posts `approve cold: W2-1` at EOD; send W2-1 from [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) |
+| **C — Close wave 1 incomplete** | Not selected — escalate to CEO if board opts out before EOD |
 
-CMO cannot execute A/B/C without CEO/board decision. Wave 2 named targets remain in table above for next attempt.
+**EOD handoff:** [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) (copy-paste W2-1 + post-send checklist).
 
 **Closeout draft (Path C):** [`partner-outreach-wave1-closeout-draft.md`](./partner-outreach-wave1-closeout-draft.md)
 
