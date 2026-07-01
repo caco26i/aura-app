@@ -58,7 +58,7 @@ export function MapPage() {
           height: 30,
           borderRadius: 999,
           border: 'none',
-          background: mapLayers[key] ? '#3d9a6a' : '#d7d2e6',
+          background: mapLayers[key] ? 'var(--aura-status-ok)' : 'var(--s3)',
           position: 'relative',
           cursor: 'pointer',
         }}
@@ -71,7 +71,7 @@ export function MapPage() {
             width: 24,
             height: 24,
             borderRadius: '50%',
-            background: '#fff',
+            background: 'var(--aura-on-primary)',
             transition: 'left 0.15s ease',
           }}
         />
