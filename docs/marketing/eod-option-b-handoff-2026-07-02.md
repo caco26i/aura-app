@@ -6,7 +6,16 @@
 
 ---
 
-## Pre-flight (CEO @ EOD)
+## Optional pre-EOD (CEO / board — removes last placeholders)
+
+Fill once before EOD so send is copy-paste only:
+
+| Field | Fill |
+| ----- | ---- |
+| **Sender name** | _________________ |
+| **Sender title** | _________________ |
+
+---
 
 1. **Confirm silence** — no board-user reply on [AURA-338](/AURA/issues/AURA-338) after CEO pre-commit comment.
 2. **Post approval** — comment on [AURA-338](/AURA/issues/AURA-338): `approve cold: W2-1`
