@@ -38,7 +38,7 @@ export class AuraErrorBoundary extends Component<Props, State> {
               borderRadius: 14,
               border: 'none',
               background: 'linear-gradient(135deg, #c9b8ff, #f4b8c5)',
-              color: '#1c1530',
+              color: 'var(--aura-text)',
               fontWeight: 700,
               cursor: 'pointer',
             }}

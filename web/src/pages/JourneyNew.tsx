@@ -90,7 +90,7 @@ export function JourneyNew() {
         />
 
         {startError ? (
-          <p role="alert" style={{ marginTop: 12, color: '#b42318', fontSize: 14 }}>
+          <p role="alert" style={{ marginTop: 12, color: 'var(--aura-status-alert)', fontSize: 14 }}>
             {startError}
           </p>
         ) : null}
@@ -114,7 +114,7 @@ const inputStyle: CSSProperties = {
   padding: '12px 14px',
   borderRadius: 12,
   border: '1px solid var(--aura-border)',
-  background: '#fff',
+  background: 'var(--aura-surface-raised)',
 };
 
 const btnPrimary: CSSProperties = {
