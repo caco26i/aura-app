@@ -6,14 +6,16 @@
 
 ---
 
-## Sender (fill once)
+## Locked sender (CEO-approved — same as W2-1)
 
-| Field | Recommended |
-| ----- | ----------- |
-| **Name** | _________________ |
-| **Title** | _________________ |
+| Field | Value |
+| ----- | ----- |
+| **Name** | **Aura Partnerships** |
+| **Title** | **Partnerships** |
 | **Org** | Aura |
 | **Pilot contact** | https://github.com/caco26i/aura-app/issues |
+
+Board may override with personal name/title on [AURA-338](/AURA/issues/AURA-338) before send.
 
 ---
 
@@ -35,8 +37,8 @@ We see fit as a **complementary digital duty-of-care layer** for broker and EAP 
 Please reply with availability for a short discovery call, or indicate the appropriate contact if another stakeholder should lead.
 
 Sincerely,  
-[YOUR_NAME]  
-[YOUR_TITLE], Aura
+Aura Partnerships  
+Partnerships, Aura
 
 **Partner summary:** https://github.com/caco26i/aura-app/blob/main/docs/partner-distribution-onepager.md  
 **Outcomes framing (diligence):** https://github.com/caco26i/aura-app/blob/main/docs/beta-analytics-outcomes-narrative.md  
