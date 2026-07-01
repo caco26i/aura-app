@@ -231,7 +231,7 @@ export function JourneyActive() {
           type="button"
           disabled={busy !== null || overlayOpen}
           onClick={() => setEndJourneyConfirmOpen(true)}
-          style={{ ...actionBtn, background: '#fff' }}
+          style={{ ...actionBtn, background: 'var(--aura-card)' }}
         >
           End journey
         </button>
@@ -261,7 +261,7 @@ export function JourneyActive() {
             style={{
               width: '100%',
               maxWidth: 420,
-              background: '#fff',
+              background: 'var(--aura-surface-raised)',
               borderRadius: 16,
               padding: 16,
               marginBottom: 'calc(24px + var(--aura-safe-area-bottom))',
@@ -277,7 +277,7 @@ export function JourneyActive() {
             </p>
             <button
               type="button"
-              style={{ ...actionBtn, marginTop: 8, background: '#fff' }}
+              style={{ ...actionBtn, marginTop: 8, background: 'var(--aura-card)' }}
               onClick={() => setSharePrimerOpen(false)}
             >
               Cancel
@@ -313,7 +313,7 @@ export function JourneyActive() {
             style={{
               width: '100%',
               maxWidth: 420,
-              background: '#fff',
+              background: 'var(--aura-surface-raised)',
               borderRadius: 16,
               padding: 16,
               marginBottom: 'calc(24px + var(--aura-safe-area-bottom))',
@@ -326,7 +326,7 @@ export function JourneyActive() {
             <p style={{ color: 'var(--aura-muted)' }}>Open emergency options in silent mode (fewer visible cues).</p>
             <button
               type="button"
-              style={{ ...actionBtn, marginTop: 8, background: '#fff' }}
+              style={{ ...actionBtn, marginTop: 8, background: 'var(--aura-card)' }}
               onClick={() => setSilentSheetOpen(false)}
             >
               Cancel
@@ -374,7 +374,7 @@ export function JourneyActive() {
             style={{
               width: '100%',
               maxWidth: 400,
-              background: '#fff',
+              background: 'var(--aura-surface-raised)',
               borderRadius: 16,
               padding: 20,
               boxShadow: 'var(--aura-shadow)',
@@ -388,7 +388,7 @@ export function JourneyActive() {
               Live tracking stops on this device. You can start a new journey anytime from the journey screen.
             </p>
             <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
-              <button type="button" onClick={() => setEndJourneyConfirmOpen(false)} style={{ ...actionBtn, background: '#fff' }}>
+              <button type="button" onClick={() => setEndJourneyConfirmOpen(false)} style={{ ...actionBtn, background: 'var(--aura-card)' }}>
                 Cancel
               </button>
               <button
@@ -401,7 +401,7 @@ export function JourneyActive() {
                 style={{
                   ...actionBtn,
                   background: 'var(--aura-status-alert)',
-                  color: '#fff',
+                  color: 'var(--aura-on-primary)',
                   borderColor: 'var(--aura-status-alert)',
                 }}
               >

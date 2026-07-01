@@ -63,9 +63,10 @@ Used by **Home**, **Modo Cita / Transporte / Check-in IA**, and shared M3 compon
 | Surface | Exception | Rationale |
 |---------|-----------|-----------|
 | **`Emergency.tsx`** | Dark violet gradient shell (`#2a1530` → `#1a0d22`), light-on-dark buttons | Full-screen SOS distinct from calm hub; not mapped to `--aura-canvas` |
-| **Action sheets / secondary buttons** | Inline `#fff` card backgrounds on journey flows | Local elevation contrast; acceptable until tokenized `--aura-card`-on-gradient pattern exists |
 | **`Settings.tsx` destructive control** | `#b42318` fill | Matches `--aura-status-alert` family; inline for button specificity |
 | **`JourneyNew.tsx` primary CTA** | Gradient `#c9b8ff` → `#f4b8c5` | Uses blush/lavender family aligned to `--aura-blush` / `--Pbg` intent |
+
+**Journey action-sheet overlays:** [`JourneyActive.tsx`](../web/src/pages/JourneyActive.tsx) uses inline `rgba(0,0,0,0.45)` scrim (no shared overlay token yet). Sheet cards use `--aura-surface-raised`; secondary/cancel buttons use `--aura-card`; destructive confirm label uses `--aura-on-primary` ([AURA-364](/AURA/issues/AURA-364)).
 
 No eng change required for launch; document-only unless consolidating to CSS variables later.
 
