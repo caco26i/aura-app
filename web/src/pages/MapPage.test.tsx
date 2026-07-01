@@ -30,7 +30,7 @@ function expectSwitchA11y(label: string, on: boolean) {
   const sw = screen.getByRole('switch', { name: new RegExp(`^${label}:`) });
   const checked = String(on);
   expect(sw.getAttribute('aria-checked')).toBe(checked);
-  expect(sw.getAttribute('aria-pressed')).toBe(checked);
+  expect(sw.getAttribute('aria-pressed')).toBeNull();
   expect(sw.getAttribute('aria-label')).toBe(`${label}: ${on ? 'on' : 'off'}`);
   const descId = sw.getAttribute('aria-describedby');
   expect(descId).toBeTruthy();
@@ -48,7 +48,7 @@ describe('MapPage layer switches', () => {
     setMapLayerMock.mockClear();
   });
 
-  it('reflects mocked mapLayers in aria-checked, aria-pressed, and aria-label', () => {
+  it('reflects mocked mapLayers in aria-checked and aria-label', () => {
     render(<MapPage />);
 
     expectSwitchA11y('Risk signals', true);
