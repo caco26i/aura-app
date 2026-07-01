@@ -6,16 +6,16 @@
 
 ---
 
-## Optional pre-EOD (CEO / board — removes last placeholders)
+## Locked sender (CEO approved)
 
-Fill once before EOD so send is copy-paste only:
+CEO **`approve fallback`** on [AURA-397](/AURA/issues/AURA-397) — locked for EOD unless board overrides before send:
 
-| Field | Fill |
-| ----- | ---- |
-| **Sender name** | _________________ |
-| **Sender title** | _________________ |
+| Field | Value |
+| ----- | ----- |
+| **Sender name** | **Aura Partnerships** |
+| **Sender title** | **Partnerships** |
 
-**EOD fallback (if not pre-filled):** use **Aura Partnerships** / **Partnerships** — CEO confirms or overrides on [AURA-397](/AURA/issues/AURA-397).
+Board may still override with a personal name/title on [AURA-338](/AURA/issues/AURA-338) before EOD; if so, replace signature in body below only.
 
 ---
 
@@ -32,16 +32,14 @@ Fill once before EOD so send is copy-paste only:
 **To:** `info@c4sw.org` *(optional CC: `advocacy@c4sw.org`)*  
 **Subject:** Aura public beta — campus safety companion pilot fit
 
-Replace sender placeholders once:
+**Paste-send-ready** — no placeholders remaining (CEO-approved sender locked above):
 
-| Placeholder | Recommended default (EOD send) |
-| ----------- | ------------------------------ |
-| `[YOUR_NAME]` | **Sender fills** — board or CEO name |
-| `[YOUR_TITLE]` | **Sender fills** — e.g. *Founder* or *Partnerships* |
-| `[ORG]` | Aura |
-| `[FEEDBACK_OR_PILOT_CONTACT]` | https://github.com/caco26i/aura-app/issues *(pilot / feedback)* |
+| Field | Value |
+| ----- | ----- |
+| **ORG** | Aura |
+| **Pilot / feedback** | https://github.com/caco26i/aura-app/issues |
 
-**Send-ready body** (fill name/title only):
+**Body:**
 
 
 Hi C4SW team,
@@ -53,10 +51,8 @@ We thought C4SW's work bridging **campus decision-makers and student wellbeing**
 **Single ask:** Would a 25-minute call to scope a small campus pilot make sense, or should I connect with someone else on your team?
 
 Best,  
-[YOUR_NAME]  
-[YOUR_TITLE], [ORG]
-
-*Fallback signature if name/title not pre-filled:* **Aura Partnerships** / **Partnerships**, Aura
+Aura Partnerships  
+Partnerships, Aura
 
 **Partner overview:** https://github.com/caco26i/aura-app/blob/main/docs/partner-distribution-onepager.md  
 **Try the beta:** https://github.com/caco26i/aura-app  
