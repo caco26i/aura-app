@@ -59,8 +59,20 @@ Check [AURA-338](/AURA/issues/AURA-338) comments for **any** of:
 
 | Trigger | Action |
 | ------- | ------ |
-| `approve cold: W2-1` + send confirmation (`W2-1 sent`, `info@c4sw.org`) | Run checklist above immediately |
+| `approve cold: W2-1` + send confirmation (`W2-1 sent [DATE]` + `info@c4sw.org`) | Run checklist above immediately — **ignore** instructional mentions of `W2-1 sent` in agent comments |
 | Board warm intro for S1/S2/S3 | Follow board direction; update log |
 | `approve cold: W2-2` / `W2-3` | Log alternate target; stage send from W2 cold drafts |
 
 If none match and before EOD Wed → stay **blocked**, comment scan result on [AURA-394](/AURA/issues/AURA-394).
+
+---
+
+## Log promotion (if T1 = 2026-07-02 EOD)
+
+Update summary row in [`partner-outreach-wave1-log.md`](./partner-outreach-wave1-log.md):
+
+```markdown
+| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent 2026-07-02** — cold → info@c4sw.org | T2 nudge **Mon 2026-07-07** if silent |
+```
+
+Update status line: `**1 T1 sent** (W2-1)` · promote W2-1 send log table dates from `[DATE]` → `2026-07-02`.
