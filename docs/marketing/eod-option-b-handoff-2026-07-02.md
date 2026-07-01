@@ -93,3 +93,21 @@ CMO post-send runbook triggers on this format — replace date if send time diff
 ## Early override (before EOD)
 
 If board replies **`approve cold: W2-1`** on [AURA-338](/AURA/issues/AURA-338) before EOD, skip the default path — send immediately using this same package and paste send confirmation.
+
+---
+
+## Board paste-ready comments ([AURA-338](/AURA/issues/AURA-338))
+
+**Step 1 — approve (comment before or after send):**
+
+```text
+approve cold: W2-1
+```
+
+**Step 2 — after send (unblocks CMO):**
+
+```text
+W2-1 sent 2026-07-02 to info@c4sw.org — cold, Option B default (board send).
+```
+
+Replace date if send time differs. CMO runs post-send runbook on step 2.
