@@ -34,12 +34,29 @@ function formatViolations(violations: Result[]): string {
     .join('\n');
 }
 
-test.describe('a11y axe — transport, check-in IA, Modo Cita (AURA-278, AURA-312)', () => {
+test.describe('a11y axe — home hub, transport, check-in IA, Modo Cita (AURA-278, AURA-312, AURA-322)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((payload) => {
       if (window.localStorage.getItem('aura:v1')) return;
       window.localStorage.setItem('aura:v1', payload);
     }, AURA_STORAGE_BOOTSTRAP);
+  });
+
+  test('/: axe clean + global status aria-live region', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'Home', level: 1 })).toBeAttached();
+
+    const status = page.locator('#main-content [role="status"][aria-live="polite"][aria-atomic="true"]');
+    await expect(status).toBeVisible();
+    await expect(status).toHaveText('Safe.');
+
+    const axe = await new AxeBuilder({ page }).include('#main-content').analyze();
+    expect(axe.violations, formatViolations(axe.violations)).toEqual([]);
+
+    expect(pageErrors, pageErrors.join('; ')).toEqual([]);
   });
 
   test('/transport: axe clean + live status region', async ({ page }) => {

@@ -32,7 +32,7 @@ export function Home() {
         }}
       >
         <div>
-          <div style={{ fontSize: 11, color: 'var(--k3)' }}>{greetingLine()}</div>
+          <div style={{ fontSize: 11, color: 'var(--k2)' }}>{greetingLine()}</div>
           <div
             style={{
               fontFamily: 'var(--fd)',
@@ -194,13 +194,13 @@ export function Home() {
           fontWeight: 500,
         }}
       >
-        <Link to="/map" style={{ color: 'var(--P)' }}>
+        <Link to="/map" style={{ color: 'var(--Pk)' }}>
           Safety map
         </Link>
-        <Link to="/trusted" style={{ color: 'var(--P)' }}>
+        <Link to="/trusted" style={{ color: 'var(--Pk)' }}>
           Network
         </Link>
-        <Link to="/settings" style={{ color: 'var(--P)' }}>
+        <Link to="/settings" style={{ color: 'var(--Pk)' }}>
           Settings
         </Link>
       </div>

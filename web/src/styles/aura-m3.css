@@ -19,7 +19,7 @@
   --warn: #9a7030;
   --warn-c: #fff6e8;
   --warn-br: rgba(154, 112, 48, 0.18);
-  --danger: #c05080;
+  --danger: #a83f68;
   --dgr-c: #fdeef5;
   --dgr-br: rgba(192, 80, 128, 0.18);
   --k1: #1a1028;
@@ -137,7 +137,7 @@
   font-weight: 500;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: var(--P);
+  color: var(--k2);
   padding: 16px 0 7px;
 }
 
@@ -236,8 +236,8 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: var(--P);
-  background: rgba(133, 116, 204, 0.15);
+  color: var(--Pk);
+  background: rgba(32, 0, 96, 0.1);
   padding: 1px 6px;
   border-radius: var(--r5);
 }
