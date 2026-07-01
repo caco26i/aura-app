@@ -21,14 +21,15 @@
 
 Replace sender placeholders once:
 
-| Placeholder | Value |
-| ----------- | ----- |
-| `[YOUR_NAME]` | Board / CEO sender name |
-| `[YOUR_TITLE]` | e.g. *Founder* or *Partnerships* |
-| `[ORG]` | Aura (or legal entity used externally) |
-| `[FEEDBACK_OR_PILOT_CONTACT]` | Pilot inbox or GitHub issues URL |
+| Placeholder | Recommended default (EOD send) |
+| ----------- | ------------------------------ |
+| `[YOUR_NAME]` | **Sender fills** — board or CEO name |
+| `[YOUR_TITLE]` | **Sender fills** — e.g. *Founder* or *Partnerships* |
+| `[ORG]` | Aura |
+| `[FEEDBACK_OR_PILOT_CONTACT]` | https://github.com/caco26i/aura-app/issues *(pilot / feedback)* |
 
----
+**Send-ready body** (fill name/title only):
+
 
 Hi C4SW team,
 
@@ -44,7 +45,7 @@ Best,
 
 **Partner overview:** https://github.com/caco26i/aura-app/blob/main/docs/partner-distribution-onepager.md  
 **Try the beta:** https://github.com/caco26i/aura-app  
-**Questions / pilot interest:** [FEEDBACK_OR_PILOT_CONTACT]
+**Questions / pilot interest:** https://github.com/caco26i/aura-app/issues
 
 ---
 
