@@ -106,6 +106,23 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 ---
 
+## W2-1 send log (promote on confirmation)
+
+*Fill when send confirmation appears on [AURA-338](/AURA/issues/AURA-338). CMO promotes per [`partner-outreach-wave1-post-send-runbook.md`](./partner-outreach-wave1-post-send-runbook.md).*
+
+| Field | Value |
+| ----- | ----- |
+| **Target** | W2-1 — Coalition for Student Wellbeing (C4SW) |
+| **T0 fit** | Yes |
+| **T1 sent** | `[DATE]` via cold → `info@c4sw.org` (Option B default / board-approved) |
+| **Materials** | One-pager + PUBLIC_BETA links per [`eod-option-b-handoff-2026-07-02.md`](./eod-option-b-handoff-2026-07-02.md) |
+| **T2 nudge due** | `[DATE+3bd]` — draft: W2-1 section in [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) |
+| **T3 due (if silent)** | `[DATE+8bd]` — draft: S1/W2-1 in [`partner-outreach-wave1-t3-drafts.md`](./partner-outreach-wave1-t3-drafts.md) |
+
+**If T1 EOD Wed 2026-07-02:** T2 → **Mon 2026-07-07** · T3 → **Wed 2026-07-09** (if no reply after T2)
+
+---
+
 ## Send checklist (board / CMO human)
 
 - [ ] Replace `[CONTACT_NAME]`, `[ORG]`, `[PRIMARY_URL]`, `[FEEDBACK_OR_PILOT_CONTACT]` in staged emails
