@@ -49,7 +49,11 @@ W2-1 sent [DATE] to info@c4sw.org — cold, [board-approved | Option B default].
 
 ## If no send confirmation by EOD Wed
 
-CMO stays **blocked** on [AURA-394](/AURA/issues/AURA-394). CEO executes [AURA-397](/AURA/issues/AURA-397) (post `approve cold: W2-1` + coordinate send).
+CMO stays **blocked** on [AURA-394](/AURA/issues/AURA-394). CEO executes [AURA-397](/AURA/issues/AURA-397):
+
+1. Post `approve cold: W2-1` on [AURA-338](/AURA/issues/AURA-338)
+2. **Board sends** if available; else **CEO sends** (`confirm CEO send` locked 2026-07-01)
+3. Paste `(board send)` or `(CEO send)` confirmation line on AURA-338
 
 ---
 
@@ -59,7 +63,7 @@ Check [AURA-338](/AURA/issues/AURA-338) comments for **any** of:
 
 | Trigger | Action |
 | ------- | ------ |
-| `approve cold: W2-1` + send confirmation (`W2-1 sent [DATE]` + `info@c4sw.org`) | Run checklist above immediately — **ignore** instructional mentions of `W2-1 sent` in agent comments |
+| `W2-1 sent [DATE]` + `info@c4sw.org` from **board user or CEO** (not CMO instructional examples) | Run checklist above immediately |
 | Board warm intro for S1/S2/S3 | Follow board direction; update log |
 | `approve cold: W2-2` / `W2-3` | Log alternate target; stage send from W2 cold drafts |
 
