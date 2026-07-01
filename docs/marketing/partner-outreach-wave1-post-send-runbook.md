@@ -72,7 +72,7 @@ If none match and before EOD Wed → stay **blocked**, comment scan result on [A
 Update summary row in [`partner-outreach-wave1-log.md`](./partner-outreach-wave1-log.md):
 
 ```markdown
-| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent 2026-07-02** — cold → info@c4sw.org | T2 nudge **Mon 2026-07-07** if silent |
+| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent 2026-07-02** — cold → info@c4sw.org | T2 nudge **Tue 2026-07-07** if silent |
 ```
 
 Update status line: `**1 T1 sent** (W2-1)` · promote W2-1 send log table dates from `[DATE]` → `2026-07-02`.
@@ -90,15 +90,15 @@ Update status line: `**1 T1 sent** (W2-1)` · promote W2-1 send log table dates 
 **Summary row** — replace W2-1 pending row:
 
 ```markdown
-| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent [SEND_DATE]** — cold → info@c4sw.org | T2 nudge **Mon 2026-07-07** if silent |
+| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent [SEND_DATE]** — cold → info@c4sw.org | T2 nudge **Tue 2026-07-07** if silent |
 ```
 
 **W2-1 send log table:**
 
 ```markdown
 | **T1 sent** | [SEND_DATE] via cold → `info@c4sw.org` (Option B default / board-approved) |
-| **T2 nudge due** | Mon 2026-07-07 — draft: W2-1 section in partner-outreach-wave1-t2-drafts.md |
-| **T3 due (if silent)** | Wed 2026-07-09 — draft: S1/W2-1 in partner-outreach-wave1-t3-drafts.md |
+| **T2 nudge due** | Tue 2026-07-07 — draft: W2-1 section in partner-outreach-wave1-t2-drafts.md |
+| **T3 due (if silent)** | Tue 2026-07-14 — draft: S1/W2-1 in partner-outreach-wave1-t3-drafts.md |
 ```
 
 **Git commit message:**

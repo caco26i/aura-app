@@ -119,7 +119,7 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 | **T2 nudge due** | `[DATE+3bd]` — draft: W2-1 section in [`partner-outreach-wave1-t2-drafts.md`](./partner-outreach-wave1-t2-drafts.md) |
 | **T3 due (if silent)** | `[DATE+8bd]` — draft: S1/W2-1 in [`partner-outreach-wave1-t3-drafts.md`](./partner-outreach-wave1-t3-drafts.md) |
 
-**If T1 EOD Wed 2026-07-02:** T2 → **Mon 2026-07-07** · T3 → **Wed 2026-07-09** (if no reply after T2)
+**If T1 EOD Wed 2026-07-02:** T2 → **Tue 2026-07-07** · T3 → **Tue 2026-07-14** (if no reply after T2; +5bd per playbook)
 
 ### After W2-1 — close wave 1 AC gap
 

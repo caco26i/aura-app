@@ -7,7 +7,7 @@
 
 ## S1 / W2-1 — Campus safety (final bump)
 
-**Use:** +5 business days after T2 if silent (e.g. T2 Mon 2026-07-07 → T3 **Mon 2026-07-14**).  
+**Use:** +5 business days after T2 if silent (e.g. T2 Tue 2026-07-07 → T3 **Tue 2026-07-14**).  
 **Subject:** Re: Aura public beta — campus safety companion pilot fit
 
 Hi C4SW team,

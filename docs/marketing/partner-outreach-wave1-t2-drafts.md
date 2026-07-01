@@ -52,7 +52,7 @@ Best,
 
 ## W2-1 — C4SW cold (Option B default)
 
-**Use:** +3 business days after T1 if no reply (e.g. T1 Wed 2026-07-02 → T2 **Mon 2026-07-07**).  
+**Use:** +3 business days after T1 if no reply (e.g. T1 Wed 2026-07-02 → T2 **Tue 2026-07-07**).  
 **Subject:** Re: Aura public beta — campus safety companion pilot fit
 
 Hi C4SW team,
