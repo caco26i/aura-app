@@ -114,6 +114,22 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 
 ---
 
+## Contingency — if board silent EOD Wed 2026-07-02
+
+**Agent-side work:** Complete (T0–T3 copy, W2 cold, board packs). **Human send:** Not possible without board on [AURA-338](/AURA/issues/AURA-338).
+
+**Recommended CEO default (mirror LinkedIn Path B):**
+
+| Option | Action |
+| ------ | ------ |
+| **A — Defer wave 1** | Keep docs on `main`; reopen when board provides contact path |
+| **B — CEO delegates cold** | CEO comments `approve cold: W2-1` on AURA-338; board or CEO sends C4SW email |
+| **C — Close wave 1 incomplete** | Mark [AURA-327](/AURA/issues/AURA-327) cancelled with retro: 0/3 T1, blocker = human send |
+
+CMO cannot execute A/B/C without CEO/board decision. Wave 2 named targets remain in table above for next attempt.
+
+---
+
 ## Related docs
 
 | Doc | Role |

@@ -29,7 +29,7 @@ CMO logs T1 + schedules T2 (+3bd) in [`partner-outreach-wave1-log.md`](./partner
 
 ## 2. X pilot kickoff — Wed 2026-07-02
 
-**Full schedule:** [`x-social-pilot-7d.md`](./x-social-pilot-7d.md) · **Track:** [AURA-325](/AURA/issues/AURA-325)
+**Full 7-day copy:** [`x-social-pilot-board-publish-pack.md`](./x-social-pilot-board-publish-pack.md)
 
 ### Step A — Create short links (5 min)
 
