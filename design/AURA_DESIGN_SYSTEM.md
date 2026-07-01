@@ -17,14 +17,18 @@ Canonical tokens live in `web/src/theme.css` (CSS variables). **M3 shell / Home 
 | `--aura-surface-soft` | Semi-transparent live-region / status panels (modo shells) |
 | `--aura-surface-muted` | Lighter placeholder surfaces (wireframe thumbs) |
 | `--aura-surface-faint` | Subtle inset panels (notify blocks) |
+| `--aura-surface-raised` | Elevated auth / sign-in card surface |
 | `--aura-on-primary` | Text/icons on `--Pbg` / primary gradient |
 | `--aura-border` | Hairline borders |
 | `--aura-shadow` | Elevated cards |
+| `--aura-shadow-lg` | Large elevated panels (auth card) |
+| `--aura-shadow-brand` | Primary brand glow (logo / orb) |
 | `--aura-radius-lg` | Large card radius (~20px) |
 | `--aura-radius-md` | Medium radius |
 | `--aura-status-ok` | Success / safe |
 | `--aura-status-warn` | Caution |
 | `--aura-status-alert` | Alert / danger emphasis |
+| `--aura-map-activity` | Map intel activity layer marker |
 | `--aura-safe-area-bottom` | `env(safe-area-inset-bottom)` for mobile |
 
 **Motion:** `prefers-reduced-motion: reduce` collapses animations/transitions (accessibility).

@@ -8,9 +8,13 @@
   --aura-surface-soft: rgba(255, 255, 255, 0.55);
   --aura-surface-muted: rgba(255, 255, 255, 0.5);
   --aura-surface-faint: rgba(255, 255, 255, 0.4);
+  --aura-surface-raised: rgba(255, 255, 255, 0.88);
   --aura-on-primary: #fff;
   --aura-border: rgba(28, 21, 48, 0.08);
   --aura-shadow: 0 12px 40px rgba(28, 21, 48, 0.12);
+  --aura-shadow-lg: 0 24px 48px rgba(26, 16, 40, 0.12);
+  --aura-shadow-brand: 0 8px 24px rgba(133, 116, 204, 0.25);
+  --aura-map-activity: #5b6fd6;
   --aura-radius-lg: 20px;
   --aura-radius-md: 14px;
   --aura-status-ok: #3d9a6a;

@@ -111,8 +111,8 @@ export function Auth() {
             margin: '0 auto',
             borderRadius: 'var(--r4)',
             padding: 28,
-            background: 'rgba(255,255,255,0.88)',
-            boxShadow: '0 24px 48px rgba(26, 16, 40, 0.12)',
+            background: 'var(--aura-surface-raised)',
+            boxShadow: 'var(--aura-shadow-lg)',
             border: '1px solid var(--bd2)',
           }}
         >
@@ -125,7 +125,7 @@ export function Auth() {
               style={{
                 borderRadius: 24,
                 objectFit: 'cover',
-                boxShadow: '0 8px 24px rgba(133, 116, 204, 0.25)',
+                boxShadow: 'var(--aura-shadow-brand)',
               }}
             />
             <h1 style={{ margin: '16px 0 6px', fontSize: 26, fontWeight: 800, fontFamily: 'var(--fd), serif' }}>
@@ -267,7 +267,7 @@ const inputStyle: CSSProperties = {
   padding: '14px 14px',
   borderRadius: 'var(--r3)',
   border: '1px solid var(--bd2)',
-  background: '#fff',
+  background: 'var(--bg)',
   fontSize: 16,
   outline: 'none',
   boxShadow: '0 0 0 0 transparent',
@@ -279,7 +279,7 @@ const primaryBtn: CSSProperties = {
   borderRadius: 'var(--r4)',
   border: 'none',
   background: 'var(--Pbg)',
-  color: '#fff',
+  color: 'var(--aura-on-primary)',
   fontWeight: 800,
   fontSize: 16,
   cursor: 'pointer',

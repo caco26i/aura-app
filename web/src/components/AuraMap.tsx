@@ -17,11 +17,21 @@ function FixResize() {
   return null;
 }
 
-const colors: Record<MapIntelFeature['kind'], string> = {
+const MAP_INTEL_COLOR_FALLBACK: Record<MapIntelFeature['kind'], string> = {
   risk: '#c94c5c',
   safe: '#3d9a6a',
   activity: '#5b6fd6',
 };
+
+function readMapIntelColors(): Record<MapIntelFeature['kind'], string> {
+  if (typeof document === 'undefined') return MAP_INTEL_COLOR_FALLBACK;
+  const root = getComputedStyle(document.documentElement);
+  return {
+    risk: root.getPropertyValue('--aura-status-alert').trim() || MAP_INTEL_COLOR_FALLBACK.risk,
+    safe: root.getPropertyValue('--aura-status-ok').trim() || MAP_INTEL_COLOR_FALLBACK.safe,
+    activity: root.getPropertyValue('--aura-map-activity').trim() || MAP_INTEL_COLOR_FALLBACK.activity,
+  };
+}
 
 export type AuraMapProps = {
   features: MapIntelFeature[];
@@ -35,6 +45,7 @@ const TILE_LOAD_TIMEOUT_MS = 15_000;
 
 export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProps) {
   const [tilesBusy, setTilesBusy] = useState(true);
+  const [markerColors] = useState(readMapIntelColors);
   const fallbackClearTimerRef = useRef<number | null>(null);
 
   const clearFallbackTimer = () => {
@@ -84,7 +95,7 @@ export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProp
               position: 'absolute',
               inset: 0,
               zIndex: 400,
-              background: 'rgba(255,255,255,0.72)',
+              background: 'var(--aura-card)',
               pointerEvents: 'none',
             }}
           />
@@ -119,7 +130,11 @@ export function AuraMap({ features, height = 280, onDoubleTapHint }: AuraMapProp
               key={f.id}
               center={[f.lat, f.lng]}
               radius={10}
-              pathOptions={{ color: colors[f.kind], fillColor: colors[f.kind], fillOpacity: 0.55 }}
+              pathOptions={{
+                color: markerColors[f.kind],
+                fillColor: markerColors[f.kind],
+                fillOpacity: 0.55,
+              }}
             >
               <Popup>
                 <strong>{f.title}</strong>
