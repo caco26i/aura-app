@@ -5,6 +5,8 @@
  * - Checklist item 5 (mocked): credentialed `GET /session` → **200** with access token; Settings shows calm copy, no error status.
  * - Checklist item 5 (mocked): `/journey/new` → **Start live tracking** issues authenticated `POST /v1/journeys` with the
  *   session token and lands on `/journey/active` without auth failure copy.
+ * - Checklist item 5 (mocked): on `/journey/active`, **I'm safe** issues authenticated `POST /v1/journeys/:id/im-safe`
+ *   with the session token and completes without auth/ownership failure copy.
  * - Checklist item 4 (gap): Google **Continue with Google** OAuth is **not** exercised in CI — requires a real
  *   `VITE_GOOGLE_CLIENT_ID` and Google; use staging manual smoke or local dev with BFF + OAuth client.
  */
@@ -128,7 +130,7 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     }, AURA_STORAGE_BOOTSTRAP);
   });
 
-  test('Start live tracking issues authenticated POST /v1/journeys and lands on /journey/active', async ({
+  test('Start live tracking + I\'m safe issue authenticated POST /v1/journeys and POST im-safe', async ({
     page,
   }) => {
     const pageErrors: string[] = [];
@@ -143,6 +145,7 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     const journeyId = 'a1b2c3d4-e5f6-4789-a012-3456789abcde';
 
     let postJourneysAuth: string | null = null;
+    let postImSafeAuth: string | null = null;
 
     await page.route('**/aura-bff/session', async (route) => {
       if (route.request().method() !== 'GET') {
@@ -157,7 +160,8 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     });
 
     await page.route('**/v1/journeys', async (route) => {
-      if (route.request().method() !== 'POST') {
+      const url = new URL(route.request().url());
+      if (route.request().method() !== 'POST' || !url.pathname.endsWith('/v1/journeys')) {
         await route.continue();
         return;
       }
@@ -166,6 +170,19 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
         status: 201,
         contentType: 'application/json',
         body: JSON.stringify({ ok: true, data: { journeyId } }),
+      });
+    });
+
+    await page.route(`**/v1/journeys/${journeyId}/im-safe`, async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.continue();
+        return;
+      }
+      postImSafeAuth = route.request().headers()['authorization'] ?? null;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, data: { receivedAt: new Date().toISOString() } }),
       });
     });
 
@@ -180,6 +197,14 @@ test.describe('journey BFF (stub path, mocked session + POST /v1/journeys)', () 
     await expect(page.getByRole('alert')).toHaveCount(0);
     await expect(page.getByText(/Sign in with Google/i)).toHaveCount(0);
     await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
+
+    await page.getByRole('button', { name: "I'm safe" }).click();
+    await expect(page.getByRole('button', { name: "I'm safe" })).toBeVisible({ timeout: 5_000 });
+
+    expect(postImSafeAuth).toBe(`Bearer ${accessToken}`);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByText(/session may have expired/i)).toHaveCount(0);
+    await expect(page.getByText(/doesn't match your current session/i)).toHaveCount(0);
 
     expect(pageErrors, `pageerror: ${pageErrors.join('; ')}`).toEqual([]);
   });
