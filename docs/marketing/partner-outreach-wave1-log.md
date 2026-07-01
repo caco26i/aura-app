@@ -126,7 +126,7 @@ If wave 1 sends stall on contacts, prioritize **named** outreach in wave 2:
 Wave 1 AC needs **2–3 T1 sends**. After W2-1 logged, prioritize:
 
 1. Board warm intro for **S2** (EAP broker) — highest ICP fit after C4SW
-2. Or board `approve cold: W2-2` (MantraCare → `clients@mantra.care`)
+2. Or board `approve cold: W2-2` — handoff: [`partner-outreach-wave1-w2-2-handoff.md`](./partner-outreach-wave1-w2-2-handoff.md) (MantraCare → `clients@mantra.care`)
 3. Or board names **S3** editor contact
 
 ---
