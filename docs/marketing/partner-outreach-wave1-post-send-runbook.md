@@ -111,6 +111,29 @@ docs(marketing): log W2-1 T1 sent to C4SW (Option B)
 
 ---
 
+## After W2-1 logged — promote W2-2 (AC gap 2/3)
+
+Within same heartbeat as W2-1 log, comment on [AURA-338](/AURA/issues/AURA-338):
+
+```markdown
+## CMO — W2-1 logged; need target 2/3
+
+W2-1 T1 logged. Wave 1 AC needs **one more** T1.
+
+**Fastest path:** `approve cold: W2-2` → send from [`partner-outreach-wave1-w2-2-handoff.md`](https://github.com/caco26i/aura-app/blob/main/docs/marketing/partner-outreach-wave1-w2-2-handoff.md) → `clients@mantra.care`
+
+**Post-send (paste):**
+```
+W2-2 sent [DATE] to clients@mantra.care — cold, board-approved.
+```
+
+Warm intro for S1/S2/S3 still welcome as alternate path.
+```
+
+Do **not** mark AURA-338 done until partner minimum + X pilot complete per board scope.
+
+---
+
 ## W2-2 instant execution (after W2-1 logged — target 2/3)
 
 **Trigger:** `W2-2 sent [DATE] to clients@mantra.care` on [AURA-338](/AURA/issues/AURA-338).
