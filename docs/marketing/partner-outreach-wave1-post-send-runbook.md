@@ -76,3 +76,35 @@ Update summary row in [`partner-outreach-wave1-log.md`](./partner-outreach-wave1
 ```
 
 Update status line: `**1 T1 sent** (W2-1)` · promote W2-1 send log table dates from `[DATE]` → `2026-07-02`.
+
+---
+
+## Instant execution (replace `[SEND_DATE]` if not 2026-07-02)
+
+**Status line** — find/replace in log:
+
+```text
+**0 T1 sent.** → **1 T1 sent** (W2-1).
+```
+
+**Summary row** — replace W2-1 pending row:
+
+```markdown
+| **W2-1 — C4SW** *(Option B default)* | **Yes** | Staged (cold) | **Sent [SEND_DATE]** — cold → info@c4sw.org | T2 nudge **Mon 2026-07-07** if silent |
+```
+
+**W2-1 send log table:**
+
+```markdown
+| **T1 sent** | [SEND_DATE] via cold → `info@c4sw.org` (Option B default / board-approved) |
+| **T2 nudge due** | Mon 2026-07-07 — draft: W2-1 section in partner-outreach-wave1-t2-drafts.md |
+| **T3 due (if silent)** | Wed 2026-07-09 — draft: S1/W2-1 in partner-outreach-wave1-t3-drafts.md |
+```
+
+**Git commit message:**
+
+```text
+docs(marketing): log W2-1 T1 sent to C4SW (Option B)
+```
+
+**Issue comments:** Use templates in checklist §2 above; AURA-394 → `done`, AURA-327 → `in_progress`.
